@@ -1,4 +1,4 @@
-# AIGC 影视智能创作平台（AI-NovelFlow 全家桶）
+# AIGC 影视智能创作平台
 
 基于 **AI-NovelFlow**（FastAPI + React）本地化改造的影视智能创作平台，集成 **ComfyUI-H3-Prompt-Builder** 漫剧引擎与 **ManjuToSplitFrameAndProperty** 视频解析管线，提供三条可独立运行的创作工作流：
 
