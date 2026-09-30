@@ -1,0 +1,318 @@
+// Settings 页面工具函数
+
+/**
+ * 获取 Provider 显示名称（使用翻译键）
+ */
+export const getProviderDisplayName = (providerId: string, t: any): string => {
+  const providerKeyMap: Record<string, string> = {
+    'deepseek': 'systemSettings.providers.deepseek',
+    'openai': 'systemSettings.providers.openai',
+    'gemini': 'systemSettings.providers.gemini',
+    'anthropic': 'systemSettings.providers.anthropic',
+    'azure': 'systemSettings.providers.azure',
+    'aliyun-bailian': 'systemSettings.providers.aliyunBailian',
+    'ollama': 'systemSettings.providers.ollama',
+    'custom': 'systemSettings.providers.custom',
+  };
+  const key = providerKeyMap[providerId];
+  if (key) {
+    return t(key, { defaultValue: providerId });
+  }
+  return providerId;
+};
+
+/**
+ * 获取模型名称（使用翻译键）
+ */
+export const getModelName = (modelId: string, t: any): string => {
+  const nameKeyMap: Record<string, string> = {
+    'qwen3.6-max-preview': 'systemSettings.modelNames.qwen36MaxPreview',
+    'qwen3.6-plus': 'systemSettings.modelNames.qwen36Plus',
+    'qwen3.6-flash': 'systemSettings.modelNames.qwen36Flash',
+    'qwen-max': 'systemSettings.modelNames.qwenMax',
+    'qwen-plus': 'systemSettings.modelNames.qwenPlus',
+    'qwen-turbo': 'systemSettings.modelNames.qwenTurbo',
+    'qwen-coder-plus': 'systemSettings.modelNames.qwenCoderPlus',
+    'qwen-2.5-72b-instruct': 'systemSettings.modelNames.qwen25',
+    'custom-model': 'systemSettings.modelNames.customModel',
+  };
+  const key = nameKeyMap[modelId];
+  if (key) {
+    return t(key, { defaultValue: '' });
+  }
+  return '';
+};
+
+/**
+ * 获取模型描述（使用翻译键）
+ */
+export const getModelDescription = (modelId: string, t: any): string => {
+  const descKeyMap: Record<string, string> = {
+    'deepseek-chat': 'systemSettings.modelDescriptions.deepseekDesc',
+    'deepseek-coder': 'systemSettings.modelDescriptions.deepseekCoderDesc',
+    'deepseek-reasoner': 'systemSettings.modelDescriptions.deepseekReasonerDesc',
+    'deepseek-v4-flash': 'systemSettings.modelDescriptions.deepseekV4FlashDesc',
+    'deepseek-v4-pro': 'systemSettings.modelDescriptions.deepseekV4ProDesc',
+    'gpt-5.5': 'systemSettings.modelDescriptions.gpt55Desc',
+    'gpt-5.4': 'systemSettings.modelDescriptions.gpt54Desc',
+    'gpt-5.4-mini': 'systemSettings.modelDescriptions.gpt54MiniDesc',
+    'gpt-5.4-nano': 'systemSettings.modelDescriptions.gpt54NanoDesc',
+    'gpt-4o': 'systemSettings.modelDescriptions.gpt4oDesc',
+    'gpt-4o-mini': 'systemSettings.modelDescriptions.gpt4oMiniDesc',
+    'gpt-4-turbo': 'systemSettings.modelDescriptions.gpt4TurboDesc',
+    'gpt-3.5-turbo': 'systemSettings.modelDescriptions.gpt35TurboDesc',
+    'gemini-2.5-pro': 'systemSettings.modelDescriptions.gemini25ProDesc',
+    'gemini-2.5-flash': 'systemSettings.modelDescriptions.gemini25FlashDesc',
+    'gemini-2.5-flash-lite': 'systemSettings.modelDescriptions.gemini25FlashLiteDesc',
+    'gemini-2.5-flash-preview-05-20': 'systemSettings.modelDescriptions.gemini25FlashPreviewDesc',
+    'gemini-2.5-pro-preview-05-20': 'systemSettings.modelDescriptions.gemini25ProPreviewDesc',
+    'gemini-2.0-flash': 'systemSettings.modelDescriptions.gemini20FlashDesc',
+    'gemini-2.0-flash-lite': 'systemSettings.modelDescriptions.gemini20FlashLiteDesc',
+    'gemini-2.0-pro-exp-02-05': 'systemSettings.modelDescriptions.gemini20ProExpDesc',
+    'claude-3-5-sonnet-20241022': 'systemSettings.modelDescriptions.claude35SonnetDesc',
+    'claude-3-opus-20240229': 'systemSettings.modelDescriptions.claude3OpusDesc',
+    'claude-3-sonnet-20240229': 'systemSettings.modelDescriptions.claude3SonnetDesc',
+    'claude-3-haiku-20240307': 'systemSettings.modelDescriptions.claude3HaikuDesc',
+    'azure-gpt-4o': 'systemSettings.modelDescriptions.azureGpt4oDesc',
+    'azure-gpt-4': 'systemSettings.modelDescriptions.azureGpt4Desc',
+    'azure-gpt-35-turbo': 'systemSettings.modelDescriptions.azureGpt35TurboDesc',
+    'qwen-max': 'systemSettings.modelDescriptions.qwenMaxDesc',
+    'qwen-plus': 'systemSettings.modelDescriptions.qwenPlusDesc',
+    'qwen-turbo': 'systemSettings.modelDescriptions.qwenTurboDesc',
+    'qwen-coder-plus': 'systemSettings.modelDescriptions.qwenCoderPlusDesc',
+    'qwen-2.5-72b-instruct': 'systemSettings.modelDescriptions.qwen25Desc',
+    'qwen3.6-max-preview': 'systemSettings.modelDescriptions.qwen36MaxPreviewDesc',
+    'qwen3.6-plus': 'systemSettings.modelDescriptions.qwen36PlusDesc',
+    'qwen3.6-flash': 'systemSettings.modelDescriptions.qwen36FlashDesc',
+    'deepseek-v3': 'systemSettings.modelDescriptions.deepseekV3AliDesc',
+    'deepseek-r1': 'systemSettings.modelDescriptions.deepseekR1AliDesc',
+    'custom-model': 'systemSettings.modelDescriptions.customModelDesc',
+  };
+  const key = descKeyMap[modelId];
+  if (key) {
+    return t(key, { defaultValue: '' });
+  }
+  return '';
+};
+
+/**
+ * 获取工作流类型名称
+ */
+export const getTypeNames = (t: any) => ({
+  character: t('systemSettings.workflow.character'),
+  scene: t('systemSettings.workflow.scene'),
+  shot_scene: t('systemSettings.workflow.shotScene'),
+  shot_character_scene: t('systemSettings.workflow.shotCharacterScene'),
+  shot_scene_prop: t('systemSettings.workflow.shotSceneProp'),
+  shot: t('systemSettings.workflow.shot'),
+  video: t('systemSettings.workflow.video'),
+  transition: t('systemSettings.workflow.transition'),
+  prop: t('systemSettings.workflow.prop'),
+  voice_design: t('systemSettings.workflow.voiceDesign'),
+  audio: t('systemSettings.workflow.audio'),
+  keyframe_image: t('systemSettings.workflow.keyframeImage'),
+  single_image_edit: t('systemSettings.workflow.singleImageEdit'),
+  first_last_video: t('systemSettings.workflow.firstLastVideo'),
+  three_frame_video: t('systemSettings.workflow.threeFrameVideo'),
+  four_frame_video: t('systemSettings.workflow.fourFrameVideo')
+});
+
+/**
+ * 获取工作流显示名称（系统预设的使用翻译键）
+ */
+export const getWorkflowDisplayName = (workflow: any, t: any): string => {
+  if (workflow.isSystem && workflow.nameKey) {
+    return t(workflow.nameKey, { defaultValue: workflow.name });
+  }
+  return workflow.name;
+};
+
+/**
+ * 获取工作流显示描述（系统预设的使用翻译键）
+ */
+export const getWorkflowDisplayDescription = (workflow: any, t: any): string => {
+  if (workflow.isSystem && workflow.descriptionKey) {
+    return t(workflow.descriptionKey, { defaultValue: workflow.description || '' });
+  }
+  return workflow.description || '';
+};
+
+/**
+ * 检查工作流映射配置是否完整
+ */
+export const checkWorkflowMappingComplete = (workflow: any): boolean => {
+  if (!workflow.nodeMapping) return false;
+
+  const mapping = workflow.nodeMapping;
+
+  switch (workflow.type) {
+    case 'character':
+    case 'scene':
+    case 'prop':
+      return !!(
+        mapping.prompt_node_id &&
+        mapping.prompt_node_id !== 'auto' &&
+        mapping.save_image_node_id &&
+        mapping.save_image_node_id !== 'auto'
+      );
+    case 'shot':
+      const shotMapping = mapping as any;
+      const hasBasicFields = !!(
+        mapping.prompt_node_id &&
+        mapping.prompt_node_id !== 'auto' &&
+        mapping.save_image_node_id &&
+        mapping.save_image_node_id !== 'auto' &&
+        mapping.width_node_id &&
+        mapping.width_node_id !== 'auto' &&
+        mapping.height_node_id &&
+        mapping.height_node_id !== 'auto'
+      );
+      const hasDualReference = (
+        shotMapping.character_reference_image_node_id &&
+        shotMapping.character_reference_image_node_id !== 'auto' &&
+        shotMapping.scene_reference_image_node_id &&
+        shotMapping.scene_reference_image_node_id !== 'auto'
+      );
+      // 检查是否有自定义参考图节点
+      const hasCustomReference = Object.keys(shotMapping).some(
+        key => key.startsWith('custom_reference_image_node_') && shotMapping[key] && shotMapping[key] !== 'auto'
+      );
+      return hasBasicFields && (hasDualReference || hasCustomReference);
+    case 'shot_scene':
+      return !!(
+        mapping.prompt_node_id &&
+        mapping.prompt_node_id !== 'auto' &&
+        mapping.save_image_node_id &&
+        mapping.save_image_node_id !== 'auto' &&
+        mapping.width_node_id &&
+        mapping.width_node_id !== 'auto' &&
+        mapping.height_node_id &&
+        mapping.height_node_id !== 'auto' &&
+        mapping.scene_reference_image_node_id &&
+        mapping.scene_reference_image_node_id !== 'auto'
+      );
+    case 'shot_character_scene':
+      return !!(
+        mapping.prompt_node_id &&
+        mapping.prompt_node_id !== 'auto' &&
+        mapping.save_image_node_id &&
+        mapping.save_image_node_id !== 'auto' &&
+        mapping.width_node_id &&
+        mapping.width_node_id !== 'auto' &&
+        mapping.height_node_id &&
+        mapping.height_node_id !== 'auto' &&
+        mapping.character_reference_image_node_id &&
+        mapping.character_reference_image_node_id !== 'auto' &&
+        mapping.scene_reference_image_node_id &&
+        mapping.scene_reference_image_node_id !== 'auto'
+      );
+    case 'shot_scene_prop':
+      return !!(
+        mapping.prompt_node_id &&
+        mapping.prompt_node_id !== 'auto' &&
+        mapping.save_image_node_id &&
+        mapping.save_image_node_id !== 'auto' &&
+        mapping.width_node_id &&
+        mapping.width_node_id !== 'auto' &&
+        mapping.height_node_id &&
+        mapping.height_node_id !== 'auto' &&
+        mapping.scene_reference_image_node_id &&
+        mapping.scene_reference_image_node_id !== 'auto' &&
+        (mapping as any).prop_reference_image_node_id &&
+        (mapping as any).prop_reference_image_node_id !== 'auto'
+      );
+    case 'video':
+    case 'three_frame_video':
+    case 'four_frame_video':
+      const videoMapping = mapping as any;
+      const hasMaxSide = videoMapping.max_side_node_id && videoMapping.max_side_node_id !== 'auto';
+      const hasMegapixels = videoMapping.megapixels_node_id && videoMapping.megapixels_node_id !== 'auto';
+      const requiredKeyframeCount = workflow.type === 'three_frame_video' ? 2 : workflow.type === 'four_frame_video' ? 3 : 0;
+      const hasRequiredKeyframes = Array.from({ length: requiredKeyframeCount }).every((_, index) => {
+        const nodeId = videoMapping[`keyframe_node_${index + 1}`];
+        return nodeId && nodeId !== 'auto';
+      });
+      return !!(
+        mapping.prompt_node_id &&
+        mapping.prompt_node_id !== 'auto' &&
+        videoMapping.video_save_node_id &&
+        videoMapping.video_save_node_id !== 'auto' &&
+        videoMapping.reference_image_node_id &&
+        videoMapping.reference_image_node_id !== 'auto' &&
+        hasMaxSide !== hasMegapixels &&
+        hasRequiredKeyframes
+      );
+    case 'first_last_video':
+      const firstLastVideoMapping = mapping as any;
+      const hasFirstLastFrameCount = firstLastVideoMapping.frame_count_node_id && firstLastVideoMapping.frame_count_node_id !== 'auto';
+      const hasFirstLastDuration = firstLastVideoMapping.duration_seconds_node_id && firstLastVideoMapping.duration_seconds_node_id !== 'auto';
+      return !!(
+        firstLastVideoMapping.prompt_node_id &&
+        firstLastVideoMapping.prompt_node_id !== 'auto' &&
+        firstLastVideoMapping.first_image_node_id &&
+        firstLastVideoMapping.first_image_node_id !== 'auto' &&
+        firstLastVideoMapping.last_image_node_id &&
+        firstLastVideoMapping.last_image_node_id !== 'auto' &&
+        firstLastVideoMapping.video_save_node_id &&
+        firstLastVideoMapping.video_save_node_id !== 'auto' &&
+        hasFirstLastFrameCount !== hasFirstLastDuration
+      );
+    case 'transition':
+      const transitionMapping = mapping as any;
+      const hasTransitionFrameCount = transitionMapping.frame_count_node_id && transitionMapping.frame_count_node_id !== 'auto';
+      const hasTransitionDuration = transitionMapping.duration_seconds_node_id && transitionMapping.duration_seconds_node_id !== 'auto';
+      return !!(
+        transitionMapping.first_image_node_id &&
+        transitionMapping.first_image_node_id !== 'auto' &&
+        transitionMapping.last_image_node_id &&
+        transitionMapping.last_image_node_id !== 'auto' &&
+        transitionMapping.video_save_node_id &&
+        transitionMapping.video_save_node_id !== 'auto' &&
+        hasTransitionFrameCount !== hasTransitionDuration
+      );
+    case 'voice_design':
+      const voiceMapping = mapping as any;
+      return !!(
+        voiceMapping.voice_prompt_node_id &&
+        voiceMapping.voice_prompt_node_id !== 'auto' &&
+        voiceMapping.ref_text_node_id &&
+        voiceMapping.ref_text_node_id !== 'auto' &&
+        voiceMapping.save_audio_node_id &&
+        voiceMapping.save_audio_node_id !== 'auto'
+      );
+    case 'audio':
+      const audioMapping = mapping as any;
+      return !!(
+        audioMapping.reference_audio_node_id &&
+        audioMapping.reference_audio_node_id !== 'auto' &&
+        audioMapping.text_node_id &&
+        audioMapping.text_node_id !== 'auto' &&
+        audioMapping.emotion_prompt_node_id &&
+        audioMapping.emotion_prompt_node_id !== 'auto' &&
+        audioMapping.save_audio_node_id &&
+        audioMapping.save_audio_node_id !== 'auto'
+      );
+    case 'keyframe_image':
+      const keyframeMapping = mapping as any;
+      return !!(
+        mapping.prompt_node_id &&
+        mapping.prompt_node_id !== 'auto' &&
+        mapping.save_image_node_id &&
+        mapping.save_image_node_id !== 'auto' &&
+        keyframeMapping.reference_image_node_id &&
+        keyframeMapping.reference_image_node_id !== 'auto'
+      );
+    case 'single_image_edit':
+      const singleImageEditMapping = mapping as any;
+      return !!(
+        singleImageEditMapping.load_image_node_id &&
+        singleImageEditMapping.load_image_node_id !== 'auto' &&
+        mapping.prompt_node_id &&
+        mapping.prompt_node_id !== 'auto' &&
+        mapping.save_image_node_id &&
+        mapping.save_image_node_id !== 'auto'
+      );
+    default:
+      return false;
+  }
+};

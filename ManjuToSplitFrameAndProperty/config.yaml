@@ -1,0 +1,46 @@
+# 漫剧抽帧与属性管线（ManjuToSplitFrameAndProperty）全局配置
+# 相对路径均以工程根目录为准
+workdir: output
+
+# ---- 阶段1 视频解析 ----
+parse:
+  sample_fps: 1.0        # 抽样帧率（帧/秒），用于 frames/ 浏览库
+  min_shot_len: 0.5      # 最短镜头秒数，短于该值的镜头与相邻镜头合并
+  scene_threshold: 30.0  # scenedetect ContentDetector 阈值（默认30）
+
+# ---- 阶段2 内容结构化 ----
+structurize:
+  asr_model: tiny        # faster-whisper 模型：tiny/base/small/medium；off=关闭ASR
+  asr_language: zh       # 语言代码，留空则自动检测
+  vlm_provider: openai    # dashscope / openai / ""（关闭视觉理解）
+  vlm_model: qwen2.5vl:3b # 视觉理解模型名
+  vlm_api_key_env: DASHSCOPE_API_KEY  # API Key 所在环境变量名
+  vlm_base_url: http://localhost:11434/v1  # OpenAI 兼容端点覆盖（本地 Ollama 填 http://localhost:11434/v1）；留空用官方默认
+
+# ---- 阶段3 资产抽取 ----
+assets:
+  min_face_size: 60      # 人脸最小边长（像素）
+  cluster_hamming_threshold: 13  # 感知哈希聚类阈值（0-64，越小越严格）
+
+# ---- 阶段4 再生成提示词包 ----
+generate:
+  platform: minimax_h3   # minimax_h3 / seedance / kling / veo / runway / jimeng
+  style: 写实电影质感，漫剧风格，浅景深
+  aspect_ratio: "9:16"
+  h3_mode: ""            # 仅 minimax_h3 使用：reference / i2v / ""（空=按 h3.mode）
+
+# ---- MiniMax H3 专用配置（pipeline/h3_export.py） ----
+h3:
+  model: MiniMax-H3          # MiniMax-H3 / MiniMax-H3-Max
+  resolution: "768P"         # H3: 768P / 2K；H3-Max: 480P / 768P
+  ratio: "9:16"              # reference 模式画幅；i2v 模式固定 adaptive
+  mode: reference            # reference=多模态参考生视频 / i2v=首帧图生视频
+  duration_auto: true        # true=按镜头时长夹取[4,15]；false=用 duration_seconds
+  duration_seconds: 5        # duration_auto=false 时的固定时长（4~15 整数）
+  audio_text_policy: 禁字幕+无BGM  # 保留默认 / 禁字幕+无BGM / 仅禁BGM / 仅禁字幕
+  retention_level: fully_preserved  # 官方 Ref2VA 保留档位：fully_preserved / partially_preserved / attribute_transfer / weak_reference
+  task_type: reference generation   # 官方 summary 任务类型（6 类可用 + 组合，如 "reference generation" / "video editing + audio reuse"）
+  output_language: 中文      # 提示词正文语言（结构标题固定英文）
+  aigc_watermark: false      # 是否添加 AIGC 标识水印
+  api_base_url: https://api.minimax.cn   # 提交工具使用；国际站可改 https://api.minimax.io
+  api_key_env: MINIMAX_API_KEY           # 提交工具读取的 API Key 环境变量

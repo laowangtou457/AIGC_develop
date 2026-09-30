@@ -1,0 +1,1016 @@
+/**
+ * ShotSplitTab - 分镜拆分 Tab（阶段 1）
+ *
+ * 功能：
+ * - 左侧：原文内容
+ * - 中间：AI 拆分结果预览
+ *
+ * 数据源统一使用 store.shots（从后端 Shot 表获取）
+ */
+
+import { useRef, useState } from 'react';
+import { useChapterGenerateStore, useDataSlice } from '../stores';
+import { shotsApi } from '../../../api/shots';
+import { toast } from '../../../stores/toastStore';
+import { useTranslation } from '../../../stores/i18nStore';
+import { getDialogueDurationWarningStats, getShotDialogueDurationWarning } from '../../../utils';
+import type { Shot } from '../../../api/shots';
+
+interface ShotSplitTabProps {
+  chapter?: any;
+  currentShot?: number;
+  novelId?: string;
+  chapterId?: string;
+}
+
+export function ShotSplitTab({
+  chapter,
+  currentShot,
+  novelId,
+  chapterId,
+}: ShotSplitTabProps) {
+  const { t } = useTranslation();
+
+  // 使用选择器模式订阅 store 状态
+  const currentShotIndex = useChapterGenerateStore((state) => state.currentShotIndex);
+  const currentShotId = useChapterGenerateStore((state) => state.currentShotId);
+  const setCurrentShot = useChapterGenerateStore((state) => state.setCurrentShot);
+  const markTabComplete = useChapterGenerateStore((state) => state.markTabComplete);
+  const parsedDataFromStore = useChapterGenerateStore((state) => state.parsedData);
+  const setParsedData = useChapterGenerateStore((state) => state.setParsedData);
+  const saveChapterResources = useChapterGenerateStore((state) => state.saveChapterResources);
+  const splitChapter = useChapterGenerateStore((state) => state.splitChapter);
+  const h3SplitChapter = useChapterGenerateStore((state) => state.h3SplitChapter);
+  const h3PromptAllShots = useChapterGenerateStore((state) => state.h3PromptAllShots);
+  const storeShots = useChapterGenerateStore((state) => state.shots);
+  const setShots = useChapterGenerateStore((state) => state.setShots);
+
+  // 使用 useDataSlice 获取方法
+  const { initChapterResources, fetchShots } = useDataSlice();
+
+  const [isSplitting, setIsSplitting] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const [isExporting, setIsExporting] = useState(false);
+  const [isImporting, setIsImporting] = useState(false);
+  const [showImportConfirm, setShowImportConfirm] = useState(false);
+  const [importFile, setImportFile] = useState<File | null>(null);
+  const [showSplitConfirm, setShowSplitConfirm] = useState(false);
+  const [isAddingShot, setIsAddingShot] = useState(false);
+  const [isInsertingShot, setIsInsertingShot] = useState<number | null>(null);
+  const [isDeletingShot, setIsDeletingShot] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [deleteShotInfo, setDeleteShotInfo] = useState<{ shotId: string; shotIndex: number } | null>(null);
+  const [showStructureEditor, setShowStructureEditor] = useState(false);
+  const [structureJson, setStructureJson] = useState('');
+  const [structureFindText, setStructureFindText] = useState('');
+  const [structureReplaceText, setStructureReplaceText] = useState('');
+  const [structureError, setStructureError] = useState('');
+  const [isSavingStructure, setIsSavingStructure] = useState(false);
+  const [structureCurrentMatchIndex, setStructureCurrentMatchIndex] = useState(-1);
+  const structureTextareaRef = useRef<HTMLTextAreaElement>(null);
+
+  // 统一使用 store.shots 作为分镜数据源
+  const shots = storeShots;
+  const dialogueWarningStats = getDialogueDurationWarningStats(shots);
+
+  // 显示拆分确认对话框
+  const handleSplit = () => {
+    if (!novelId || !chapterId) return;
+    setShowSplitConfirm(true);
+  };
+
+  // 确认并执行 AI 拆分
+  const confirmSplit = async () => {
+    if (!novelId || !chapterId) return;
+    setShowSplitConfirm(false);
+    setIsSplitting(true);
+    try {
+      await splitChapter(novelId, chapterId);
+
+      if (useChapterGenerateStore.getState().shots.length > 0) {
+        initChapterResources();
+        console.log('AI 拆分成功');
+        markTabComplete(0);
+      }
+    } catch (error) {
+      console.error('AI 拆分失败:', error);
+      toast.error(t('chapterGenerate.aiSplitFailedRetry'));
+    } finally {
+      setIsSplitting(false);
+    }
+  };
+
+  const saveShotsData = async (shotsToSave: Shot[], successMessage = t('chapterGenerate.shotSaveSuccess')) => {
+    if (!novelId || !chapterId) return;
+    setIsSaving(true);
+    try {
+      // 1. 保存章节资源（characters, scenes, props）
+      await saveChapterResources(novelId, chapterId);
+
+      // 2. 批量保存分镜数据到 Shot 表
+      if (shotsToSave.length > 0) {
+        const result = await shotsApi.batchUpdateShots(
+          novelId,
+          chapterId,
+          shotsToSave.map((shot) => ({
+            id: shot.id,
+            description: shot.description,
+            video_description: shot.video_description,
+            characters: shot.characters,
+            scene: shot.scene,
+            props: shot.props,
+            duration: shot.duration,
+            continuity_mode: shot.continuity_mode || 'NORMAL',
+            dialogues: shot.dialogues,
+          }))
+        );
+
+        if (result.success) {
+          const resultData = result.data as any;
+          console.log(t('chapterGenerate.shotsSaved', { count: resultData?.updated_count }));
+          markTabComplete(0);
+          toast.success(successMessage);
+        } else {
+          console.error(t('chapterGenerate.shotSaveFailed', { message: result.message || t('common.unknownError') }));
+          toast.error(t('chapterGenerate.shotSaveFailed', { message: result.message || t('common.unknownError') }));
+        }
+      } else {
+        markTabComplete(0);
+        toast.success(t('chapterGenerate.chapterResourceSaved'));
+      }
+    } catch (error) {
+      console.error(t('chapterGenerate.saveFailed') + ':', error);
+      toast.error(t('chapterGenerate.saveFailedRetry'));
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  // 保存分镜数据
+  const handleSave = async () => {
+    await saveShotsData(shots);
+  };
+
+  const handleAutoFixCriticalDurations = async () => {
+    const fixes = shots
+      .map((shot) => ({ shot, warning: getShotDialogueDurationWarning(shot) }))
+      .filter(({ warning }) => warning.level === 'critical');
+
+    if (fixes.length === 0) {
+      toast.info('没有严重时长异常需要修正');
+      return;
+    }
+
+    const fixedDurationById = new Map(
+      fixes.map(({ shot, warning }) => [String(shot.id), Math.min(180, warning.suggestedDuration + 1)])
+    );
+    const fixedShots = shots.map((shot) => {
+      const fixedDuration = fixedDurationById.get(String(shot.id));
+      return fixedDuration ? { ...shot, duration: fixedDuration } : shot;
+    });
+
+    setShots(fixedShots);
+    await saveShotsData(fixedShots, `已修正并保存 ${fixes.length} 个严重时长异常`);
+  };
+
+  // 处理分镜列表项点击
+  const handleShotClick = (shotId: string, index: number) => {
+    setCurrentShot(shotId, index);
+  };
+
+  // 新增分镜（在末尾）
+  const handleAddShot = async () => {
+    if (!novelId || !chapterId) return;
+    setIsAddingShot(true);
+    try {
+      const result = await shotsApi.createShot(novelId, chapterId, {
+        description: t('chapterGenerate.newShotDescription'),
+        duration: 5,
+        characters: [],
+        scene: '',
+        props: [],
+        dialogues: [],
+        continuity_mode: 'NORMAL',
+      });
+
+      if (result.success) {
+        // 刷新分镜数据
+        await fetchShots(novelId, chapterId);
+        toast.success(t('chapterGenerate.shotAdded'));
+      } else {
+        toast.error(t('chapterGenerate.shotAddFailed', { message: result.message || t('common.unknownError') }));
+      }
+    } catch (error) {
+      console.error(t('chapterGenerate.addShotFailed') + ':', error);
+      toast.error(t('chapterGenerate.shotAddFailedRetry'));
+    } finally {
+      setIsAddingShot(false);
+    }
+  };
+
+  // 插入分镜（在指定分镜前面）
+  const handleInsertShot = async (beforeIndex: number) => {
+    if (!novelId || !chapterId) return;
+    setIsInsertingShot(beforeIndex);
+    try {
+      const result = await shotsApi.createShot(novelId, chapterId, {
+        description: t('chapterGenerate.insertedShotDescription'),
+        duration: 5,
+        characters: [],
+        scene: '',
+        props: [],
+        dialogues: [],
+        continuity_mode: 'NORMAL',
+        insert_index: beforeIndex,
+      });
+
+      if (result.success) {
+        // 刷新分镜数据
+        await fetchShots(novelId, chapterId);
+        toast.success(t('chapterGenerate.shotInserted'));
+      } else {
+        toast.error(t('chapterGenerate.shotInsertFailed', { message: result.message || t('common.unknownError') }));
+      }
+    } catch (error) {
+      console.error(t('chapterGenerate.insertShotFailed') + ':', error);
+      toast.error(t('chapterGenerate.shotInsertFailedRetry'));
+    } finally {
+      setIsInsertingShot(null);
+    }
+  };
+
+  // 删除分镜
+  const handleDeleteShot = async (shotId: string, shotIndex: number) => {
+    if (!novelId || !chapterId) return;
+    setDeleteShotInfo({ shotId, shotIndex });
+    setShowDeleteConfirm(true);
+  };
+
+  // 确认删除
+  const confirmDeleteShot = async () => {
+    if (!deleteShotInfo || !novelId || !chapterId) return;
+
+    const { shotId, shotIndex } = deleteShotInfo;
+    setIsDeletingShot(true);
+    try {
+      const result = await shotsApi.deleteShot(novelId, chapterId, shotId);
+
+      if (result.success) {
+        // 刷新分镜数据
+        await fetchShots(novelId, chapterId);
+
+        // 如果删除的是当前选中的分镜，调整选中
+        if (currentShotId === shotId) {
+          if (shots.length > 1) {
+            const newIndex = Math.min(shotIndex, shots.length - 1);
+            const newShot = shots[newIndex];
+            if (newShot && newShot.id !== shotId) {
+              setCurrentShot(newShot.id, newIndex);
+            } else if (shots[newIndex - 1]) {
+              setCurrentShot(shots[newIndex - 1].id, newIndex);
+            }
+          }
+        } else if (currentShotIndex > shotIndex) {
+          const newShotIndex = currentShotIndex - 1;
+          const newShot = shots[newShotIndex - 1];
+          if (newShot) {
+            setCurrentShot(newShot.id, newShotIndex);
+          }
+        }
+
+        toast.success(t('chapterGenerate.shotDeleted'));
+      } else {
+        toast.error(t('chapterGenerate.shotDeleteFailed', { message: result.message || t('common.unknownError') }));
+      }
+    } catch (error) {
+      console.error(t('chapterGenerate.deleteShotFailed') + ':', error);
+      toast.error(t('chapterGenerate.shotDeleteFailedRetry'));
+    } finally {
+      setIsDeletingShot(false);
+      setShowDeleteConfirm(false);
+      setDeleteShotInfo(null);
+    }
+  };
+
+  const buildStructuredShotData = () => ({
+    chapter: parsedDataFromStore?.chapter || chapter?.title || '',
+    characters: parsedDataFromStore?.characters || [],
+    scenes: parsedDataFromStore?.scenes || [],
+    props: parsedDataFromStore?.props || [],
+    shots: shots.map((shot, idx) => ({
+      id: shot.id,
+      index: shot.index || (idx + 1),
+      description: shot.description || '',
+      video_description: shot.video_description || '',
+      characters: shot.characters || [],
+      scene: shot.scene || '',
+      props: shot.props || [],
+      duration: shot.duration || 5,
+      continuity_mode: shot.continuity_mode || 'NORMAL',
+      dialogues: shot.dialogues || [],
+    }))
+  });
+
+  const applyStructuredShotData = async (structuredData: any) => {
+    if (!novelId || !chapterId) return;
+    if (!structuredData || !Array.isArray(structuredData.shots)) {
+      throw new Error(t('chapterGenerate.invalidJsonFormat'));
+    }
+
+    const shotsList = structuredData.shots.map((shot: any) => ({
+      id: shot.id,
+      description: shot.description || '',
+      video_description: shot.video_description || '',
+      characters: Array.isArray(shot.characters) ? shot.characters : [],
+      scene: shot.scene || '',
+      props: Array.isArray(shot.props) ? shot.props : [],
+      duration: Number(shot.duration) || 5,
+      continuity_mode: shot.continuity_mode || 'NORMAL',
+      dialogues: Array.isArray(shot.dialogues) ? shot.dialogues : [],
+    }));
+
+    const result = await shotsApi.batchUpdateShots(novelId, chapterId, shotsList);
+    if (!result.success) {
+      throw new Error(result.message || '保存失败');
+    }
+
+    if (structuredData.characters || structuredData.scenes || structuredData.props) {
+      setParsedData({
+        chapter: structuredData.chapter || '',
+        characters: Array.isArray(structuredData.characters) ? structuredData.characters : [],
+        scenes: Array.isArray(structuredData.scenes) ? structuredData.scenes : [],
+        props: Array.isArray(structuredData.props) ? structuredData.props : [],
+      });
+      await saveChapterResources(novelId, chapterId);
+    }
+
+    await fetchShots(novelId, chapterId);
+    initChapterResources();
+    markTabComplete(0);
+  };
+
+  const openStructureEditor = () => {
+    setStructureJson(JSON.stringify(buildStructuredShotData(), null, 2));
+    setStructureFindText('');
+    setStructureReplaceText('');
+    setStructureCurrentMatchIndex(-1);
+    setStructureError('');
+    setShowStructureEditor(true);
+  };
+
+  const getStructureMatchIndexes = () => {
+    if (!structureFindText) return [];
+    const indexes: number[] = [];
+    let index = structureJson.indexOf(structureFindText);
+    while (index >= 0) {
+      indexes.push(index);
+      index = structureJson.indexOf(structureFindText, index + structureFindText.length);
+    }
+    return indexes;
+  };
+
+  const selectStructureMatch = (matchIndexes: number[], matchIndex: number) => {
+    const index = matchIndexes[matchIndex];
+    if (index === undefined) return;
+    const textarea = structureTextareaRef.current;
+    if (textarea) {
+      textarea.focus();
+      requestAnimationFrame(() => {
+        textarea.setSelectionRange(index, index + structureFindText.length);
+        const lineNumber = structureJson.slice(0, index).split('\n').length - 1;
+        const lineHeight = Number.parseFloat(window.getComputedStyle(textarea).lineHeight) || 22;
+        textarea.scrollTop = Math.max(0, lineNumber * lineHeight - textarea.clientHeight / 2);
+      });
+    }
+    setStructureCurrentMatchIndex(matchIndex);
+  };
+
+  const handleStructureReplace = () => {
+    if (!structureFindText) return;
+    const index = structureJson.indexOf(structureFindText);
+    if (index < 0) {
+      toast.warning('未找到匹配内容');
+      return;
+    }
+    setStructureJson(`${structureJson.slice(0, index)}${structureReplaceText}${structureJson.slice(index + structureFindText.length)}`);
+  };
+
+  const handleStructureFind = () => {
+    if (!structureFindText) return;
+    const matchIndexes = getStructureMatchIndexes();
+    if (matchIndexes.length === 0) {
+      toast.warning('未找到匹配内容');
+      setStructureCurrentMatchIndex(-1);
+      return;
+    }
+    selectStructureMatch(matchIndexes, 0);
+  };
+
+  const handleStructureFindNext = () => {
+    if (!structureFindText) return;
+    const matchIndexes = getStructureMatchIndexes();
+    if (matchIndexes.length === 0) {
+      toast.warning('未找到匹配内容');
+      setStructureCurrentMatchIndex(-1);
+      return;
+    }
+    const nextIndex = structureCurrentMatchIndex >= 0
+      ? (structureCurrentMatchIndex + 1) % matchIndexes.length
+      : 0;
+    selectStructureMatch(matchIndexes, nextIndex);
+  };
+
+  const handleStructureReplaceAll = () => {
+    if (!structureFindText) return;
+    const nextJson = structureJson.split(structureFindText).join(structureReplaceText);
+    if (nextJson === structureJson) {
+      toast.warning('未找到匹配内容');
+      return;
+    }
+    setStructureJson(nextJson);
+  };
+
+  const handleSaveStructureJson = async () => {
+    if (!novelId || !chapterId) return;
+    setStructureError('');
+    setIsSavingStructure(true);
+    try {
+      const parsed = JSON.parse(structureJson);
+      await applyStructuredShotData(parsed);
+      setShowStructureEditor(false);
+      toast.success('结构数据已保存');
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'JSON 格式错误或保存失败';
+      setStructureError(message);
+      toast.error(message);
+    } finally {
+      setIsSavingStructure(false);
+    }
+  };
+
+  // 导出分镜数据为 JSON
+  const handleExport = () => {
+    if (shots.length === 0) {
+      toast.warning(t('chapterGenerate.noShotsToExport'));
+      return;
+    }
+
+    setIsExporting(true);
+    try {
+      const exportData = buildStructuredShotData();
+
+      const jsonString = JSON.stringify(exportData, null, 2);
+      const blob = new Blob([jsonString], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${t('chapterGenerate.shotData_')}${chapter?.title || chapterId || 'unknown'}.json`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+
+      console.log(t('chapterGenerate.shotDataExported') + ':', exportData);
+      toast.success(t('chapterGenerate.shotDataExported'));
+    } catch (error) {
+      console.error(t('chapterGenerate.exportFailed') + ':', error);
+      toast.error(t('chapterGenerate.exportFailedRetry'));
+    } finally {
+      setIsExporting(false);
+    }
+  };
+
+  // 导入分镜数据
+  const handleImport = () => {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = '.json';
+    input.onchange = async (e: Event) => {
+      const file = (e.target as HTMLInputElement).files?.[0];
+      if (!file) return;
+      setImportFile(file);
+      setShowImportConfirm(true);
+    };
+    input.click();
+  };
+
+  // 确认导入
+  const handleConfirmImport = async () => {
+    if (!importFile || !novelId || !chapterId) return;
+
+    setShowImportConfirm(false);
+    setIsImporting(true);
+    try {
+      const reader = new FileReader();
+      reader.onload = async (readEvent: ProgressEvent<FileReader>) => {
+        try {
+          const content = readEvent.target?.result as string;
+          const importedData = JSON.parse(content);
+
+          await applyStructuredShotData(importedData);
+
+          console.log(t('chapterGenerate.shotDataImported'));
+          toast.success(t('chapterGenerate.shotDataImported'));
+        } catch (parseError) {
+          console.error(t('chapterGenerate.importFailedJsonError') + ':', parseError);
+          toast.error(t('chapterGenerate.importFailedJsonError', { message: (parseError as Error).message }));
+        } finally {
+          setIsImporting(false);
+          setImportFile(null);
+        }
+      };
+      reader.readAsText(importFile);
+    } catch (error) {
+      console.error(t('chapterGenerate.importFailed') + ':', error);
+      toast.error(t('chapterGenerate.importFailed', { message: (error as Error).message }));
+      setIsImporting(false);
+      setImportFile(null);
+    }
+  };
+
+  const shotIndex = currentShot ?? currentShotIndex ?? 1;
+  const structureMatchIndexes = getStructureMatchIndexes();
+  const structureMatchCount = structureMatchIndexes.length;
+  const structureMatchLabel = structureFindText
+    ? structureMatchCount > 0 && structureCurrentMatchIndex >= 0
+      ? `第 ${structureCurrentMatchIndex + 1} / ${structureMatchCount} 处`
+      : `找到 ${structureMatchCount} 处`
+    : '';
+  const truncateText = (value: string, maxLength = 42) => (
+    value.length > maxLength ? `${value.slice(0, maxLength)}...` : value
+  );
+
+  return (
+    <div className="h-full flex flex-col">
+      {/* 操作栏 */}
+      <div className="flex-shrink-0 flex items-center justify-between mb-4 pb-4 border-b border-gray-200">
+        <div className="flex items-center gap-4">
+          <button
+            onClick={() => {
+              if (!novelId || !chapterId) return;
+              if (!window.confirm('使用 H3 漫剧引擎生成文字分镜？（将替换当前分镜，原分镜及生成资源将被清空）')) return;
+              h3SplitChapter(novelId, chapterId);
+            }}
+            disabled={isSplitting || !chapterId}
+            className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            title="剧本→分镜剧本（H3 漫剧导演）"
+          >
+            {isSplitting ? t('chapterGenerate.splitting') : 'H3 生成文字分镜'}
+          </button>
+          <button
+            onClick={() => {
+              if (!novelId || !chapterId) return;
+              if (!window.confirm('使用 H3 引擎为全部镜头生成逐镜 H3 提示词？（将覆盖各分镜的视频描述）')) return;
+              h3PromptAllShots(novelId, chapterId, '{}');
+            }}
+            disabled={isSplitting || !chapterId}
+            className="px-4 py-2 bg-fuchsia-600 text-white rounded-lg hover:bg-fuchsia-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            title="分镜→逐镜 H3 提示词（保存到分镜视频描述）"
+          >
+            生成分镜提示词（H3）
+          </button>
+          <button
+            onClick={handleSplit}
+            disabled={isSplitting || !chapterId}
+            className="btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {isSplitting ? t('chapterGenerate.splitting') : t('chapterGenerate.aiSplit')}
+          </button>
+          <button
+            onClick={handleAddShot}
+            disabled={isAddingShot || !chapterId}
+            className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          >
+            {isAddingShot ? t('chapterGenerate.adding') : t('chapterGenerate.addShot')}
+          </button>
+          <button
+            onClick={handleSave}
+            disabled={isSaving || !chapterId}
+            className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          >
+            {isSaving ? t('common.saving') : t('chapterGenerate.saveShots')}
+          </button>
+          <button
+            onClick={openStructureEditor}
+            disabled={!chapterId}
+            className="btn-secondary disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            编辑结构数据
+          </button>
+          <button
+            onClick={handleExport}
+            disabled={isExporting || shots.length === 0}
+            className="btn-secondary disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {isExporting ? t('chapterGenerate.exporting') : t('chapterGenerate.exportShots')}
+          </button>
+          <button
+            onClick={handleImport}
+            disabled={isImporting || !chapterId}
+            className="btn-secondary disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {isImporting ? t('chapterGenerate.importing') : t('chapterGenerate.importShots')}
+          </button>
+          <button
+            type="button"
+            onClick={handleAutoFixCriticalDurations}
+            disabled={isSaving || dialogueWarningStats.stats.critical === 0}
+            className="btn-secondary border-red-200 text-red-600 hover:bg-red-50 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            自动修正异常时长
+          </button>
+        </div>
+        <div className="text-sm text-gray-500">
+          {t('chapterGenerate.totalShots', { count: shots.length })}
+        </div>
+      </div>
+
+      {/* 分镜列表 */}
+      <div className="flex-1 min-h-0 overflow-hidden">
+        {/* 分镜列表 */}
+        <div className="h-full overflow-y-auto border border-gray-200 rounded-lg bg-white">
+          {shots.map((shot: Shot, idx: number) => {
+            const shotNum = idx + 1;
+            const shotId = shot.id;
+            const isSelected = shot.id === currentShotId || (!currentShotId && shotNum === shotIndex);
+            const characters = shot.characters || [];
+            const scene = shot.scene;
+            const props = shot.props || [];
+            const dialogues = shot.dialogues || [];
+            const dialogueWarning = getShotDialogueDurationWarning(shot);
+
+            const dialogueCharacters = Array.from(
+              new Set(dialogues.map((d) => d.character_name))
+            );
+
+            return (
+              <div
+                key={shot.id}
+                className={`p-3 border-b border-gray-100 cursor-pointer hover:bg-gray-50 transition-colors ${
+                  isSelected ? 'bg-blue-50 border-blue-200' : ''
+                }`}
+                onClick={() => handleShotClick(shotId, shotNum)}
+              >
+                {/* 分镜编号和操作按钮 */}
+                <div className="flex items-center justify-between mb-2">
+                  <div className="flex items-center gap-2 flex-1 min-w-0">
+                    <span className="text-sm font-bold text-gray-900">{t('chapterGenerate.shotNumberLabel', { number: shotNum })}</span>
+                    <span className={`text-xs px-2 py-0.5 rounded ${dialogueWarning.style.badgeClassName}`}>
+                      {shot.duration}{t('common.second')}
+                      {dialogues.length > 0 && dialogueWarning.level !== 'normal' && ` · ${dialogueWarning.style.shortLabel}`}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-1 flex-shrink-0" onClick={(e) => e.stopPropagation()}>
+                    <button
+                      onClick={() => handleInsertShot(shotNum)}
+                      disabled={isInsertingShot === shotNum}
+                      className="p-1 text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 rounded transition-colors"
+                      title={t('chapterGenerate.insertShotBefore')}
+                    >
+                      {isInsertingShot === shotNum ? (
+                        <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                        </svg>
+                      ) : (
+                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                        </svg>
+                      )}
+                    </button>
+                    <button
+                      onClick={() => handleDeleteShot(shotId, shotNum)}
+                      disabled={isDeletingShot}
+                      className="p-1 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded transition-colors"
+                      title={t('chapterGenerate.deleteShot')}
+                    >
+                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                      </svg>
+                    </button>
+                  </div>
+                </div>
+
+                {/* 分镜描述 */}
+                <p className="text-xs text-gray-600 truncate mb-2 leading-relaxed" title={shot.description}>
+                  {truncateText(shot.description || '', 160)}
+                </p>
+
+                {/* 角色、场景、道具信息 */}
+                <div className="space-y-1">
+                  {/* 角色 */}
+                  {characters.length > 0 && (
+                    <div className="flex flex-wrap gap-1">
+                      <span className="text-xs text-gray-500 flex-shrink-0">{t('chapterGenerate.charactersColon')}</span>
+                      <div className="flex flex-wrap gap-1">
+                        {characters.slice(0, 3).map((charName) => (
+                          <span
+                            key={charName}
+                            className="inline-flex items-center px-1.5 py-0.5 bg-blue-100 text-blue-700 rounded text-xs"
+                          >
+                            {charName}
+                          </span>
+                        ))}
+                        {characters.length > 3 && (
+                          <span className="text-xs text-gray-400">+{characters.length - 3}</span>
+                        )}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* 台词角色 */}
+                  {dialogueCharacters.length > 0 && (
+                    <div className="flex flex-wrap gap-1">
+                      <span className="text-xs text-gray-500 flex-shrink-0">{t('chapterGenerate.dialoguesColon')}</span>
+                      <div className="flex flex-wrap gap-1">
+                        {dialogueCharacters.slice(0, 3).map((charName, idx) => (
+                          <span
+                            key={idx}
+                            className="inline-flex items-center px-1.5 py-0.5 bg-amber-100 text-amber-700 rounded text-xs"
+                          >
+                            {String(charName)}
+                          </span>
+                        ))}
+                        {dialogueCharacters.length > 3 && (
+                          <span className="text-xs text-gray-400">+{dialogueCharacters.length - 3}</span>
+                        )}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* 场景 */}
+                  {scene && (
+                    <div className="flex items-center gap-1 min-w-0">
+                      <span className="text-xs text-gray-500 flex-shrink-0">{t('chapterGenerate.sceneColon')}</span>
+                      <span
+                        className="inline-flex items-center max-w-full px-1.5 py-0.5 bg-green-100 text-green-700 rounded text-xs truncate"
+                        title={scene}
+                      >
+                        {truncateText(scene, 24)}
+                      </span>
+                    </div>
+                  )}
+
+                  {/* 道具 */}
+                  {props.length > 0 && (
+                    <div className="flex flex-wrap gap-1">
+                      <span className="text-xs text-gray-500 flex-shrink-0">{t('chapterGenerate.propsColon')}</span>
+                      <div className="flex flex-wrap gap-1">
+                        {props.slice(0, 3).map((propName) => (
+                          <span
+                            key={propName}
+                            className="inline-flex items-center px-1.5 py-0.5 bg-purple-100 text-purple-700 rounded text-xs"
+                          >
+                            {propName}
+                          </span>
+                        ))}
+                        {props.length > 3 && (
+                          <span className="text-xs text-gray-400">+{props.length - 3}</span>
+                        )}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            );
+          })}
+          {shots.length === 0 && (
+            <div className="p-8 text-center text-gray-500 text-sm">
+              {t('chapterGenerate.clickAiSplitHint')}
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* 拆分确认对话框 */}
+      {showSplitConfirm && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg p-6 w-full max-w-md">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-10 h-10 rounded-full bg-amber-500/20 flex items-center justify-center">
+                <svg className="w-5 h-5 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                </svg>
+              </div>
+              <h3 className="text-lg font-semibold text-gray-900">{t('chapterGenerate.confirmAiSplit')}</h3>
+            </div>
+            <p className="text-sm text-red-600 mb-6">
+              {t('chapterGenerate.aiSplitClearWarning')}
+            </p>
+            <div className="flex justify-end gap-3">
+              <button
+                onClick={() => setShowSplitConfirm(false)}
+                className="btn-secondary"
+              >
+                {t('common.cancel')}
+              </button>
+              <button
+                onClick={confirmSplit}
+                disabled={isSplitting}
+                className="btn-primary bg-amber-600 hover:bg-amber-700 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {isSplitting ? t('chapterGenerate.splitting') : t('chapterGenerate.confirmSplit')}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 导入确认对话框 */}
+      {showImportConfirm && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg p-6 w-full max-w-md">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-10 h-10 rounded-full bg-amber-500/20 flex items-center justify-center">
+                <svg className="w-5 h-5 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                </svg>
+              </div>
+              <h3 className="text-lg font-semibold text-gray-900">{t('chapterGenerate.confirmImportShots')}</h3>
+            </div>
+            <p className="text-sm text-red-600 mb-6">
+              {t('chapterGenerate.importOverwriteWarning')}
+            </p>
+            <div className="flex justify-end gap-3">
+              <button
+                onClick={() => {
+                  setShowImportConfirm(false);
+                  setImportFile(null);
+                }}
+                className="btn-secondary"
+              >
+                {t('common.cancel')}
+              </button>
+              <button
+                onClick={handleConfirmImport}
+                className="btn-primary bg-amber-600 hover:bg-amber-700"
+              >
+                {t('chapterGenerate.confirmImport')}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 结构数据编辑弹窗 */}
+      {showStructureEditor && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg shadow-xl w-full max-w-6xl max-h-[90vh] flex flex-col overflow-hidden">
+            <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200">
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900">编辑结构数据</h3>
+                <p className="text-sm text-gray-500 mt-1">可直接编辑解析后的 JSON；保存前会检查 JSON 格式。</p>
+              </div>
+              <button
+                onClick={() => setShowStructureEditor(false)}
+                disabled={isSavingStructure}
+                className="p-2 hover:bg-gray-100 rounded-full transition-colors disabled:opacity-50"
+                title={t('common.close')}
+              >
+                <span className="text-xl leading-none text-gray-500">×</span>
+              </button>
+            </div>
+
+            <div className="px-6 py-3 border-b border-gray-200 bg-gray-50">
+              <div className="grid grid-cols-1 md:grid-cols-[1fr_1fr_auto_auto_auto_auto] gap-2">
+                <input
+                  value={structureFindText}
+                  onChange={(event) => {
+                    setStructureFindText(event.target.value);
+                    setStructureCurrentMatchIndex(-1);
+                  }}
+                  className="input-field"
+                  placeholder="查找内容"
+                />
+                <input
+                  value={structureReplaceText}
+                  onChange={(event) => setStructureReplaceText(event.target.value)}
+                  className="input-field"
+                  placeholder="替换为"
+                />
+                <button
+                  type="button"
+                  onClick={handleStructureFind}
+                  disabled={!structureFindText}
+                  className="btn-secondary disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  查找
+                </button>
+                <button
+                  type="button"
+                  onClick={handleStructureFindNext}
+                  disabled={!structureFindText || structureMatchCount === 0}
+                  className="btn-secondary disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  下一处
+                </button>
+                <button
+                  type="button"
+                  onClick={handleStructureReplace}
+                  disabled={!structureFindText}
+                  className="btn-secondary disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  替换
+                </button>
+                <button
+                  type="button"
+                  onClick={handleStructureReplaceAll}
+                  disabled={!structureFindText}
+                  className="btn-secondary disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  替换全部
+                </button>
+              </div>
+              {structureMatchLabel && (
+                <div className={`mt-2 text-sm ${structureMatchCount > 0 ? 'text-gray-600' : 'text-red-600'}`}>
+                  {structureMatchLabel}
+                </div>
+              )}
+              {structureError && (
+                <div className="mt-2 text-sm text-red-600 bg-red-50 border border-red-100 rounded px-3 py-2">
+                  {structureError}
+                </div>
+              )}
+            </div>
+
+            <div className="flex-1 min-h-0 p-6 overflow-hidden">
+              <textarea
+                ref={structureTextareaRef}
+                value={structureJson}
+                onChange={(event) => {
+                  setStructureJson(event.target.value);
+                  setStructureCurrentMatchIndex(-1);
+                  if (structureError) setStructureError('');
+                }}
+                spellCheck={false}
+                className="w-full h-full min-h-[520px] font-mono text-sm leading-relaxed border border-gray-300 rounded-lg p-4 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none"
+              />
+            </div>
+
+            <div className="flex items-center justify-end gap-3 px-6 py-4 border-t border-gray-200">
+              <button
+                type="button"
+                onClick={() => setShowStructureEditor(false)}
+                disabled={isSavingStructure}
+                className="btn-secondary disabled:opacity-50"
+              >
+                {t('common.cancel')}
+              </button>
+              <button
+                type="button"
+                onClick={handleSaveStructureJson}
+                disabled={isSavingStructure}
+                className="btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {isSavingStructure ? t('common.saving') : '保存'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 删除确认对话框 */}
+      {showDeleteConfirm && deleteShotInfo && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg p-6 w-full max-w-md">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-10 h-10 rounded-full bg-red-500/20 flex items-center justify-center">
+                <svg className="w-5 h-5 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                </svg>
+              </div>
+              <h3 className="text-lg font-semibold text-gray-900">{t('chapterGenerate.confirmDeleteShot')}</h3>
+            </div>
+            <p className="text-sm text-gray-600 mb-2">
+              {t('chapterGenerate.aboutToDelete')} <span className="font-semibold">{t('chapterGenerate.shot', { number: deleteShotInfo.shotIndex })}</span>
+            </p>
+            <p className="text-sm text-red-600 mb-6 font-medium">
+              {t('chapterGenerate.deleteCannotUndo')}
+            </p>
+            <div className="flex justify-end gap-3">
+              <button
+                onClick={() => {
+                  setShowDeleteConfirm(false);
+                  setDeleteShotInfo(null);
+                }}
+                className="btn-secondary"
+                disabled={isDeletingShot}
+              >
+                {t('common.cancel')}
+              </button>
+              <button
+                onClick={confirmDeleteShot}
+                disabled={isDeletingShot}
+                className="btn-primary bg-red-600 hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {isDeletingShot ? t('chapterGenerate.deleting') : t('chapterGenerate.confirmDelete')}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+export default ShotSplitTab;

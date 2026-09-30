@@ -1,0 +1,1099 @@
+"""离线自检：不联网，检查插件结构与核心逻辑。用法：python self_test.py"""
+
+import json
+import os
+import sys
+import unittest
+import unittest.mock
+
+PLUGIN_DIR = os.path.dirname(os.path.abspath(__file__))
+sys.path.insert(0, PLUGIN_DIR)
+
+import nodes  # noqa: E402
+import manju_nodes  # noqa: E402
+
+
+class TestConfig(unittest.TestCase):
+    def test_config_loads(self):
+        cfg = nodes.load_config()
+        self.assertIn("base_url", cfg)
+        self.assertIn("model", cfg)
+        self.assertIn("api_key", cfg)
+
+    def test_rules_exist(self):
+        base = nodes.read_text_file(os.path.join(nodes.RULES_DIR, "base_system_prompt.txt"))
+        self.assertTrue(base and len(base) > 100, "base rules missing or too short")
+        for name, fname in nodes.STYLE_KEYS.items():
+            if fname is None:
+                continue
+            content = nodes.read_text_file(os.path.join(nodes.STYLES_DIR, fname))
+            self.assertTrue(content and len(content) > 50, "style file empty: " + fname)
+
+
+class TestEndpoint(unittest.TestCase):
+    def test_normalize_endpoint(self):
+        self.assertEqual(
+            nodes.normalize_endpoint("https://api.deepseek.com"),
+            "https://api.deepseek.com/chat/completions",
+        )
+        self.assertEqual(
+            nodes.normalize_endpoint("https://api.deepseek.com/"),
+            "https://api.deepseek.com/chat/completions",
+        )
+        self.assertEqual(
+            nodes.normalize_endpoint("https://api.deepseek.com/v1"),
+            "https://api.deepseek.com/v1/chat/completions",
+        )
+        self.assertEqual(
+            nodes.normalize_endpoint("https://api.deepseek.com/chat/completions"),
+            "https://api.deepseek.com/chat/completions",
+        )
+        self.assertEqual(nodes.normalize_endpoint(""), "")
+
+
+class TestCallLlmRetry(unittest.TestCase):
+    def _fake_urlopen(self, responses):
+        calls = {"n": 0}
+
+        def fake(request, timeout=120):
+            calls["n"] += 1
+            body = responses[min(calls["n"], len(responses)) - 1]
+
+            class FakeResp:
+                def read(self):
+                    return json.dumps(body).encode("utf-8")
+
+                def __enter__(self):
+                    return self
+
+                def __exit__(self, *args):
+                    return False
+
+            return FakeResp()
+
+        return fake, calls
+
+    def test_retries_when_reasoning_exhausts_tokens(self):
+        fake, calls = self._fake_urlopen([
+            {"choices": [{"message": {"content": ""}, "finish_reason": "length"}]},
+            {"choices": [{"message": {"content": "done"}, "finish_reason": "stop"}]},
+        ])
+        with unittest.mock.patch.object(nodes.urllib.request, "urlopen", side_effect=fake):
+            result = nodes.call_llm("https://api.deepseek.com", "k", "m", "sys", "user", max_tokens=8192)
+        self.assertEqual(result, "done")
+        self.assertEqual(calls["n"], 2)
+
+    def test_raises_when_still_empty(self):
+        fake, calls = self._fake_urlopen([
+            {"choices": [{"message": {"content": ""}, "finish_reason": "length"}]},
+            {"choices": [{"message": {"content": ""}, "finish_reason": "length"}]},
+        ])
+        with unittest.mock.patch.object(nodes.urllib.request, "urlopen", side_effect=fake):
+            with self.assertRaises(RuntimeError) as ctx:
+                nodes.call_llm("https://api.deepseek.com", "k", "m", "sys", "user", max_tokens=8192)
+        self.assertIn("未返回正文", str(ctx.exception))
+        self.assertEqual(calls["n"], 2)
+
+    def test_retries_when_stop_with_empty_content(self):
+        fake, calls = self._fake_urlopen([
+            {"choices": [{"message": {"content": ""}, "finish_reason": "stop"}]},
+            {"choices": [{"message": {"content": "done"}, "finish_reason": "stop"}]},
+        ])
+        with unittest.mock.patch.object(nodes.urllib.request, "urlopen", side_effect=fake):
+            result = nodes.call_llm("https://api.deepseek.com", "k", "m", "sys", "user", max_tokens=8192)
+        self.assertEqual(result, "done")
+        self.assertEqual(calls["n"], 2)
+
+    def test_thinking_disabled_in_payload(self):
+        captured = {}
+
+        def fake(request, timeout=120):
+            captured["body"] = json.loads(request.data.decode("utf-8"))
+
+            class FakeResp:
+                def read(self):
+                    return json.dumps({"choices": [{"message": {"content": "ok"}, "finish_reason": "stop"}]}).encode("utf-8")
+
+                def __enter__(self):
+                    return self
+
+                def __exit__(self, *args):
+                    return False
+
+            return FakeResp()
+
+        with unittest.mock.patch.object(nodes.urllib.request, "urlopen", side_effect=fake):
+            nodes.call_llm("https://api.deepseek.com", "k", "m", "sys", "user")
+        self.assertEqual(captured["body"]["thinking"], {"type": "disabled"})
+
+
+class TestTemplate(unittest.TestCase):
+    def test_t2va(self):
+        out = nodes.build_template("一个女孩在雨夜街道撑伞。", "T2VA", "自动", "自动")
+        self.assertIn("integrated_multimodal_description: [Shot 1]", out)
+        self.assertIn("overall_soundscape:", out)
+        self.assertIn("non_diegetic_music:", out)
+
+    def test_i2va_has_alignment(self):
+        out = nodes.build_template("女孩继续向前走。", "I2VA", "自动", "自动")
+        self.assertIn("For the target video, at 0.00 seconds", out)
+
+    def test_fl2va_has_alignment_and_duration(self):
+        out = nodes.build_template("从站立到蹲下。", "FL2VA", "8", "16:9")
+        self.assertIn("How the reference pictures align", out)
+        self.assertIn("8.00-second", out)
+        self.assertIn("Duration: 8 seconds.", out)
+
+    def test_ref2va_six_sections(self):
+        out = nodes.build_template("把视频1中的人物换成图1。", "Ref2VA", "自动", "自动")
+        for section in (
+            "subject_definitions:",
+            "summary:",
+            "retention_analysis:",
+            "detailed_description:",
+            "overall_soundscape:",
+            "non_diegetic_music:",
+        ):
+            self.assertIn(section, out)
+
+
+class TestSystemPrompt(unittest.TestCase):
+    def test_style_rules_injected(self):
+        sp = nodes.build_system_prompt("极简产品广告", "自动（英文结构+保留原文）")
+        self.assertIn("产品", sp)
+
+    def test_language_instruction(self):
+        sp = nodes.build_system_prompt("通用", "中文提示词")
+        self.assertIn("中文", sp)
+
+
+class TestNodeInterface(unittest.TestCase):
+    def test_input_types(self):
+        it = nodes.H3PromptBuilder.INPUT_TYPES()
+        self.assertIn("required", it)
+        self.assertIn("text", it["required"])
+        self.assertIn("mode", it["required"])
+        self.assertIn("optional", it)
+        self.assertIn("api_key", it["optional"])
+
+    def test_template_dispatch(self):
+        node = nodes.H3PromptBuilder()
+        out = node.build("一只猫在窗台上晒太阳。", "模板骨架", "T2VA", "通用", "自动", "自动", "自动（英文结构+保留原文）")
+        self.assertIn("integrated_multimodal_description", out[0])
+
+    def test_llm_without_key_returns_message(self):
+        node = nodes.H3PromptBuilder()
+        fake_config = {"api_key": "", "model": "x", "base_url": "x", "temperature": 0.4, "max_tokens": 8192}
+        with unittest.mock.patch.object(nodes, "load_config", return_value=fake_config):
+            out = node.build("一个女孩撑伞。", "LLM 改写", "auto", "通用", "自动", "自动", "自动（英文结构+保留原文）", api_key="")
+        self.assertIn("未配置 API Key", out[0])
+
+
+class TestManjuPreset(unittest.TestCase):
+    def test_build_preset_json(self):
+        out = manju_nodes.build_preset_json("古风", "9:16", "180", "自动（英文结构+保留原文）")
+        data = json.loads(out)
+        self.assertEqual(data["style"], "古风")
+        self.assertEqual(data["aspect_ratio"], "9:16")
+        self.assertEqual(data["duration"], 180)
+
+
+class TestManjuMapping(unittest.TestCase):
+    def test_parse_basic(self):
+        out = manju_nodes.parse_mapping_text("角色A=图1\n场景A=图3", "")
+        data = json.loads(out)
+        self.assertEqual(data["角色A"], 1)
+        self.assertEqual(data["场景A"], 3)
+
+    def test_parse_separators(self):
+        out = manju_nodes.parse_mapping_text("角色A：1，角色B：Picture 2，道具A=3", "")
+        data = json.loads(out)
+        self.assertEqual(data["角色A"], 1)
+        self.assertEqual(data["角色B"], 2)
+        self.assertEqual(data["道具A"], 3)
+
+    def test_duplicate_number_warning(self):
+        out = manju_nodes.parse_mapping_text("角色A=图1\n角色B=图1", "")
+        data = json.loads(out)
+        self.assertIn("_warnings", data)
+
+    def test_assets_missing_warning(self):
+        assets = json.dumps({"characters": [{"id": "角色C", "description": "x", "shots": [1]}]}, ensure_ascii=False)
+        out = manju_nodes.parse_mapping_text("角色A=图1", assets)
+        data = json.loads(out)
+        self.assertTrue(any("角色C" in w for w in data["_warnings"]))
+
+
+class TestManjuRefs(unittest.TestCase):
+    STORYBOARD = json.dumps({
+        "episode_title": "测试集",
+        "duration_seconds": 12,
+        "shots": [
+            {"shot_id": 1, "time_range": "0:00-0:05", "duration": 5, "scene": "场景A",
+             "characters": ["角色A"], "props": [], "shot_size": "中景", "camera": "固定",
+             "action": "角色A走进教室", "dialogue": "你好。", "sfx": "脚步声", "mood": "平静",
+             "continuity": {"start": "门口", "end": "讲台前"}},
+            {"shot_id": 2, "time_range": "0:05-0:12", "duration": 7, "scene": "场景A",
+             "characters": ["角色A", "角色B"], "props": ["道具A"], "shot_size": "近景", "camera": "推近",
+             "action": "角色A把道具A递给角色B", "dialogue": "给你。", "sfx": "", "mood": "紧张",
+             "continuity": {"start": "讲台前", "end": "角色B拿到道具A"}},
+        ],
+    }, ensure_ascii=False)
+    MAPPING = json.dumps({"角色A": 1, "角色B": 2, "场景A": 3, "道具A": 4}, ensure_ascii=False)
+
+    def test_tags_ordered_and_renumbered(self):
+        data = manju_nodes.compute_shot_refs(self.STORYBOARD, self.MAPPING, 2)
+        self.assertEqual(data["tags"][0], ["<Picture 1>", "角色A"])
+        self.assertEqual(data["tags"][1], ["<Picture 2>", "角色B"])
+        self.assertEqual(data["tags"][2], ["<Picture 3>", "场景A"])
+        self.assertEqual(data["tags"][3], ["<Picture 4>", "道具A"])
+        self.assertEqual(data["missing"], [])
+
+    def test_missing_detected(self):
+        mapping = json.dumps({"角色A": 1}, ensure_ascii=False)
+        data = manju_nodes.compute_shot_refs(self.STORYBOARD, mapping, 2)
+        self.assertIn("角色B", data["missing"])
+        self.assertIn("场景A", data["missing"])
+        self.assertIn("道具A", data["missing"])
+
+    def test_index_out_of_range(self):
+        with self.assertRaises(ValueError):
+            manju_nodes.compute_shot_refs(self.STORYBOARD, self.MAPPING, 99)
+
+    def test_wiring_note(self):
+        note = manju_nodes.build_wiring_note(self.STORYBOARD, self.MAPPING, 2)
+        self.assertIn("<Picture 1>=角色A", note)
+        self.assertIn("图库第 1 张", note)
+        self.assertNotIn("你的图", note)
+
+    def test_per_shot_wiring(self):
+        out = manju_nodes.build_per_shot_wiring(self.STORYBOARD, self.MAPPING)
+        self.assertIn("Shot 1:", out)
+        self.assertIn("Shot 2:", out)
+        self.assertIn("角色A", out)
+        self.assertIn("图库第 1 张", out)
+        self.assertNotIn("你的图", out)
+
+    def test_per_shot_wiring_invalid(self):
+        self.assertEqual(manju_nodes.build_per_shot_wiring("bad", "{}"), "")
+
+
+class TestManjuSystemPrompt(unittest.TestCase):
+    def test_rules_exist_and_extra_injected(self):
+        sp = manju_nodes.build_manju_system_prompt("manju_storyboard.txt", "【本集预设】{}")
+        self.assertIn("分镜导演", sp)
+        self.assertIn("本集预设", sp)
+
+
+class TestManjuNodes(unittest.TestCase):
+    def test_input_types(self):
+        for cls in (
+            manju_nodes.ManjuPreset,
+            manju_nodes.ManjuScriptToStoryboard,
+            manju_nodes.ManjuResourceMapping,
+            manju_nodes.ManjuShotPrompt,
+            manju_nodes.ManjuLlmConfig,
+        ):
+            it = cls.INPUT_TYPES()
+            self.assertIn("required", it)
+
+    def test_preset_node(self):
+        node = manju_nodes.ManjuPreset()
+        out = node.build("古风", "9:16", "120", "自动（英文结构+保留原文）")
+        self.assertIn("duration", out[0])
+
+    def test_mapping_node(self):
+        node = manju_nodes.ManjuResourceMapping()
+        out = node.build("角色A=图1", "")
+        self.assertIn("角色A", out[0])
+
+    def test_storyboard_node_empty_script(self):
+        node = manju_nodes.ManjuScriptToStoryboard()
+        out = node.build("", "{}", api_key="")
+        self.assertIn("请输入剧本", out[0])
+
+    def test_shot_prompt_node_bad_json(self):
+        node = manju_nodes.ManjuShotPrompt()
+        out = node.build("not json", "{}", 1, api_key="")
+        self.assertIn("错误：", out[0])
+
+
+class TestManjuV2Preset(unittest.TestCase):
+    def test_preset_policy(self):
+        out = manju_nodes.build_preset_json("古风", "9:16", "120", "自动（英文结构+保留原文）", "仅禁BGM")
+        self.assertEqual(json.loads(out)["audio_text_policy"], "仅禁BGM")
+
+
+class TestDeriveAssets(unittest.TestCase):
+    def test_derive_assets(self):
+        out = manju_nodes.derive_assets_from_storyboard(TestManjuRefs.STORYBOARD)
+        assets = json.loads(out)
+        self.assertEqual([c["id"] for c in assets["characters"]], ["角色A", "角色B"])
+        self.assertEqual(assets["scenes"][0]["id"], "场景A")
+        self.assertEqual(assets["props"][0]["id"], "道具A")
+        self.assertIn(2, assets["props"][0]["shots"])
+
+
+class TestResolveLlm(unittest.TestCase):
+    def test_llm_config_overrides_config(self):
+        k, m, u, t, cfg, warn = manju_nodes.resolve_llm_config(
+            "", "", "", '{"api_key":"k1","model":"m1","base_url":"https://x","temperature":0.3}'
+        )
+        self.assertEqual(k, "k1")
+        self.assertEqual(m, "m1")
+        self.assertEqual(u, "https://x")
+        self.assertEqual(t, 0.3)
+        self.assertIsNone(warn)
+
+    def test_node_field_wins_over_llm_config(self):
+        k, _, _, _, _, _ = manju_nodes.resolve_llm_config("k2", "", "", '{"api_key":"k1"}')
+        self.assertEqual(k, "k2")
+
+    def test_invalid_llm_config_warns(self):
+        _, _, _, _, _, warn = manju_nodes.resolve_llm_config("", "", "", "not json")
+        self.assertIn("llm_config", warn)
+
+
+class TestAutoSuggest(unittest.TestCase):
+    ASSETS = json.dumps({
+        "characters": [{"id": "角色A", "description": "黑发少年", "shots": [1]}],
+        "scenes": [{"id": "场景A", "description": "教室", "shots": [1]}],
+        "props": [{"id": "道具A", "description": "盒子", "shots": [1]}],
+    }, ensure_ascii=False)
+
+    def test_auto_suggest_mapping(self):
+        node = manju_nodes.ManjuResourceMapping()
+        out = node.build("", self.ASSETS, "关闭")
+        mapping = json.loads(out[0])
+        self.assertEqual(mapping["角色A"], 1)
+        self.assertEqual(mapping["场景A"], 2)
+        self.assertEqual(mapping["道具A"], 3)
+        self.assertIn("角色A=图1", out[1])
+
+    def test_image_prompts(self):
+        node = manju_nodes.ManjuResourceMapping()
+        out = node.build("", self.ASSETS, "离线模板")
+        self.assertIn("角色A", out[2])
+        self.assertIn("黑发少年", out[2])
+        self.assertIn("设定图", out[2])
+        self.assertIn("三视图", out[2])
+
+
+class TestManjuV2Nodes(unittest.TestCase):
+    def test_fixed_storyboard_skips_llm(self):
+        node = manju_nodes.ManjuScriptToStoryboard()
+        with unittest.mock.patch.object(manju_nodes, "call_llm", side_effect=AssertionError("不应调用 LLM")):
+            out = node.build("随便的剧本", "{}", api_key="", model="", base_url="",
+                             llm_config="", fixed_storyboard_json=TestManjuRefs.STORYBOARD)
+        sb = json.loads(out[0])
+        self.assertEqual(len(sb["shots"]), 2)
+        self.assertEqual(sb["_policy"], "禁字幕+无BGM")
+        assets = json.loads(out[1])
+        self.assertEqual([c["id"] for c in assets["characters"]], ["角色A", "角色B"])
+
+    def test_export_all(self):
+        node = manju_nodes.ManjuShotPrompt()
+        with unittest.mock.patch.object(manju_nodes, "call_llm", return_value="MOCK_PROMPT"):
+            out = node.build(TestManjuRefs.STORYBOARD, TestManjuRefs.MAPPING, 1,
+                             api_key="k", export_all=True)
+        self.assertIn("=== Shot 1 ===", out[0])
+        self.assertIn("=== Shot 2 ===", out[0])
+        self.assertIn("MOCK_PROMPT", out[0])
+        self.assertIn("Shot 1 接线：", out[1])
+
+    def test_policy_injected(self):
+        sb = json.loads(TestManjuRefs.STORYBOARD)
+        sb["_policy"] = "仅禁字幕"
+        sb_json = json.dumps(sb, ensure_ascii=False)
+        captured = []
+
+        def fake_llm(*args, **kwargs):
+            captured.append(args[4])
+            return "P"
+
+        node = manju_nodes.ManjuShotPrompt()
+        with unittest.mock.patch.object(manju_nodes, "call_llm", side_effect=fake_llm):
+            node.build(sb_json, TestManjuRefs.MAPPING, 1, api_key="k")
+        self.assertIn("仅禁字幕", captured[0])
+
+    def test_storyboard_content_in_user_message(self):
+        captured = []
+
+        def fake_llm(*args, **kwargs):
+            captured.append((args[3], args[4]))
+            return '{"storyboard": {"shots": []}, "assets": {}}'
+
+        node = manju_nodes.ManjuScriptToStoryboard()
+        with unittest.mock.patch.object(manju_nodes, "call_llm", side_effect=fake_llm):
+            node.build("第一集测试剧本", "{}", api_key="k")
+        system, user_msg = captured[0]
+        self.assertNotIn("第一集测试剧本", system)
+        self.assertIn("第一集测试剧本", user_msg)
+        self.assertIn("剧本原文", user_msg)
+
+    def test_llm_config_node(self):
+        node = manju_nodes.ManjuLlmConfig()
+        out = node.build("", "m1", "https://x", "")
+        cfg = json.loads(out[0])
+        self.assertEqual(cfg["model"], "m1")
+        self.assertNotIn("temperature", cfg)
+        out2 = node.build("", "m1", "https://x", "0.3")
+        self.assertEqual(json.loads(out2[0])["temperature"], 0.3)
+
+    def test_shot_index_step(self):
+        it = manju_nodes.ManjuShotPrompt.INPUT_TYPES()
+        self.assertEqual(it["required"]["shot_index"][1].get("step"), 1)
+
+    def test_per_shot_wiring_output(self):
+        node = manju_nodes.ManjuResourceMapping()
+        out = node.build("", TestAutoSuggest.ASSETS, "关闭", TestManjuRefs.STORYBOARD)
+        self.assertIn("Shot 1:", out[3])
+
+    def test_per_shot_wiring_empty_without_storyboard(self):
+        node = manju_nodes.ManjuResourceMapping()
+        out = node.build("", TestAutoSuggest.ASSETS, "关闭")
+        self.assertEqual(out[3], "")
+
+
+class TestShotSelect(unittest.TestCase):
+    def test_filtered_mapping_shot1(self):
+        node = manju_nodes.ManjuResourceMapping()
+        out = node.build("", TestAutoSuggest.ASSETS, "关闭", TestManjuRefs.STORYBOARD, 1)
+        mapping = json.loads(out[0])
+        self.assertEqual(mapping, {"角色A": 1, "场景A": 2})
+        self.assertIn("角色A=图1", out[1])
+        self.assertNotIn("角色B", out[1])
+        self.assertIn("Shot 1:", out[3])
+        self.assertNotIn("Shot 2:", out[3])
+
+    def test_default_zero_full(self):
+        node = manju_nodes.ManjuResourceMapping()
+        out = node.build("", TestAutoSuggest.ASSETS, "关闭", TestManjuRefs.STORYBOARD, 0)
+        self.assertIn("Shot 1:", out[3])
+        self.assertIn("Shot 2:", out[3])
+
+    def test_out_of_range(self):
+        node = manju_nodes.ManjuResourceMapping()
+        out = node.build("", TestAutoSuggest.ASSETS, "关闭", TestManjuRefs.STORYBOARD, 99)
+        self.assertIn("错误：镜头序号超出范围", out[3])
+        self.assertIn("道具A", out[0])
+
+    def test_image_prompts_unchanged(self):
+        node = manju_nodes.ManjuResourceMapping()
+        out = node.build("", TestAutoSuggest.ASSETS, "离线模板", TestManjuRefs.STORYBOARD, 1)
+        self.assertIn("道具A", out[2])
+
+    def test_input_types_has_shot_index(self):
+        it = manju_nodes.ManjuResourceMapping.INPUT_TYPES()
+        self.assertEqual(it["optional"]["shot_index"][1].get("default"), 0)
+
+    def test_derive_assets_when_missing(self):
+        node = manju_nodes.ManjuResourceMapping()
+        out = node.build("", "", "关闭", TestManjuRefs.STORYBOARD, 1)
+        mapping = json.loads(out[0])
+        self.assertIn("角色A", mapping)
+        self.assertIn("场景A", mapping)
+        self.assertIn("Shot 1:", out[3])
+
+
+class TestImagePromptMode(unittest.TestCase):
+    def test_default_mode(self):
+        it = manju_nodes.ManjuResourceMapping.INPUT_TYPES()
+        self.assertEqual(it["optional"]["image_prompt_mode"][1].get("default"), "关闭")
+
+    def test_off_mode_empty(self):
+        node = manju_nodes.ManjuResourceMapping()
+        out = node.build("", TestAutoSuggest.ASSETS, "关闭")
+        self.assertEqual(out[2], "")
+
+    def test_rules_file_content(self):
+        content = manju_nodes.read_text_file(os.path.join(manju_nodes.RULES_DIR, "manju_image_prompt.txt"))
+        for keyword in ("三视图", "面部特写", "双手自然垂下"):
+            self.assertIn(keyword, content)
+
+    def test_llm_mode_calls_llm(self):
+        captured = []
+
+        def fake_llm(*args, **kwargs):
+            captured.append((args[3], args[4]))
+            return "MOCK_IMAGE_PROMPTS"
+
+        node = manju_nodes.ManjuResourceMapping()
+        with unittest.mock.patch.object(manju_nodes, "call_llm", side_effect=fake_llm):
+            out = node.build("", TestAutoSuggest.ASSETS, "LLM 生成", "", 0, '{"style":"古风"}', api_key="k")
+        system, user_msg = captured[0]
+        self.assertIn("美术设定师", system)
+        self.assertIn("资源清单", user_msg)
+        self.assertIn("古风", user_msg)
+        self.assertEqual(out[2], "MOCK_IMAGE_PROMPTS")
+
+    def test_llm_mode_failure_message(self):
+        node = manju_nodes.ManjuResourceMapping()
+        with unittest.mock.patch.object(manju_nodes, "call_llm", side_effect=RuntimeError("boom")):
+            out = node.build("", TestAutoSuggest.ASSETS, "LLM 生成", "", 0, "{}", api_key="k")
+        self.assertIn("图像提示词生成失败", out[2])
+
+
+class TestRequestTimeout(unittest.TestCase):
+    def _patch_llm(self, cfg, timeout_arg=None):
+        captured = {}
+
+        class FakeResp:
+            def __enter__(self):
+                return self
+
+            def __exit__(self, *a):
+                return False
+
+            def read(self):
+                return b'{"choices":[{"message":{"content":"ok"},"finish_reason":"stop"}]}'
+
+        def fake_urlopen(request, timeout):
+            captured["timeout"] = timeout
+            return FakeResp()
+
+        def call():
+            if timeout_arg is None:
+                return nodes.call_llm("https://api.deepseek.com/chat/completions", "k", "m", "s", "u")
+            return nodes.call_llm("https://api.deepseek.com/chat/completions", "k", "m", "s", "u", timeout=timeout_arg)
+
+        return captured, call
+
+    def test_config_timeout_used(self):
+        captured, call = self._patch_llm({"thinking_disabled": True, "request_timeout": 240})
+        with unittest.mock.patch("urllib.request.urlopen", side_effect=self._fake_urlopen(captured)), \
+                unittest.mock.patch.object(nodes, "load_config", return_value={"thinking_disabled": True, "request_timeout": 240}):
+            call()
+        self.assertEqual(captured["timeout"], 240)
+
+    def test_explicit_timeout_wins(self):
+        captured, call = self._patch_llm({"thinking_disabled": True}, timeout_arg=77)
+        with unittest.mock.patch("urllib.request.urlopen", side_effect=self._fake_urlopen(captured)), \
+                unittest.mock.patch.object(nodes, "load_config", return_value={"thinking_disabled": True}):
+            call()
+        self.assertEqual(captured["timeout"], 77)
+
+    def _fake_urlopen(self, captured):
+        class FakeResp:
+            def __enter__(self):
+                return self
+
+            def __exit__(self, *a):
+                return False
+
+            def read(self):
+                return b'{"choices":[{"message":{"content":"ok"},"finish_reason":"stop"}]}'
+
+        def fake_urlopen(request, timeout):
+            captured["timeout"] = timeout
+            return FakeResp()
+
+        return fake_urlopen
+
+
+class TestManjuImagePromptNode(unittest.TestCase):
+    def test_input_types(self):
+        it = manju_nodes.ManjuImagePrompt.INPUT_TYPES()
+        self.assertIn("assets_json", it["required"])
+        self.assertIn("preset_json", it["required"])
+
+    def test_empty_assets(self):
+        node = manju_nodes.ManjuImagePrompt()
+        out = node.build("", "{}")
+        self.assertIn("请先输入资产清单", out[0])
+
+    def test_llm_called(self):
+        captured = []
+
+        def fake_llm(*args, **kwargs):
+            captured.append((args[3], args[4]))
+            return "MOCK_IMG"
+
+        node = manju_nodes.ManjuImagePrompt()
+        with unittest.mock.patch.object(manju_nodes, "call_llm", side_effect=fake_llm):
+            out = node.build(TestAutoSuggest.ASSETS, '{"style":"古风"}', api_key="k")
+        self.assertEqual(out[0], "MOCK_IMG")
+        system, user = captured[0]
+        self.assertIn("美术设定师", system)
+        self.assertIn("资源清单", user)
+        self.assertIn("古风", user)
+
+
+class TestManjuV24Rules(unittest.TestCase):
+    def test_storyboard_rules_upgraded(self):
+        content = manju_nodes.read_text_file(os.path.join(manju_nodes.RULES_DIR, "manju_storyboard.txt"))
+        for keyword in ("purpose", "coverage", "情绪外化表", "边界锁", "镜头设计样例"):
+            self.assertIn(keyword, content)
+
+    def test_review_rules_exist(self):
+        content = manju_nodes.read_text_file(os.path.join(manju_nodes.RULES_DIR, "manju_review.txt"))
+        for keyword in ("覆盖率", "轴线", "连续性", "时长对账", "动作具体性", "情绪外化", "资产完整性", "台词"):
+            self.assertIn(keyword, content)
+
+
+class TestManjuDirectorReview(unittest.TestCase):
+    SB = json.dumps({
+        "storyboard": {
+            "duration_seconds": 6,
+            "coverage": [{"beat": "b1", "source_text": "s", "shot_ids": [1], "status": "covered"}],
+            "shots": [
+                {"shot_id": 1, "duration": 3, "time_range": "0:00-0:03", "scene": "场景A", "characters": ["角色A"], "props": [], "action": "角色A站在原地", "camera": "固定镜头", "continuity": {"start": "s1", "end": "e1"}, "purpose": "建立空间"},
+                {"shot_id": 2, "duration": 3, "time_range": "0:03-0:06", "scene": "场景A", "characters": ["角色A"], "props": [], "action": "角色A抬手", "camera": "固定镜头", "continuity": {"start": "e1", "end": "e2"}, "purpose": "反应"},
+            ],
+        },
+        "assets": {"characters": [{"id": "角色A", "description": "", "shots": [1, 2]}], "scenes": [{"id": "场景A", "description": "", "shots": [1, 2]}], "props": []},
+    }, ensure_ascii=False)
+
+    def test_pass_single_call(self):
+        calls = []
+
+        def fake_llm(*args, **kwargs):
+            calls.append(args[4])
+            return json.dumps({"verdict": "PASS", "issues": [], "summary": "ok"}, ensure_ascii=False)
+
+        node = manju_nodes.ManjuDirectorReview()
+        with unittest.mock.patch.object(manju_nodes, "call_llm", side_effect=fake_llm):
+            out = node.build(self.SB, "第一集剧本", "{}", api_key="k")
+        self.assertEqual(len(calls), 1)
+        self.assertEqual(json.loads(out[0])["storyboard"]["duration_seconds"], 6)
+        self.assertIn("PASS", out[2])
+        self.assertIn("审阅第 1 轮", out[2])
+
+    def test_fail_then_fix_then_pass(self):
+        fixed = json.dumps({
+            "storyboard": {
+                "duration_seconds": 6,
+                "coverage": [{"beat": "b1", "source_text": "s", "shot_ids": [1], "status": "covered"}],
+                "shots": [
+                    {"shot_id": 1, "duration": 3, "time_range": "0:00-0:03", "scene": "场景A", "characters": ["角色A"], "props": [], "action": "角色A慢慢抬起右手", "camera": "固定镜头", "continuity": {"start": "s1", "end": "e1"}, "purpose": "建立空间"},
+                    {"shot_id": 2, "duration": 3, "time_range": "0:03-0:06", "scene": "场景A", "characters": ["角色A"], "props": [], "action": "角色A抬头看向门口", "camera": "固定镜头", "continuity": {"start": "e1", "end": "e2"}, "purpose": "反应"},
+                ],
+            },
+            "assets": {"characters": [{"id": "角色A", "description": "", "shots": [1, 2]}], "scenes": [{"id": "场景A", "description": "", "shots": [1, 2]}], "props": []},
+        }, ensure_ascii=False)
+        seq = [
+            json.dumps({"verdict": "FAIL", "issues": [{"severity": "high", "shot_id": "-1", "field": "coverage", "problem": "关键节拍丢戏", "suggestion": "增加镜头"}], "summary": "fix"}, ensure_ascii=False),
+            fixed,
+            json.dumps({"verdict": "PASS", "issues": [], "summary": "ok"}, ensure_ascii=False),
+        ]
+        calls = []
+
+        def fake_llm(*args, **kwargs):
+            calls.append(args[4])
+            return seq[len(calls) - 1]
+
+        node = manju_nodes.ManjuDirectorReview()
+        with unittest.mock.patch.object(manju_nodes, "call_llm", side_effect=fake_llm):
+            out = node.build(self.SB, "第一集剧本", "{}", api_key="k")
+        self.assertEqual(len(calls), 3)
+        self.assertEqual(json.loads(out[0])["storyboard"]["shots"][0]["action"], "角色A慢慢抬起右手")
+        self.assertIn("问题清单", calls[1])
+        self.assertIn("仅修复", calls[1])
+        self.assertIn("禁止新增", calls[1])
+        self.assertIn("PASS", out[2])
+
+    def test_max_rounds_warning(self):
+        def fake_llm(*args, **kwargs):
+            return json.dumps({"verdict": "FAIL", "issues": [{"severity": "high", "shot_id": "-1", "field": "coverage", "problem": "x", "suggestion": "y"}], "summary": "still bad"}, ensure_ascii=False)
+
+        node = manju_nodes.ManjuDirectorReview()
+        cfg = {"api_key": "k", "max_review_rounds": 2, "reviewer_temperature": 0.1, "manju_temperature": 0.2}
+        with unittest.mock.patch.object(manju_nodes, "call_llm", side_effect=fake_llm), \
+                unittest.mock.patch.object(manju_nodes, "load_config", return_value=cfg):
+            out = node.build(self.SB, "第一集剧本", "{}")
+        self.assertIn("已达最大审阅轮数", out[2])
+
+    def test_no_api_key(self):
+        node = manju_nodes.ManjuDirectorReview()
+        with unittest.mock.patch.object(manju_nodes, "load_config", return_value={"api_key": ""}):
+            out = node.build(self.SB, "第一集剧本", "{}")
+        self.assertIn("未配置 API Key", out[0])
+
+    def test_invalid_json(self):
+        node = manju_nodes.ManjuDirectorReview()
+        out = node.build("not json", "第一集剧本", "{}")
+        self.assertIn("错误", out[0])
+
+
+class TestDurationNormalize(unittest.TestCase):
+    def test_fills_gap(self):
+        sb = {
+            "storyboard": {
+                "duration_seconds": 6,
+                "shots": [
+                    {"shot_id": 1, "duration": 2, "time_range": "0:00-0:02"},
+                    {"shot_id": 2, "duration": 2, "time_range": "0:02-0:04"},
+                ],
+            },
+            "assets": {},
+        }
+        out = json.loads(manju_nodes._normalize_durations(json.dumps(sb, ensure_ascii=False)))
+        shots = out["storyboard"]["shots"]
+        self.assertEqual(sum(s["duration"] for s in shots), 6)
+        self.assertEqual(shots[-1]["time_range"], "0:03-0:06")
+
+    def test_no_change_when_correct(self):
+        sb = {
+            "storyboard": {
+                "duration_seconds": 6,
+                "shots": [
+                    {"shot_id": 1, "duration": 3, "time_range": "0:00-0:03"},
+                    {"shot_id": 2, "duration": 3, "time_range": "0:03-0:06"},
+                ],
+            },
+            "assets": {},
+        }
+        text = json.dumps(sb, ensure_ascii=False)
+        self.assertEqual(json.loads(manju_nodes._normalize_durations(text)), json.loads(text))
+
+    def test_plain_storyboard_root(self):
+        sb = {"duration_seconds": 4, "shots": [{"shot_id": 1, "duration": 3, "time_range": "0:00-0:03"}]}
+        out = json.loads(manju_nodes._normalize_durations(json.dumps(sb, ensure_ascii=False)))
+        self.assertEqual(sum(s["duration"] for s in out["shots"]), 4)
+
+    def test_target_restored_when_changed(self):
+        sb = {
+            "storyboard": {
+                "duration_seconds": 6,
+                "shots": [
+                    {"shot_id": 1, "duration": 3, "time_range": "0:00-0:03"},
+                    {"shot_id": 2, "duration": 3, "time_range": "0:03-0:06"},
+                ],
+            },
+            "assets": {},
+        }
+        out = json.loads(manju_nodes._normalize_durations(json.dumps(sb, ensure_ascii=False), target=8))
+        self.assertEqual(out["storyboard"]["duration_seconds"], 8)
+        self.assertEqual(sum(s["duration"] for s in out["storyboard"]["shots"]), 8)
+
+
+class TestIssueNormalize(unittest.TestCase):
+    def test_high_continuity_downgraded(self):
+        issues = [
+            {"severity": "high", "field": "continuity", "problem": "x", "suggestion": "y"},
+            {"severity": "high", "field": "coverage", "problem": "丢戏", "suggestion": "加镜头"},
+        ]
+        out = manju_nodes._normalize_issues(issues)
+        self.assertEqual([i["severity"] for i in out], ["medium", "high"])
+
+    def test_duration_high_downgraded(self):
+        issues = [{"severity": "high", "field": "duration", "problem": "x", "suggestion": "y"}]
+        out = manju_nodes._normalize_issues(issues)
+        self.assertEqual(out[0]["severity"], "medium")
+
+    def test_noop_issue_removed(self):
+        issues = [
+            {"severity": "high", "field": "duration", "problem": "无需修改", "suggestion": "无"},
+            {"severity": "medium", "field": "action", "problem": "z", "suggestion": "具体化"},
+        ]
+        out = manju_nodes._normalize_issues(issues)
+        self.assertEqual(len(out), 1)
+        self.assertEqual(out[0]["field"], "action")
+
+    def test_bad_issue_entries_removed(self):
+        issues = ["not-a-dict", None, {"severity": "high", "field": "coverage", "problem": "丢戏", "suggestion": "加镜头"}]
+        out = manju_nodes._normalize_issues(issues)
+        self.assertEqual(len(out), 1)
+
+    def test_long_issue_removed(self):
+        issues = [{"severity": "high", "field": "dialogue", "problem": "重" * 900, "suggestion": "改"}]
+        out = manju_nodes._normalize_issues(issues)
+        self.assertEqual(len(out), 0)
+
+    def test_repetitive_issue_removed(self):
+        problem = "但分镜中台词与剧本一致，核对后无改写。" * 30
+        issues = [{"severity": "high", "field": "dialogue", "problem": problem, "suggestion": "y"}]
+        out = manju_nodes._normalize_issues(issues)
+        self.assertEqual(len(out), 0)
+
+    def test_issues_capped(self):
+        issues = [{"severity": "high", "field": "coverage", "problem": "丢戏%d" % i, "suggestion": "加"} for i in range(12)]
+        out = manju_nodes._normalize_issues(issues)
+        self.assertLessEqual(len(out), 8)
+
+    def test_no_rewrite_claim_removed(self):
+        issues = [{"severity": "high", "field": "dialogue", "problem": "台词完整保留，无改写，但未标注说话人", "suggestion": "x"}]
+        out = manju_nodes._normalize_issues(issues)
+        self.assertEqual(len(out), 0)
+
+    def test_speculative_high_downgraded(self):
+        issues = [
+            {"severity": "high", "field": "assets", "problem": "背景中可能有族人", "suggestion": "x"},
+            {"severity": "high", "field": "coverage", "problem": "关键节拍无镜头落实", "suggestion": "加镜头"},
+        ]
+        out = manju_nodes._normalize_issues(issues)
+        self.assertEqual([i["severity"] for i in out], ["medium", "high"])
+
+    def test_inconsistent_kept(self):
+        issues = [{"severity": "high", "field": "continuity", "problem": "左右占位不一致", "suggestion": "统一"}]
+        out = manju_nodes._normalize_issues(issues)
+        self.assertEqual(len(out), 1)
+
+    def test_review_max_tokens_capped(self):
+        captured = {}
+
+        def fake_llm(*args, **kwargs):
+            captured["max_tokens"] = kwargs.get("max_tokens")
+            return json.dumps({"verdict": "PASS", "issues": [], "summary": "ok"}, ensure_ascii=False)
+
+        node = manju_nodes.ManjuDirectorReview()
+        with unittest.mock.patch.object(manju_nodes, "call_llm", side_effect=fake_llm):
+            node.build(TestManjuDirectorReview.SB, "剧本", "{}", api_key="k")
+        self.assertLessEqual(captured["max_tokens"], 8192)
+
+
+class TestDirectorReviewAssets(unittest.TestCase):
+    SB_PLAIN = json.dumps({
+        "duration_seconds": 6,
+        "shots": [
+            {"shot_id": 1, "duration": 3, "time_range": "0:00-0:03", "scene": "场景A", "characters": ["角色A"], "props": ["道具A"], "action": "x", "camera": "固定", "continuity": {"start": "s", "end": "e"}, "purpose": "p"},
+            {"shot_id": 2, "duration": 3, "time_range": "0:03-0:06", "scene": "场景A", "characters": ["角色A"], "props": [], "action": "y", "camera": "固定", "continuity": {"start": "e", "end": "e2"}, "purpose": "p"},
+        ],
+    }, ensure_ascii=False)
+
+    def _pass_llm(self):
+        def fake_llm(*a, **k):
+            return json.dumps({"verdict": "PASS", "issues": [], "summary": "ok"}, ensure_ascii=False)
+        return fake_llm
+
+    def test_plain_input_assets_derived(self):
+        node = manju_nodes.ManjuDirectorReview()
+        with unittest.mock.patch.object(manju_nodes, "call_llm", side_effect=self._pass_llm()):
+            out = node.build(self.SB_PLAIN, "剧本", "{}", api_key="k")
+        assets = json.loads(out[1])
+        self.assertEqual([c["id"] for c in assets["characters"]], ["角色A"])
+        self.assertEqual(assets["scenes"][0]["id"], "场景A")
+        self.assertEqual(assets["props"][0]["id"], "道具A")
+        top = json.loads(out[0])
+        self.assertIn("shots", top)
+        self.assertNotIn("storyboard", top)
+
+    def test_assets_json_parameter_used(self):
+        assets_in = json.dumps({
+            "characters": [{"id": "角色A", "description": "详细描述", "shots": [1]}],
+            "scenes": [], "props": [],
+        }, ensure_ascii=False)
+        node = manju_nodes.ManjuDirectorReview()
+        with unittest.mock.patch.object(manju_nodes, "call_llm", side_effect=self._pass_llm()):
+            out = node.build(self.SB_PLAIN, "剧本", "{}", api_key="k", assets_json=assets_in)
+        assets = json.loads(out[1])
+        self.assertEqual(assets["characters"][0]["description"], "详细描述")
+
+    def test_wrapper_input_stays_wrapper(self):
+        node = manju_nodes.ManjuDirectorReview()
+        with unittest.mock.patch.object(manju_nodes, "call_llm", side_effect=self._pass_llm()):
+            out = node.build(TestManjuDirectorReview.SB, "剧本", "{}", api_key="k")
+        top = json.loads(out[0])
+        self.assertIn("storyboard", top)
+        self.assertIn("assets", top)
+
+    def test_derive_assets_wrapper_supported(self):
+        wrapper = json.dumps({"storyboard": json.loads(self.SB_PLAIN), "assets": {}}, ensure_ascii=False)
+        assets = json.loads(manju_nodes.derive_assets_from_storyboard(wrapper))
+        self.assertEqual([c["id"] for c in assets["characters"]], ["角色A"])
+        self.assertEqual(assets["props"][0]["id"], "道具A")
+
+
+class TestAdScriptGrid(unittest.TestCase):
+    def test_h3_length_grid(self):
+        from ad_script_nodes import h3_length_for_seconds
+        cases = {0.2: 5, 5: 124, 10: 243, 12: 294, 15: 362, 30: 736}
+        for seconds, expected in cases.items():
+            self.assertEqual(h3_length_for_seconds(seconds), expected, "seconds=%s" % seconds)
+
+    def test_h3_length_valid(self):
+        from ad_script_nodes import h3_length_for_seconds
+        for seconds in (1, 3, 7, 11, 16, 40, 60):
+            length = h3_length_for_seconds(seconds)
+            self.assertTrue(5 <= length <= 3592)
+            self.assertEqual(length % 17, 5, "length=%s" % length)
+
+    def test_distribute_scene_seconds(self):
+        from ad_script_nodes import distribute_scene_seconds
+        self.assertEqual(distribute_scene_seconds(30, 3), [10, 10, 10])
+        self.assertEqual(distribute_scene_seconds(32, 3), [10, 10, 12])
+        self.assertEqual(distribute_scene_seconds(30, 1), [30])
+
+
+class TestAdScriptPlan(unittest.TestCase):
+    def test_build_plan_json_valid(self):
+        import json as _json
+        from ad_script_nodes import build_plan_json
+        plan = build_plan_json(
+            ["<Subject 1> keeps the same face.", ""],
+            [["Open the scene.", "End mid-step."], ["Continue the stride."]],
+            [10, 10],
+            123,
+        )
+        data = _json.loads(plan)
+        self.assertIn("shots", data)
+        self.assertIn("prompt_prefix", data)
+        self.assertEqual(data["prompt_prefix"], ["<Subject 1> keeps the same face."])
+        self.assertEqual(len(data["shots"]), 2)
+        self.assertEqual(data["shots"][0]["id"], "scene_01")
+        self.assertEqual(data["shots"][0]["duration_seconds"], 10)
+        self.assertEqual(data["shots"][0]["seed"], 124)
+        self.assertEqual(data["shots"][1]["id"], "scene_02")
+        self.assertEqual(data["shots"][1]["seed"], 125)
+        self.assertIn("defaults", data)
+
+    def test_build_plan_json_mismatch(self):
+        from ad_script_nodes import build_plan_json
+        with self.assertRaises(ValueError):
+            build_plan_json(["P"], [["A"]], [10, 10], 1)
+
+    def test_build_plan_json_empty_scenes(self):
+        from ad_script_nodes import build_plan_json
+        with self.assertRaises(ValueError):
+            build_plan_json(["P"], [], [], 1)
+
+
+class TestAdScriptParsers(unittest.TestCase):
+    def test_parse_scripts(self):
+        from ad_script_nodes import parse_scripts
+        raw = '[{"title": "A", "script": "第一段"}, {"title": "B", "script": "第二段"}]'
+        scripts = parse_scripts(raw)
+        self.assertEqual(len(scripts), 2)
+        self.assertEqual(scripts[0]["title"], "A")
+        self.assertEqual(scripts[1]["script"], "第二段")
+
+    def test_parse_scripts_fence(self):
+        from ad_script_nodes import parse_scripts
+        raw = '```json\n[{"title": "A", "script": "正文"}]\n```'
+        self.assertEqual(len(parse_scripts(raw)), 1)
+
+    def test_parse_scripts_invalid(self):
+        from ad_script_nodes import parse_scripts
+        self.assertIsNone(parse_scripts("不是 JSON"))
+        self.assertIsNone(parse_scripts('[{"title": "A"}]'))
+
+    def test_build_preview(self):
+        from ad_script_nodes import build_preview
+        scripts = [{"title": "A", "script": "第一行\n第二行"}, {"title": "B", "script": "另一段"}]
+        preview = build_preview(scripts)
+        self.assertIn("[0] A｜第一行", preview)
+        self.assertIn("[1] B｜另一段", preview)
+
+    def test_select_script(self):
+        from ad_script_nodes import select_script
+        scripts = '[{"title": "A", "script": "剧本A"}, {"title": "B", "script": "剧本B"}]'
+        self.assertEqual(select_script(scripts, 1), ("剧本B", "B"))
+        self.assertEqual(select_script(scripts, 0), ("剧本A", "A"))
+        self.assertEqual(select_script(scripts, 9), (None, None))
+        self.assertEqual(select_script("[]", 0), (None, None))
+        self.assertEqual(select_script("bad", 0), (None, None))
+
+    def test_parse_scene_pack(self):
+        from ad_script_nodes import parse_scene_pack
+        raw = '{"prompt_prefix": ["P1", "P2"], "scenes": [{"prompt": ["S1a", "S1b"]}, {"prompt": "S2"}]}'
+        prefix, prompts = parse_scene_pack(raw)
+        self.assertEqual(prefix, ["P1", "P2"])
+        self.assertEqual(len(prompts), 2)
+        self.assertEqual(prompts[0], ["S1a", "S1b"])
+        self.assertEqual(prompts[1], ["S2"])
+
+    def test_parse_scene_pack_invalid(self):
+        from ad_script_nodes import parse_scene_pack
+        self.assertIsNone(parse_scene_pack("bad"))
+        self.assertIsNone(parse_scene_pack('{"scenes": []}'))
+        self.assertIsNone(parse_scene_pack('{"prompt_prefix": [], "scenes": [{}]}'))
+
+
+class TestAdScriptRules(unittest.TestCase):
+    def test_ad_script_rules_exist(self):
+        import nodes as _nodes
+        for fname in ("ad_script.txt", "ad_chain_plan.txt"):
+            content = _nodes.read_text_file(os.path.join(_nodes.RULES_DIR, fname))
+            self.assertTrue(content and len(content) > 100, fname + " missing or too short")
+
+
+class TestAdScriptNodes(unittest.TestCase):
+    def test_batch_input_types(self):
+        from ad_script_nodes import AdScriptBatch
+        types = AdScriptBatch.INPUT_TYPES()
+        self.assertIn("business", types["required"])
+        self.assertIn("ad_copy", types["required"])
+        self.assertIn("script_count", types["required"])
+
+    def test_batch_empty_input(self):
+        from ad_script_nodes import AdScriptBatch
+        out = AdScriptBatch().build("", "")
+        self.assertIn("请输入主营业务和广告语", out[0])
+        self.assertEqual(out[2], 0)
+
+    def test_batch_mock_llm(self):
+        import unittest.mock
+        from ad_script_nodes import AdScriptBatch
+        raw = '[{"title": "A", "script": "剧本A"}, {"title": "B", "script": "剧本B"}]'
+        with unittest.mock.patch("ad_script_nodes.call_llm", return_value=raw):
+            scripts_json, preview, count = AdScriptBatch().build(
+                "拼豆", "拼豆团购有优惠", script_count=2, api_key="k"
+            )
+        self.assertEqual(count, 2)
+        self.assertIn("剧本A", scripts_json)
+        self.assertIn("[0]", preview)
+        self.assertIn("[1]", preview)
+
+    def test_select_node(self):
+        from ad_script_nodes import AdScriptSelect
+        out = AdScriptSelect().build('[{"title": "A", "script": "剧本A"}]', 0)
+        self.assertEqual(out[0], "剧本A")
+        self.assertEqual(out[1], "A")
+
+    def test_select_node_empty(self):
+        from ad_script_nodes import AdScriptSelect
+        out = AdScriptSelect().build("[]", 0)
+        self.assertIn("为空或序号越界", out[0])
+
+    def test_select_node_out_of_range(self):
+        from ad_script_nodes import AdScriptSelect
+        out = AdScriptSelect().build('[{"title": "A", "script": "剧本A"}]', 5)
+        self.assertIn("为空或序号越界", out[0])
+
+    def test_chain_empty_input(self):
+        from ad_script_nodes import AdScriptToChainPlan
+        out = AdScriptToChainPlan().build("")
+        self.assertIn("请输入剧本", out[0])
+
+    def test_chain_mock_llm(self):
+        import json as _json
+        import unittest.mock
+        from ad_script_nodes import AdScriptToChainPlan
+        raw = (
+            '{"prompt_prefix": ["P"], "scenes": '
+            '[{"prompt": ["A1", "A2"]}, {"prompt": ["B"]}, {"prompt": ["C"]}]}'
+        )
+        with unittest.mock.patch("ad_script_nodes.call_llm", return_value=raw):
+            plan, preview = AdScriptToChainPlan().build(
+                "剧本", duration_seconds=30, scene_count=3, base_seed=1, api_key="k"
+            )
+        data = _json.loads(plan)
+        self.assertEqual(len(data["shots"]), 3)
+        self.assertEqual(data["shots"][0]["id"], "scene_01")
+        self.assertEqual(data["shots"][0]["duration_seconds"], 10)
+        self.assertEqual(data["shots"][0]["prompt"], ["A1", "A2"])
+        self.assertEqual(data["shots"][1]["duration_seconds"], 10)
+        self.assertEqual(data["shots"][2]["duration_seconds"], 10)
+        self.assertIn("prompt_prefix", data)
+        self.assertIsInstance(preview, str)
+
+    def test_chain_wrong_scene_count(self):
+        import unittest.mock
+        from ad_script_nodes import AdScriptToChainPlan
+        raw = '{"prompt_prefix": ["P"], "scenes": [{"prompt": ["A"]}]}'
+        with unittest.mock.patch("ad_script_nodes.call_llm", return_value=raw):
+            plan, preview = AdScriptToChainPlan().build(
+                "剧本", duration_seconds=30, scene_count=3, base_seed=1, api_key="k"
+            )
+        self.assertIn("要求 3 场", plan)
+
+    def test_new_nodes_registered_in_init(self):
+        init_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "__init__.py")
+        with open(init_path, encoding="utf-8") as f:
+            text = f.read()
+        for name in ("AdScriptBatch", "AdScriptSelect", "AdScriptToChainPlan"):
+            self.assertIn(name, text)
+
+
+if __name__ == "__main__":
+    unittest.main(verbosity=2)

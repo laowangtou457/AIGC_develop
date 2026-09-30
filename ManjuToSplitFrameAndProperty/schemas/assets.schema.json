@@ -1,0 +1,36 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "assets",
+  "description": "阶段3产物：资产库（角色/场景/道具）",
+  "type": "object",
+  "required": ["video"],
+  "properties": {
+    "video": { "type": "string" },
+    "characters": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "name", "ref_images"],
+        "properties": {
+          "id": { "type": "string" },
+          "name": { "type": "string" },
+          "ref_images": { "type": "array", "items": { "type": "string" } },
+          "source_shots": { "type": "array", "items": { "type": "integer" } },
+          "ref_time": { "type": "number" }
+        }
+      }
+    },
+    "scenes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string" },
+          "shot_ids": { "type": "array", "items": { "type": "integer" } },
+          "ref_images": { "type": "array", "items": { "type": "string" } }
+        }
+      }
+    },
+    "props": { "type": "array" }
+  }
+}

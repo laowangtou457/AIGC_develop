@@ -1,0 +1,43 @@
+# ===== 根级补充忽略（子目录已有各自 .gitignore）=====
+
+# Python 环境与缓存
+**/venv/
+**/.venv/
+**/__pycache__/
+*.py[cod]
+
+# Node
+**/node_modules/
+
+# 数据库与运行时数据
+*.db
+*.sqlite3
+*.log
+
+# 大体积安装包 / 临时文件
+python-3.12.10-amd64.exe
+*.exe
+*.orig.bak
+
+# AI 模型权重（请勿入库）
+*.safetensors
+*.ckpt
+*.gguf
+*.onnx
+*.pth
+*.pt
+
+# 视频解析管线产物与输入素材
+ManjuToSplitFrameAndProperty/output/
+ManjuToSplitFrameAndProperty/input/
+ManjuToSplitFrameAndProperty/.venv/
+
+# 本地配置（含密钥）
+.env
+.env.local
+
+# 编辑器 / 系统
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db

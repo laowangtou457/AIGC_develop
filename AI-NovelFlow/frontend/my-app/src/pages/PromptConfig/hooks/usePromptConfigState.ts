@@ -1,0 +1,222 @@
+import { useState, useEffect, useCallback } from 'react';
+import { toast } from '../../../stores/toastStore';
+import { useTranslation } from '../../../stores/i18nStore';
+import { promptTemplateApi } from '../../../api/promptTemplates';
+import type { PromptTemplate } from '../../../types';
+import type { TemplateType, PromptForm } from '../types';
+import { DEFAULT_CHARACTER_TEMPLATE, DEFAULT_CHAPTER_SPLIT_TEMPLATE, DEFAULT_STYLE_TEMPLATE } from '../constants';
+
+// 模板类型配置
+export const TEMPLATE_TYPE_CONFIG: Record<TemplateType, { nameKey: string; descKey: string; defaultTemplate: string }> = {
+  style: { nameKey: 'promptConfig.types.style', descKey: 'promptConfig.types.styleDesc', defaultTemplate: DEFAULT_STYLE_TEMPLATE },
+  character_parse: { nameKey: 'promptConfig.types.characterParse', descKey: 'promptConfig.types.characterParseDesc', defaultTemplate: '' },
+  scene_parse: { nameKey: 'promptConfig.types.sceneParse', descKey: 'promptConfig.types.sceneParseDesc', defaultTemplate: '' },
+  prop_parse: { nameKey: 'promptConfig.types.propParse', descKey: 'promptConfig.types.propParseDesc', defaultTemplate: '' },
+  character: { nameKey: 'promptConfig.types.character', descKey: 'promptConfig.types.characterDesc', defaultTemplate: DEFAULT_CHARACTER_TEMPLATE },
+  scene: { nameKey: 'promptConfig.types.scene', descKey: 'promptConfig.types.sceneDesc', defaultTemplate: '' },
+  prop: { nameKey: 'promptConfig.types.prop', descKey: 'promptConfig.types.propDesc', defaultTemplate: '' },
+  chapter_split: { nameKey: 'promptConfig.types.chapterSplit', descKey: 'promptConfig.types.chapterSplitDesc', defaultTemplate: DEFAULT_CHAPTER_SPLIT_TEMPLATE },
+  shot_image_prompt: { nameKey: 'promptConfig.types.shotImagePrompt', descKey: 'promptConfig.types.shotImagePromptDesc', defaultTemplate: '' },
+  video_mode_recommender: { nameKey: 'promptConfig.types.videoModeRecommender', descKey: 'promptConfig.types.videoModeRecommenderDesc', defaultTemplate: '' },
+  keyframe_description: { nameKey: 'promptConfig.types.keyframeDescription', descKey: 'promptConfig.types.keyframeDescriptionDesc', defaultTemplate: '' },
+  keyframe_planner: { nameKey: 'promptConfig.types.keyframePlanner', descKey: 'promptConfig.types.keyframePlannerDesc', defaultTemplate: '' },
+  keyframe_image_prompt: { nameKey: 'promptConfig.types.keyframeImagePrompt', descKey: 'promptConfig.types.keyframeImagePromptDesc', defaultTemplate: '' },
+  keyframe_transition: { nameKey: 'promptConfig.types.keyframeTransition', descKey: 'promptConfig.types.keyframeTransitionDesc', defaultTemplate: '' },
+  h3_single_frame_prompt: { nameKey: 'promptConfig.types.h3SingleFramePrompt', descKey: 'promptConfig.types.h3SingleFramePromptDesc', defaultTemplate: '' },
+  h3_first_last_frame_prompt: { nameKey: 'promptConfig.types.h3FirstLastFramePrompt', descKey: 'promptConfig.types.h3FirstLastFramePromptDesc', defaultTemplate: '' },
+  h3_multi_keyframe_prompt: { nameKey: 'promptConfig.types.h3MultiKeyframePrompt', descKey: 'promptConfig.types.h3MultiKeyframePromptDesc', defaultTemplate: '' },
+};
+
+export const TEMPLATE_TYPES: TemplateType[] = [
+  'style',
+  'character_parse',
+  'scene_parse',
+  'prop_parse',
+  'character',
+  'scene',
+  'prop',
+  'chapter_split',
+  'shot_image_prompt',
+  'video_mode_recommender',
+  'keyframe_description',
+  'keyframe_planner',
+  'keyframe_image_prompt',
+  'keyframe_transition',
+  'h3_single_frame_prompt',
+  'h3_first_last_frame_prompt',
+  'h3_multi_keyframe_prompt',
+];
+
+export function usePromptConfigState() {
+  const { t } = useTranslation();
+
+  // 各类型模板状态
+  const [templatesByType, setTemplatesByType] = useState<Record<TemplateType, PromptTemplate[]>>({
+    style: [],
+    character_parse: [],
+    scene_parse: [],
+    prop_parse: [],
+    character: [],
+    scene: [],
+    prop: [],
+    chapter_split: [],
+    shot_image_prompt: [],
+    video_mode_recommender: [],
+    keyframe_description: [],
+    keyframe_planner: [],
+    keyframe_image_prompt: [],
+    keyframe_transition: [],
+    h3_single_frame_prompt: [],
+    h3_first_last_frame_prompt: [],
+    h3_multi_keyframe_prompt: [],
+  });
+  const [loadingByType, setLoadingByType] = useState<Record<TemplateType, boolean>>({
+    style: true,
+    character_parse: true,
+    scene_parse: true,
+    prop_parse: true,
+    character: true,
+    scene: true,
+    prop: true,
+    chapter_split: true,
+    shot_image_prompt: true,
+    video_mode_recommender: true,
+    keyframe_description: true,
+    keyframe_planner: true,
+    keyframe_image_prompt: true,
+    keyframe_transition: true,
+    h3_single_frame_prompt: true,
+    h3_first_last_frame_prompt: true,
+    h3_multi_keyframe_prompt: true,
+  });
+
+  // 弹窗状态
+  const [showModal, setShowModal] = useState(false);
+  const [showViewModal, setShowViewModal] = useState(false);
+  const [modalType, setModalType] = useState<TemplateType>('character');
+  const [editingPrompt, setEditingPrompt] = useState<PromptTemplate | null>(null);
+  const [viewingPrompt, setViewingPrompt] = useState<PromptTemplate | null>(null);
+  const [form, setForm] = useState<PromptForm>({
+    name: '', description: '', template: DEFAULT_CHARACTER_TEMPLATE, wordCount: 50
+  });
+  const [saving, setSaving] = useState(false);
+
+  // 加载所有类型的模板
+  useEffect(() => {
+    TEMPLATE_TYPES.forEach(type => fetchTemplates(type));
+  }, []);
+
+  const fetchTemplates = async (type: TemplateType) => {
+    setLoadingByType(prev => ({ ...prev, [type]: true }));
+    try {
+      const data = await promptTemplateApi.fetchList(type);
+      if (data.success && data.data) {
+        setTemplatesByType(prev => ({ ...prev, [type]: data.data! }));
+      }
+    } catch (error) {
+      console.error(`加载${type}提示词模板失败:`, error);
+    } finally {
+      setLoadingByType(prev => ({ ...prev, [type]: false }));
+    }
+  };
+
+  const openModal = useCallback((type: TemplateType, template?: PromptTemplate) => {
+    setModalType(type);
+    if (template) {
+      setEditingPrompt(template);
+      let wordCount = 50;
+      if (type === 'chapter_split') {
+        const numMatch = template.template.match(/必须控制\s*(\d+)\s*字/);
+        if (numMatch) wordCount = parseInt(numMatch[1]);
+      }
+      setForm({ name: template.name, description: template.description, template: template.template, wordCount });
+    } else {
+      setEditingPrompt(null);
+      const config = TEMPLATE_TYPE_CONFIG[type];
+      setForm({
+        name: '', description: '',
+        template: config.defaultTemplate,
+        wordCount: 50
+      });
+    }
+    setShowModal(true);
+  }, []);
+
+  const openViewModal = useCallback((template: PromptTemplate) => {
+    setViewingPrompt(template);
+    setShowViewModal(true);
+  }, []);
+
+  const handleSave = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSaving(true);
+    try {
+      let templateContent = form.template;
+      if (modalType === 'chapter_split') {
+        templateContent = templateContent.replace(
+          /每个分镜的剧情字数必须控制\s*{?每个分镜对应拆分故事字数}?\s*左右/,
+          `每个分镜的剧情字数必须控制 ${form.wordCount} 字左右`
+        );
+        templateContent = templateContent.replace(/{每个分镜对应拆分故事字数}/g, `${form.wordCount}`);
+      }
+      const payload = { name: form.name, description: form.description, template: templateContent, type: modalType };
+      const data = editingPrompt
+        ? await promptTemplateApi.update(editingPrompt.id, payload)
+        : await promptTemplateApi.create(payload);
+      if (data.success) {
+        toast.success(t('common.success'));
+        setShowModal(false);
+        fetchTemplates(modalType);
+      } else {
+        toast.error(data.message || t('common.saveFailed'));
+      }
+    } catch (error) {
+      console.error('保存提示词模板失败:', error);
+      toast.error(t('common.saveFailed'));
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleCopy = async (template: PromptTemplate) => {
+    try {
+      const data = await promptTemplateApi.copy(template.id);
+      if (data.success) {
+        toast.success(t('promptConfig.copySuccess'));
+        fetchTemplates(template.type as TemplateType);
+      } else {
+        toast.error(data.message || t('common.copyFailed'));
+      }
+    } catch (error) {
+      console.error('复制提示词模板失败:', error);
+      toast.error(t('common.copyFailed'));
+    }
+  };
+
+  const handleDelete = async (template: PromptTemplate) => {
+    if (!confirm(t('promptConfig.confirmDelete', { name: template.name }))) return;
+    try {
+      const data = await promptTemplateApi.delete(template.id);
+      if (data.success) {
+        fetchTemplates(template.type as TemplateType);
+      } else {
+        toast.error(data.message || t('common.deleteFailed'));
+      }
+    } catch (error) {
+      console.error('删除提示词模板失败:', error);
+      toast.error(t('common.deleteFailed'));
+    }
+  };
+
+  return {
+    // State
+    templatesByType,
+    loadingByType,
+    showModal, setShowModal, showViewModal, setShowViewModal,
+    modalType, editingPrompt, viewingPrompt,
+    form, setForm, saving,
+    // Actions
+    openModal, openViewModal, handleSave, handleCopy, handleDelete,
+    fetchTemplates,
+  };
+}

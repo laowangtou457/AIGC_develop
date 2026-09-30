@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>软件开发文档 — 设计图集（架构/类/时序/组件/ER/用例/部署）</title>
+<style>
+  body { font-family: 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif; margin: 0; background: #f4f3ee; color: #1a1b1c; }
+  .header { background: linear-gradient(135deg, #0e7490, #2563eb); color: #fff; padding: 28px 32px; }
+  .header h1 { margin: 0 0 6px; font-size: 22px; }
+  .header p { margin: 0; opacity: .85; font-size: 13px; }
+  .container { max-width: 1100px; margin: 0 auto; padding: 24px 16px 60px; }
+  .card { background: #fff; border: 1px solid #e4e3dd; border-radius: 14px; padding: 18px 20px; margin: 18px 0; box-shadow: 0 1px 3px rgba(0,0,0,.04); }
+  .card-title { font-size: 15px; font-weight: 600; margin-bottom: 12px; color: #155e75; }
+  .mermaid { display: flex; justify-content: center; }
+  .note { font-size: 12px; color: #6b7280; margin-top: 16px; text-align: center; }
+</style>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+</head>
+<body>
+  <div class="header">
+    <h1>软件开发文档 — 设计图集</h1>
+    <p>系统架构 / 类图 / 时序图 / 组件图 / ER 图 / 用例图 / 部署图 ｜ 来源：docs/00_软件开发文档.md ｜ 2026-09-17</p>
+  </div>
+  <div class="container">
+    
+    <div class="card">
+      <div class="card-title">1. 3. 总体架构设计</div>
+      <div class="mermaid">
+flowchart TB
+    subgraph Client["浏览器"]
+        UI["React 前端 :5173<br/>ChapterGenerate 页面"]
+    end
+
+    subgraph Backend["AI-NovelFlow 后端 FastAPI :8000"]
+        API["API 层<br/>chapters / shots / h3_workflow"]
+        H3SVC["H3ManjuService<br/>app/services/h3_manju_service.py"]
+        H3ENG["H3 规则引擎<br/>app/services/h3_prompt_builder/<br/>manju_nodes.py + rules/*.txt"]
+        LLMSVC["LLMService<br/>（复用系统配置）"]
+        DB[("SQLite<br/>novelflow.db")]
+    end
+
+    subgraph External["外部依赖"]
+        LLM["LLM API<br/>DeepSeek Chat Completions"]
+        CUI["ComfyUI :8188<br/>生图/生视频工作流"]
+    end
+
+    UI -->|"/api 代理"| API
+    API --> H3SVC
+    H3SVC --> H3ENG
+    H3SVC --> LLMSVC
+    LLMSVC --> LLM
+    API --> DB
+    API --> CUI
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">2. 5. 后端设计</div>
+      <div class="mermaid">
+classDiagram
+    class H3ManjuService {
+        -llm
+        +__init__()
+        +_chat() str
+        +script_to_storyboard() dict
+        +storyboard_to_shot_prompt() dict
+        +build_default_preset() str
+        +shot_to_dialogue_list() list
+    }
+    class LLMService {
+        +chat_completion(system_prompt, user_content, temperature, max_tokens) dict
+    }
+    H3ManjuService --> LLMService : 复用配置调用
+
+    class manju_nodes {
+        +build_manju_system_prompt(rule_file, extra) str
+        +_extract_json(raw) dict
+        +_build_summary(storyboard) str
+        +_policy_from_preset(preset_json) str
+        +compute_shot_refs(storyboard_json, mapping_json, shot_index) dict
+        +build_wiring_note(storyboard_json, mapping_json, shot_index) str
+        +parse_mapping_text(text, assets_json) str
+        +_load_json(value, what) dict
+        +DEFAULT_MANJU_POLICY
+    }
+    H3ManjuService ..> manju_nodes : 复用纯函数
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">3. 5. 后端设计</div>
+      <div class="mermaid">
+sequenceDiagram
+    participant FE as 前端 ShotSplitTab
+    participant API as h3_workflow.py
+    participant SVC as H3ManjuService
+    participant LLM as LLMService/DeepSeek
+    participant DB as SQLite
+
+    FE->>API: POST /h3-split {script, preset_json}
+    API->>DB: 查章节/小说（404 校验）
+    API->>SVC: script_to_storyboard(script, preset)
+    SVC->>SVC: build_manju_system_prompt("manju_storyboard.txt")
+    SVC->>LLM: chat_completion(system, user)
+    LLM-->>SVC: 分镜 JSON 文本
+    SVC->>SVC: _extract_json / 校验 shots / 补 _policy
+    SVC-->>API: {storyboard_json, assets_json, summary}
+    API->>DB: 清空旧分镜（delete_by_chapter + 目录清理）
+    API->>DB: 逐镜创建 Shot 记录（字段映射）
+    API->>DB: 写 chapter.parsed_data（h3_storyboard/h3_assets）
+    API-->>FE: {success, shots[], storyboard_json, ...}
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">4. 5. 后端设计</div>
+      <div class="mermaid">
+sequenceDiagram
+    participant FE as 前端
+    participant API as h3_workflow.py
+    participant SVC as H3ManjuService
+    participant DB as SQLite
+
+    FE->>API: POST /h3-prompt-all {mapping_json}
+    API->>DB: 读 chapter.parsed_data → h3_storyboard
+    API->>DB: 读该章全部分镜（按 index 排序）
+    loop 每个 Shot
+        API->>SVC: storyboard_to_shot_prompt(sb_json, mapping, index)
+        SVC->>SVC: compute_shot_refs（Picture N 重编号/缺失检测）
+        SVC->>SVC: build_manju_system_prompt("manju_shot_prompt.txt")
+        SVC->>LLM: chat_completion
+        LLM-->>SVC: h3_prompt
+        API->>DB: update shot.video_description = h3_prompt
+    end
+    API-->>FE: {results: [{index, success, h3_prompt, wiring_note}]}
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">5. 6. 前端设计</div>
+      <div class="mermaid">
+flowchart LR
+    subgraph UI["ChapterGenerate 页面"]
+        SPLIT["ShotSplitTab.tsx"]
+        BTN1["H3 生成文字分镜"]
+        BTN2["生成分镜提示词（H3）"]
+    end
+    subgraph Store["Zustand store"]
+        ACT["chapterActionsSlice"]
+        H3M["h3SplitChapter()"]
+        H3P["h3PromptAllShots()"]
+    end
+    subgraph API["API 客户端"]
+        API_BASE["fetch /api 代理"]
+    end
+
+    BTN1 --> ACT --> H3M --> API_BASE
+    BTN2 --> ACT --> H3P --> API_BASE
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">6. 8. 数据设计</div>
+      <div class="mermaid">
+erDiagram
+    NOVEL ||--o{ CHAPTER : contains
+    CHAPTER ||--o{ SHOT : contains
+    CHAPTER ||--o{ CHARACTER : "parsed"
+    CHAPTER ||--o{ SCENE : "parsed"
+    CHAPTER ||--o{ PROP : "parsed"
+
+    NOVEL {
+        string id PK
+        string title
+        string description
+        string status
+    }
+    CHAPTER {
+        string id PK
+        string novel_id FK
+        int number
+        string title
+        text content
+        text parsed_data
+    }
+    SHOT {
+        string id PK
+        string chapter_id FK
+        int index
+        text description
+        text video_description
+        text characters
+        string scene
+        text props
+        int duration
+        text dialogues
+        string image_url
+        string video_url
+        string image_status
+        string video_status
+    }
+    CHARACTER {
+        string id PK
+        string novel_id FK
+        string name
+    }
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">7. 9. UML 设计视图</div>
+      <div class="mermaid">
+flowchart LR
+    U["用户（小说创作者）"]
+    U -->|导入小说| A["导入小说"]
+    U -->|生成剧本| B["编辑章节"]
+    U -->|H3 生成文字分镜| C["生成文字分镜"]
+    U -->|H3 生成分镜提示词| D["生成分镜提示词"]
+    U -->|生成视频| E["生成视频"]
+    U -->|解析并出图| F["AI解析角色/场景/道具"]
+    F -->|素材注入| E
+    C --> D
+    D --> E
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">8. 9. UML 设计视图</div>
+      <div class="mermaid">
+flowchart TB
+    subgraph Host["Windows 主机（用户 PC）"]
+        subgraph S1["后端进程 :8000"]
+            UV["Uvicorn + FastAPI"]
+        end
+        subgraph S2["前端进程 :5173"]
+            VD["Vite Dev Server"]
+        end
+        subgraph S3["ComfyUI 进程 :8188"]
+            CUI["ComfyUI（可选，出图/视频）"]
+        end
+        DB[("novelflow.db")]
+        RULES["h3_prompt_builder/rules/*.txt"]
+    end
+    LLMAPI["DeepSeek API（外网）"]
+    UV --> DB
+    UV --> RULES
+    VD -->|"/api 代理"| UV
+    UV --> CUI
+    UV --> LLMAPI
+      </div>
+    </div>
+    <div class="note">若图形未渲染，请检查网络（Mermaid.js 来自 jsdelivr CDN）；也可直接在支持 Mermaid 的 Markdown 编辑器中打开 00_软件开发文档.md。</div>
+  </div>
+  <script>
+    (function() {
+      try {
+        if (typeof mermaid !== 'undefined') {
+          mermaid.initialize({ startOnLoad: true, theme: 'default', securityLevel: 'loose', flowchart: { curve: 'basis', htmlLabels: true }, er: { useMaxWidth: true } });
+        } else {
+          document.querySelectorAll('.mermaid').forEach(function(el) {
+            var d = document.createElement('div');
+            d.style.color = '#b91c1c'; d.style.padding = '12px'; d.textContent = 'Mermaid 库加载失败（网络受限），请打开 Markdown 源文件查看或使用 mermaid.live。';
+            el.replaceWith(d);
+          });
+        }
+      } catch (e) {
+        document.querySelectorAll('.mermaid').forEach(function(el) { el.textContent = '渲染失败: ' + e.message; });
+      }
+    })();
+  </script>
+</body>
+</html>

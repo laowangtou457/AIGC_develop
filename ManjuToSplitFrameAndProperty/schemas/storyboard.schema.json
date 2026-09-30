@@ -1,0 +1,51 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "storyboard",
+  "description": "阶段2产物：分镜表（镜头 + 台词 + 画面描述）",
+  "type": "object",
+  "required": ["video", "shots"],
+  "properties": {
+    "video": { "type": "string" },
+    "duration": { "type": "number" },
+    "asr_model": { "type": "string" },
+    "vlm_provider": { "type": "string" },
+    "shots": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "start", "end"],
+        "properties": {
+          "id": { "type": "integer" },
+          "start": { "type": "number" },
+          "end": { "type": "number" },
+          "keyframes": { "type": "array", "items": { "type": "string" } },
+          "dialogue": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "start": { "type": "number" },
+                "end": { "type": "number" },
+                "text": { "type": "string" }
+              }
+            }
+          },
+          "visual": {
+            "type": "object",
+            "properties": {
+              "scene": { "type": "string" },
+              "characters": { "type": "array", "items": { "type": "string" } },
+              "action": { "type": "string" },
+              "costume": { "type": "string" },
+              "props": { "type": "array", "items": { "type": "string" } },
+              "camera": { "type": "string" },
+              "lighting": { "type": "string" },
+              "music_note": { "type": "string" }
+            }
+          }
+        }
+      }
+    },
+    "warnings": { "type": "array", "items": { "type": "string" } }
+  }
+}

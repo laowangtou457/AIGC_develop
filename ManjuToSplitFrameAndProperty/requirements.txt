@@ -1,0 +1,7 @@
+numpy
+opencv-python-headless<5
+PyYAML
+requests
+imageio-ffmpeg
+scenedetect==0.6.7.1
+faster-whisper
