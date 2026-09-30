@@ -1,7 +1,7 @@
-# AI-NovelFlow × H3 漫剧工作流集成 — UML 图集
+# AI-NovelFlow 影视智能创作平台 — UML 图集
 
 > 全部图形使用 Mermaid 语法（v10+），可在 VS Code（Markdown Preview Mermaid Support）、Typora、GitHub 中直接渲染。
-> 本文档是 `00_软件开发文档.md` 第 9 节的完整展开版。
+> 本文档是 `00_软件开发文档.md` 的完整展开版。v1.0 为 H3 集成图集（第 1-7 章），v2.0 追加三大工作流架构图（第 8 章）。
 
 ---
 
@@ -457,3 +457,49 @@ erDiagram
 - Typora：内置 Mermaid 支持
 - GitHub：仓库内直接渲染 .md 的 Mermaid
 - 若编辑器不支持 Mermaid，可复制代码块到 https://mermaid.live 在线渲染
+
+---
+
+## 8. 三大工作流架构图（v2.0 追加）
+
+### 8.1 平台系统架构（含三工作流）
+
+```mermaid
+flowchart TB
+    subgraph Browser["浏览器 React :5173"]
+        W["欢迎页 / 小说管理 / 章节生成页"]
+        M["武术指导 /martial-arts"]
+        V["视频资源替换 /video-asset-swap"]
+        MON["任务进程监控 /monitor"]
+    end
+
+    subgraph BE["AI-NovelFlow 后端 FastAPI :8000"]
+        H3["h3_workflow 路由<br/>H3ManjuService + h3_prompt_builder 规则库"]
+        MA["martial_arts 路由<br/>video_director_ai（锚定卡/16宫格/生图编排）"]
+        VA["video_asset 路由<br/>VideoAssetHistory 模型"]
+        GS["gpu_scheduler（GPU 串行调度）"]
+        TASK["任务系统 / 监控聚合"]
+    end
+
+    subgraph Ext["外部本地服务"]
+        OLL["Ollama :11434<br/>qwen3:8b / 30b-a3b / qwen2.5vl"]
+        CUI["ComfyUI :8188<br/>Flux2-4B 生图 / MiniMax H3 生视频"]
+        PIPE["ManjuToSplitFrameAndProperty<br/>视频解析管线（独立 venv 子进程）"]
+    end
+
+    DB[("SQLite novelflow.db")]
+
+    W --> BE
+    M --> BE
+    V --> BE
+    MON --> BE
+    H3 --> OLL
+    MA --> OLL
+    MA --> CUI
+    VA --> PIPE
+    VA --> DB
+    H3 --> DB
+    MA --> DB
+    GS -.全局锁.-> H3
+    GS -.全局锁.-> MA
+    PIPE -.产物JSON只读.-> VA

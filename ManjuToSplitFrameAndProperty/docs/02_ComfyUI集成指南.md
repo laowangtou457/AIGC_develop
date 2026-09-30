@@ -27,11 +27,11 @@
 
 ```powershell
 # 1) 复制插件包（只复制 comfyui 目录本身）
-Copy-Item "D:\AIGC\develop\New_AI_Production_Workflow\ManjuToSplitFrameAndProperty\comfyui" `
-          "D:\ComfyUI\custom_nodes\ManjuToSplitFrameAndProperty" -Recurse
+Copy-Item "F:\Develop\NewAIProductionWorkflow\ManjuToSplitFrameAndProperty\comfyui" `
+          "F:\Develop\ComfyUI\custom_nodes\ManjuToSplitFrameAndProperty" -Recurse
 
 # 2) 依赖装进 ComfyUI 的 Python 环境（在 ComfyUI 根目录的 venv 里执行）
-& "D:\ComfyUI\python_embeded\python.exe" -m pip install -r "D:\AIGC\develop\New_AI_Production_Workflow\ManjuToSplitFrameAndProperty\requirements.txt"
+& "F:\Develop\ComfyUI\python_embeded\python.exe" -m pip install -r "F:\Develop\NewAIProductionWorkflow\ManjuToSplitFrameAndProperty\requirements.txt"
 
 # 3) 重启 ComfyUI
 ```
@@ -95,3 +95,12 @@ PrimitiveNode(视频路径)
 | 节点报 `pipeline` 不存在 | 插件包被装错层级；`__init__.py` 会自动把工程根加入 sys.path，需保持 comfyui 与 pipeline 同级 |
 | ManjuSplitFrameParse 报视频找不到 | video 输入必须是**本机绝对路径**（ComfyUI 不解析相对路径） |
 | H3 输出 warnings 非空 | 按 warnings 提示修正资产图（格式/尺寸/体积），参考 docs/03 |
+
+
+---
+
+## 附：当前部署现状（2026-09-30）
+
+- 本机 ComfyUI 位于 `F:\Develop\ComfyUI`（全家桶一键启动拉起，端口 :8188）
+- 平台「视频资源替换」已通过**子进程隔离**调用本管线，无需把 `comfyui/` 插件装入 ComfyUI 即可使用
+- 若仍希望以 ComfyUI 节点方式使用：按上文复制 `comfyui/` 到 `F:\Develop\ComfyUI\custom_nodes\` 并重启

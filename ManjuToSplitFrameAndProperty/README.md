@@ -3,7 +3,7 @@
 从一段视频中**抽取镜头结构（抽帧/分镜）、结构化内容（台词/画面描述）、抽取资产（角色/场景）**，
 并导出面向多平台（MiniMax H3 / Seedance / Kling / Veo / 即梦）的**再生成提示词包与 API payload**。
 
-属于 `New_AI_Production_Workflow` 漫剧工作流生态的一员：
+属于 `NewAIProductionWorkflow` 漫剧工作流生态的一员：
 - 上游：`AI-NovelFlow`（剧本→文字分镜）产出的成片或参考片
 - 平级：`ComfyUI-H3-Prompt-Builder`（LLM 版 H3 提示词引擎，本工程提示词结构与 MiniMax 官方规范对齐）
 - 本工程定位：**从视频逆向出分镜表 + 资产库 + 逐镜生成提示词**，既可独立 CLI 运行，
@@ -138,3 +138,21 @@ ManjuToSplitFrameAndProperty\
 | `docs/02_ComfyUI集成指南.md` | 节点清单、安装、工作流、与 H3-Prompt-Builder 协同 |
 | `docs/03_MiniMaxH3导出规范.md` | 官方 API 规格、六段式结构、payload、限制校验 |
 | `docs/04_变更记录.md` | 版本变更记录 |
+
+---
+
+## 七、平台集成（AI-NovelFlow → 视频资源替换工作流）
+
+自 2026-09-29 起，本管线已作为 **AI-NovelFlow 平台「工作流③ 视频资源替换」** 的底层引擎接入：
+
+1. 平台侧边栏【视频资源替换】（`/video-asset-swap`）→ 上传成片
+2. 后端 `/api/video-asset/analyze` 以**子进程 + 独立 venv** 隔离调用本管线：
+   ```
+   run_all.py <视频> --asr-model tiny --platform minimax_h3
+   ```
+3. 产物（`output/<视频名>/`）由平台以**只读 JSON + 静态文件服务**方式暴露
+   （可中断续跑；目录穿越已做前缀校验，返回 403）
+4. 资产替换：`/api/video-asset/jobs/{id}/swap-asset` 覆盖 `assets.json` 参考图
+   （原图备份 `.orig.bak`）→ 重跑阶段 4 → ZIP 打包下载
+
+设计原则：**产物即接口**（全部 JSON/图/prompts.md 均可人工修订）、**隔离调用**（不污染平台后端内存与依赖）、**可审计**（每次分析/替换留痕 `VideoAssetHistory`）。
