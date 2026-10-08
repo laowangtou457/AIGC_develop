@@ -45,6 +45,8 @@ LIGHT_MODEL_TASKS = {
     "shot_image_prompt",  # 主分镜图提示词：30b 输出 1.9 万字符分析叙述且易卡死，8b 直接输出 Qwen-Edit 提示词正文
     "martial_arts_plan",  # 武术指导-招式编排：8b 输出紧凑招式列表/锚定卡
     "martial_arts_build",  # 武术指导-提示词组装：30b 长文输出带过程叙述易截断，8b 直接输出两段正文
+    "prompt_reforge_extract",  # 提示词提取与重构-节拍提取：8b JSON 输出稳定
+    "prompt_reforge_build",    # 提示词提取与重构-逐镜重构：8b 直接输出干净六段式/六要素正文
 }
 LIGHT_PARSE_MODEL = "qwen3:8b"
 

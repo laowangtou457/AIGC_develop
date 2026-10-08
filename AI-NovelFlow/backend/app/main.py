@@ -5,7 +5,7 @@ from sqlalchemy import text
 import asyncio
 
 from app.api import characters, tasks, config, health, test_cases, workflows, files, prompt_templates, llm_logs, scenes, props
-from app.api import novels, chapters, shots, h3_workflow, martial_arts, video_asset
+from app.api import novels, chapters, shots, h3_workflow, martial_arts, video_asset, prompt_reforge
 from app.core.database import engine, Base
 from app.services.comfyui_monitor import init_monitor
 # 导入所有模型以确保创建表
@@ -18,6 +18,7 @@ from app.models.system_config import SystemConfig  # 导入系统配置模型
 from app.models.shot import Shot
 from app.models.martial_arts_history import MartialArtsHistory  # 武术指导历史任务
 from app.models.video_asset_history import VideoAssetHistory  # 视频资源替换历史任务
+from app.models.prompt_reforge_history import PromptReforgeHistory  # 提示词提取与重构历史任务
 
 
 def ensure_schema_updates():
@@ -184,6 +185,7 @@ app.include_router(prompt_templates.router, prefix="/api/prompt-templates", tags
 app.include_router(llm_logs.router, prefix="/api/llm-logs", tags=["llm-logs"])
 app.include_router(martial_arts.router, prefix="/api/martial-arts", tags=["martial-arts"])
 app.include_router(video_asset.router, prefix="/api/video-asset", tags=["video-asset"])
+app.include_router(prompt_reforge.router, prefix="/api/prompt-reforge", tags=["prompt-reforge"])
 
 
 @app.get("/")

@@ -1,0 +1,13 @@
+{
+  "shot": 8,
+  "prompt_text": "Shot 2: 4-8 seconds, 9:16 aspect ratio. subject: young male swordswoman in white robes, middle-aged male dagger-wielding warrior in black robes. action: fight on a stormy bridge. scene: stormy bridge under dark skies, rain pouring heavily. camera:环绕镜头. lighting: dark, with rain and river sounds. technical: no subtitles, no text.  ",
+  "duration": 4,
+  "ratio": "9:16",
+  "platforms": [
+    "minimax_h3",
+    "seedance",
+    "kling",
+    "veo",
+    "jimeng"
+  ]
+}

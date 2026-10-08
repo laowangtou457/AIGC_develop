@@ -1,0 +1,465 @@
+# -*- coding: utf-8 -*-
+"""
+提示词提取与重构 服务
+=======================
+
+功能：输入 提示词 / 剧本 / 小说 → 按「导演模型」提取剧本节拍 → 重构为
+【AI 工具可生成级】的逐镜提示词集（MiniMax H3 / Seedance / Kling / Veo / 即梦）。
+
+导演模型抽象（参考 AI 视频提示词导演技能安装的提示词升级经验）：
+  - h3_ref2va      : MiniMax 官方 Ref2VA 六段式（subject_definitions/summary/retention_analysis/
+                     detailed_description/overall_soundscape/non_diegetic_music）
+  - h3_i2v         : MiniMax 官方 I2VA 三字段（首帧对齐指令 + integrated_multimodal_description/
+                     overall_soundscape/non_diegetic_music）
+  - martial_arts   : 武术指导导演（动作戏 7 原则/人物清点/姿态配额/天气氛围/场景尺度/武器约束）
+  - general_cinematic : 通用影视导演（主体构图/动作表演/场景道具/运镜/光线氛围/技术规格）
+
+执行链路（全 8b 轻量模型，串行防卡死）：
+  ① 提取（Extract）: 输入文本 → 结构化节拍 JSON（角色/场景/动作/运镜/对白/氛围）
+  ② 重构（Reforge）: 导演模型规则 + 节拍 JSON → 逐镜提示词正文
+  ③ 组装（Pack）  : 按目标平台模板组装 → prompts.md + payloads/*.json + report.json 落盘
+
+产物目录：<AI-NovelFlow>/backend/data/prompt_reforge/<task_id>/
+"""
+import asyncio
+import json
+import os
+import re
+from datetime import datetime
+from pathlib import Path
+
+from app.core.database import SessionLocal
+from app.models.prompt_reforge_history import PromptReforgeHistory
+from app.services.llm_service import LLMService
+
+# ── 常量 ──
+H3_RULES_DIR = Path(r"F:\Develop\NewAIProductionWorkflow\ManjuToSplitFrameAndProperty\docs\references")
+REFORGE_DATA_DIR = Path(r"F:\Develop\NewAIProductionWorkflow\AI-NovelFlow\backend\data\prompt_reforge")
+
+MAX_INPUT_CHARS = 12000          # 输入文本截断（本地 8b 上下文有限）
+MAX_BEATS = 12                   # 提取节拍上限（超出按重要度取前 N，防止输出截断）
+MIN_DURATION, MAX_DURATION = 4, 15   # H3 单段时长约束
+
+# 目标平台展示名
+PLATFORM_LABELS = {
+    "minimax_h3": "MiniMax H3",
+    "seedance": "Seedance",
+    "kling": "Kling",
+    "veo": "Veo",
+    "jimeng": "即梦",
+}
+DEFAULT_PLATFORMS = ["minimax_h3", "seedance", "kling", "veo", "jimeng"]
+
+# ═══════════════════════════ 导演模型抽象 ═══════════════════════════
+
+def _read_rules(*names: str) -> str:
+    """读取官方提示词规则存档（存在则加载，缺失时返回空）"""
+    parts = []
+    for name in names:
+        p = H3_RULES_DIR / name
+        if p.exists():
+            try:
+                parts.append(p.read_text(encoding="utf-8"))
+            except Exception:
+                pass
+    return "\n\n".join(parts)
+
+
+def _build_ref2va_rules() -> str:
+    """H3 Ref2VA 六段式导演规则：官方 ref-en.txt + 工程控制要点"""
+    official = _read_rules("ref-en.txt")
+    return "\n".join([
+        "你是资深 AI 视频提示词导演，精通 MiniMax H3 官方 Ref2VA 六段式提示词规范。",
+        "必须严格按以下六段结构输出每一镜提示词（结构词全英文，内容可按输入语言）：",
+        "1. subject_definitions: <Subject N> 主体定义（角色/场景，含外观来源）。",
+        "2. summary: [任务类型] 一句话概括本镜（如 [reference generation]）。",
+        "3. retention_analysis: <Subject N> (appears in [Shot N]): fully_preserved - 保持外观一致性。",
+        "4. detailed_description: 风格开场句 + [Shot N] + 主体/机位/动作/光线/对白；后续镜头用 At MM:SS.mmm 时间戳。",
+        "5. overall_soundscape: 环境音 1-4 句（不重复对白/音乐）。",
+        "6. non_diegetic_music: 配乐 1-3 句（禁止抽象情绪词，如 sad/tense 不可用）。",
+        "对白必须用 <d>[中文|English] 原文</d> 逐字保留；画面禁止出现字幕/文字/水印（写明 no subtitles）。",
+        "首镜无时间戳，后续镜头 At MM:SS.mmm, the shot cuts to ...。",
+        "每镜时长限制 4-15 秒，画幅 9:16。",
+        "",
+        "【官方规范参考】",
+        (official[:6000] if official else "(官方规范文件缺失，按上述要点执行)"),
+    ])
+
+
+def _build_i2v_rules() -> str:
+    """H3 I2VA 三字段导演规则：官方 base-en.txt + 控制要点"""
+    official = _read_rules("base-en.txt")
+    return "\n".join([
+        "你是资深 AI 视频提示词导演，精通 MiniMax H3 官方 I2VA 三字段提示词规范（图生视频）。",
+        "每镜提示词必须严格按以下结构输出：",
+        "第一行固定对齐指令：For the target video, at 0.00 seconds into the target video, <Picture 1> (from [Shot N]) is fully referenced.",
+        "（空行）",
+        "integrated_multimodal_description: 主体/动作推进/结果 + 机位/光线，强调首帧锚定 → 动作演进。",
+        "overall_soundscape: 环境音 1-4 句。",
+        "non_diegetic_music: 配乐 1-3 句（禁止抽象情绪词）。",
+        "对白必须用 <d>[中文|English] 原文</d>；画面禁止字幕/文字/水印。",
+        "每镜时长 4-15 秒，画幅 9:16。",
+        "",
+        "【官方规范参考】",
+        (official[:6000] if official else "(官方规范文件缺失，按上述要点执行)"),
+    ])
+
+
+def _build_martial_arts_rules() -> str:
+    """武术指导导演规则（借鉴 martial-arts-director-cy 的招式编排与镜头语言）"""
+    return "\n".join([
+        "你是资深武术指导（借鉴袁和平/成龙/甄子丹/John Wick 的招式节奏与镜头语言），负责把输入重构为武打镜头提示词集。",
+        "【编排规则】",
+        "- 动作戏 7 原则：清晰(谁打谁/用什么/命中哪/结果)、场景几何(方位可追踪)、赌注、动机、编排有创意、脆弱(真实威胁)、后果(真实代价)。",
+        "- 人物清点（强制）：先识别全部出场人物（主角/对手/配角），数量必须与输入一致，禁止漏人、禁止虚化剪影；每个角色给出姓名/身份/体型/服装/武器/武术体系。",
+        "- 姿态配额（N=镜头总数）：≥⌈N/5⌉ 低桩(半蹲/沉马/跪步)、≥⌈N/8⌉ 腾空高位、≥⌈N/5⌉ 转身或背身、≥⌈N/8⌉ 近景特写，其余自由站姿。",
+        "- 第 1 镜起势与末镜收势必须仪式感且明显不同（抱拳礼/持剑诀/单膝半跪/立掌当胸/横兵于膝等）。",
+        "- 每招视觉差异化：朝向/重心/发力部位不重复；keypose 是运动中瞬间，禁止已完成定格。",
+        "- 天气氛围（强制）：每镜写明 场景+时段+天气+光感+氛围；服装材质/颜色/配饰必须与天气协调。",
+        "- 场景尺度（强制）：写明尺度与纵深，量化表达（如'吊桥横跨数百米峡谷，两端铁索锚固崖壁，桥身狭长悬垂、木板稀疏、随风摇晃，桥下深谷云雾缭绕不见底'），禁止大桥画成木板。",
+        "- 武器约束（强制）：每个角色明确 weapon_length（如'单刀刃长约二尺五'）；每镜写清 composition（主体位置/景别/镜头角度/空间层次）。",
+        "- 经典动作参考：可用通用动作特征（黄飞鸿式沉桥架式/叶问式寸劲短打/大鹏展翅起手/单臂背刀蓄势等），不写真实角色名。",
+        "每镜输出：镜头编号/时长/画幅/主体与构图/动作与招式/运镜/光线氛围/音效。",
+    ])
+
+
+def _build_general_cinematic_rules() -> str:
+    """通用影视导演规则（Seedance / Kling / Veo / 即梦 通用可生成级）"""
+    return "\n".join([
+        "你是资深影视提示词导演，精通各 AI 视频生成平台（Seedance/Kling/Veo/即梦）的提示词写法，把输入重构为【AI 工具可生成级】逐镜提示词。",
+        "【每镜提示词必须包含六要素】",
+        "1. subject/composition：主体是谁、位置、景别（远景/全景/中景/近景/特写）、画面构图。",
+        "2. action/performance：具体动作与表演细节（动词明确、有起承转合，禁止'做出动作'这类空话）。",
+        "3. scene/props：场景环境 + 关键道具 + 空间层次与尺度。",
+        "4. camera/motion：机位（正面/侧面/低角度/航拍等）+ 运镜（推/拉/摇/移/跟/环绕，含幅度与速度）。",
+        "5. lighting/atmosphere：光线（晨光/暮色/霓虹/烛光等）+ 色调 + 氛围。",
+        "6. technical/spec：时长 + 画幅 + 画质要求。",
+        "【硬性规则】",
+        "- 人物性别/年龄/服装必须写明（避免模型把女性生成男性、少女生成大妈）。",
+        "- 多人场景必须逐一列出出场人物并保持数量一致，禁止漏人。",
+        "- 动作必须具体可执行，按时间顺序推进（起势→交锋→结果）。",
+        "- 禁止出现抽象情感词（如'紧张的气氛'），改为可视觉化的描述（'雨滴在刀身上滑落，呼吸可闻'）。",
+        "- 每镜时长 4-15 秒；镜头间动作与场景保持连贯（可追踪的几何方位）。",
+        "输出格式：Shot N（时长Xs｜9:16）→ 六要素逐行。",
+    ])
+
+
+DIRECTOR_MODELS = {
+    "h3_ref2va": {
+        "name": "H3 Ref2VA 六段式（MiniMax 官方）",
+        "description": "输出可直接提交 MiniMax H3 的 Ref2VA 六段式逐镜提示词（参考图模式）",
+        "build_rules": _build_ref2va_rules,
+    },
+    "h3_i2v": {
+        "name": "H3 I2VA 三字段（MiniMax 官方）",
+        "description": "输出可直接提交 MiniMax H3 的 I2VA 三字段逐镜提示词（图生视频模式）",
+        "build_rules": _build_i2v_rules,
+    },
+    "martial_arts": {
+        "name": "武术指导（动作片导演）",
+        "description": "输出武打镜头提示词集：招式编排/姿态配额/天气氛围/场景尺度/武器约束",
+        "build_rules": _build_martial_arts_rules,
+    },
+    "general_cinematic": {
+        "name": "通用影视导演（多平台）",
+        "description": "输出适配 Seedance/Kling/Veo/即梦 的通用可生成级逐镜提示词",
+        "build_rules": _build_general_cinematic_rules,
+    },
+}
+
+DEFAULT_DIRECTOR_MODEL = "h3_ref2va"
+
+
+def get_director_model(key: str) -> dict:
+    """获取导演模型定义（不存在时回退默认）"""
+    model = DIRECTOR_MODELS.get(key)
+    if not model:
+        model = DIRECTOR_MODELS[DEFAULT_DIRECTOR_MODEL]
+    return model
+
+
+# ═══════════════════════════ 工具函数 ═══════════════════════════
+
+def _truncate_input(text: str) -> str:
+    text = (text or "").strip()
+    if len(text) > MAX_INPUT_CHARS:
+        return text[:MAX_INPUT_CHARS] + "\n…（输入过长已截断）"
+    return text
+
+
+def _update_state(task_id: str, *, status=None, stage=None, error=None, output_md=None, report=None):
+    """状态落库（每次新建 Session，避免 detached 问题）"""
+    db = SessionLocal()
+    try:
+        job = db.query(PromptReforgeHistory).filter(PromptReforgeHistory.id == task_id).first()
+        if not job:
+            return
+        if status is not None:
+            job.status = status
+        if stage is not None:
+            job.stage = stage
+        if error is not None:
+            job.error = error
+        if output_md is not None:
+            job.output_md = output_md
+        if report is not None:
+            job.report_json = json.dumps(report, ensure_ascii=False)
+        db.commit()
+    finally:
+        db.close()
+
+
+# ═══════════════════════════ ① 提取 ═══════════════════════════
+
+EXTRACT_SYSTEM = """你是影视剧本结构化分析师。把输入的提示词/剧本/小说文本提取为严格的 JSON 剧本节拍表，供视频提示词导演使用。
+
+【输出 JSON 结构】
+{
+  "title": "作品标题或主题",
+  "style": "整体风格一句话（如：写实电影质感 / 水墨武侠 / 赛博朋克霓虹）",
+  "characters": [{"name": "角色名", "gender": "男/女/中性", "age": "少年/青年/中年/老年或具体", "appearance": "外貌服装武器等关键特征"}],
+  "scenes": [{"name": "场景名", "setting": "环境结构/时段/光线/尺度纵深"}],
+  "beats": [
+    {"beat_no": 1, "scene": "场景名", "summary": "本镜剧情一句话", "characters": ["角色名"],
+     "action": "具体动作与事件（起承转合）", "camera": "机位与运镜建议",
+     "atmosphere": "光线色调氛围（可视觉化）", "dialogue": [{"speaker": "角色名", "text": "对白原文"}]}
+  ]
+}
+
+【规则】
+- beats 最多 12 个，超过时按剧情重要度取前 12 个关键镜头。
+- 每个 beat 必须有 scene/action/camera/atmosphere；有对白才写 dialogue，无对白用空数组。
+- characters 必须与剧情一致，禁止漏人；性别/年龄/服装必须明确。
+- 只输出一个合法 JSON，禁止输出任何解释文字、编号列表、markdown 代码块。"""
+
+
+async def _extract_beats(input_text: str) -> dict:
+    """调用本地 LLM 提取结构化节拍"""
+    result = await LLMService().chat_completion(
+        system_prompt=EXTRACT_SYSTEM,
+        user_content=f"请提取以下文本的剧本节拍（JSON）：\n\n{input_text}",
+        temperature=0.2,
+        max_tokens=4000,
+        response_format="json_object",
+        task_type="prompt_reforge_extract",
+        prompt_template_name="提示词重构-节拍提取",
+    )
+    if not result.get("success"):
+        raise RuntimeError(result.get("error") or "节拍提取失败")
+    raw = result.get("content") or ""
+    try:
+        data = json.loads(raw)
+    except Exception:
+        # 尝试剥离围栏/前后噪声
+        m = re.search(r"\{.*\}", raw, re.S)
+        if not m:
+            raise RuntimeError(f"节拍提取 JSON 解析失败: {raw[:300]}")
+        data = json.loads(m.group(0))
+    if not isinstance(data, dict):
+        raise RuntimeError("节拍提取返回非对象")
+    beats = data.get("beats") or []
+    data["beats"] = beats[:MAX_BEATS]
+    return data
+
+
+# ═══════════════════════════ ② 重构 ═══════════════════════════
+
+def _platform_pack_instruction(platforms: list) -> str:
+    """按目标平台生成组装指令"""
+    lines = ["【输出要求】按以下平台分区输出逐镜提示词集（每镜完整、可直接复制提交）："]
+    labels = [PLATFORM_LABELS.get(p, p) for p in platforms]
+    lines.append("分区顺序：" + " / ".join(labels))
+    lines.append("【分区格式（必须遵守）】每个平台分区必须以单独一行 '### <平台英文名>' 开头，")
+    lines.append("例如 '### MiniMax H3'、'### Seedance'、'### Kling'、'### Veo'、'### 即梦'；分区之间空一行；")
+    lines.append("分区标题必须是独立行，禁止与其他文字混排。")
+    for p in platforms:
+        label = PLATFORM_LABELS.get(p, p)
+        if p == "minimax_h3":
+            lines.append(f"- {label} 分区：每镜按导演模型指定的 H3 官方结构（六段式/三字段）完整输出。")
+        else:
+            lines.append(f"- {label} 分区：每镜按六要素（subject/action/scene/camera/lighting/technical）完整输出。")
+    lines.append("- 每个平台分区内逐镜编号一致（Shot 1…N）；镜号/时长/画幅信息放在每镜开头。")
+    lines.append("- 全部镜头必须保持人物/场景/动作连贯（可追踪），禁止镜头间跳变无因。")
+    return "\n".join(lines)
+
+
+REFORGE_OUTPUT_TAIL = (
+    "\n【硬性输出约束】只输出提示词正文，禁止任何解释性文字、过程叙述、分析总结；"
+    "不要输出'以下是重构结果'之类引导语；不要输出 JSON 或代码块围栏。"
+)
+
+
+async def _reforge_prompts(director_key: str, beats: dict, platforms: list) -> str:
+    """按导演模型 + 节拍 + 目标平台，生成多平台逐镜提示词集"""
+    director = get_director_model(director_key)
+    rules = director["build_rules"]()
+    system_prompt = "\n\n".join([
+        rules,
+        _platform_pack_instruction(platforms),
+        "你是 AI 视频提示词导演，输出必须达到【AI 工具可生成级】：模型拿到提示词无需二次理解即可生成。",
+    ])
+    user_content = (
+        f"导演模型：{director['name']}\n"
+        f"目标平台：{'、'.join(PLATFORM_LABELS.get(p, p) for p in platforms)}\n\n"
+        f"【提取的剧本节拍】\n{json.dumps(beats, ensure_ascii=False, indent=2)}\n\n"
+        "请按导演模型规则与平台要求，输出逐镜提示词集。"
+    )
+    result = await LLMService().chat_completion(
+        system_prompt=system_prompt,
+        user_content=user_content + REFORGE_OUTPUT_TAIL,
+        temperature=0.3,
+        max_tokens=6000,
+        task_type="prompt_reforge_build",
+        prompt_template_name=f"提示词重构-{director['name']}",
+    )
+    if not result.get("success"):
+        raise RuntimeError(result.get("error") or "提示词重构失败")
+    return (result.get("content") or "").strip()
+
+
+# ═══════════════════════════ ③ 组装落盘 ═══════════════════════════
+
+def _shot_blocks_from_md(md_text: str) -> list:
+    """从提示词集 Markdown 粗拆镜头块（供 payload JSON 使用，尽力而为）"""
+    blocks = []
+    current = []
+    for line in (md_text or "").splitlines():
+        if re.match(r"^#{1,6}\s*(Shot|镜头|【?第?[0-9]+镜)", line) or re.match(r"^Shot\s+\d+", line):
+            if current:
+                blocks.append("\n".join(current))
+            current = [line]
+        else:
+            current.append(line)
+    if current:
+        blocks.append("\n".join(current))
+    return [b for b in blocks if b.strip()][:MAX_BEATS]
+
+
+def _split_platform_parts(md_text: str, platforms: list) -> dict:
+    """按 '### <平台名>' 分区标题把模型输出拆成 {platform: text}（找不到标记时整段归第一平台）"""
+    parts: dict[str, str] = {}
+    lines = (md_text or "").splitlines()
+    cur_key = None
+    cur_lines = []
+    label_to_key = {PLATFORM_LABELS.get(p, p): p for p in platforms}
+    for line in lines:
+        m = re.match(r"^#{1,3}\s*(.+?)\s*$", line.strip())
+        if m and m.group(1).strip() in label_to_key:
+            if cur_key:
+                parts[cur_key] = "\n".join(cur_lines).strip()
+            cur_key = label_to_key[m.group(1).strip()]
+            cur_lines = []
+        elif cur_key is None and line.strip():
+            cur_key = platforms[0]
+            cur_lines = [line]
+        else:
+            cur_lines.append(line)
+    if cur_key:
+        parts[cur_key] = "\n".join(cur_lines).strip()
+    # 未命中的平台留占位
+    for p in platforms:
+        parts.setdefault(p, parts.get(platforms[0], ""))
+    return parts
+
+
+def _pack_outputs(task_id: str, input_text: str, beats: dict, md_text: str, platforms: list) -> dict:
+    """落盘 prompts.md / payloads/*.json / report.json，返回文件树"""
+    out_dir = REFORGE_DATA_DIR / task_id
+    payload_dir = out_dir / "payloads"
+    payload_dir.mkdir(parents=True, exist_ok=True)
+
+    # prompts.md：头部 + 提取摘要 + 逐镜提示词集
+    header = [
+        "# 提示词提取与重构结果集",
+        "",
+        f"- 任务：{task_id}",
+        f"- 生成时间：{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}",
+        f"- 目标平台：{'、'.join(PLATFORM_LABELS.get(p, p) for p in platforms)}",
+        f"- 提取节拍数：{len(beats.get('beats') or [])}",
+        "",
+        "## 原始输入（节选）",
+        "",
+        f"```text\n{input_text[:1500]}\n```",
+        "",
+        "## 提取结果（剧本节拍）",
+        "",
+        "```json",
+        json.dumps(beats, ensure_ascii=False, indent=2),
+        "```",
+        "",
+        "## 逐镜提示词集（AI 工具可生成级）",
+        "",
+    ]
+    md_path = out_dir / "prompts.md"
+    md_path.write_text("\n".join(header) + md_text + "\n", encoding="utf-8")
+
+    # payloads：逐镜提示词 JSON（供 API/ComfyUI 复用）
+    blocks = _shot_blocks_from_md(md_text)
+    payloads = []
+    for idx, block in enumerate(blocks, 1):
+        payload = {
+            "shot": idx,
+            "prompt_text": block,
+            "duration": 4,   # 默认 4-15s 内，正文含时长时以正文为准
+            "ratio": "9:16",
+            "platforms": platforms,
+        }
+        payloads.append(payload)
+        (payload_dir / f"shot_{idx:03d}.json").write_text(
+            json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
+
+    # report.json
+    platform_parts = _split_platform_parts(md_text, platforms)
+    report = {
+        "task_id": task_id,
+        "beats": beats,
+        "platforms": platforms,
+        "shot_count": len(payloads),
+        "platform_parts": platform_parts,
+        "generated_at": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+    }
+    (out_dir / "report.json").write_text(json.dumps(report, ensure_ascii=False, indent=2), encoding="utf-8")
+
+    # 文件树
+    file_tree = []
+    for root, _dirs, files in os.walk(out_dir):
+        rel_root = Path(root).relative_to(out_dir)
+        for fn in sorted(files):
+            rel = str(rel_root / fn) if str(rel_root) != "." else fn
+            file_tree.append({"path": rel.replace("\\", "/"), "size": os.path.getsize(os.path.join(root, fn))})
+    return {"file_tree": file_tree, "shot_count": len(payloads)}
+
+
+# ═══════════════════════════ 主流程 ═══════════════════════════
+
+async def run_prompt_reforge(task_id: str, input_text: str, director_key: str, platforms: list):
+    """后台任务：提取 → 重构 → 组装落盘"""
+    director = get_director_model(director_key)
+    platforms = [p for p in platforms if p in PLATFORM_LABELS] or DEFAULT_PLATFORMS
+    input_text = _truncate_input(input_text)
+
+    try:
+        # ① 提取
+        _update_state(task_id, stage=f"① 提取剧本节拍（{director['name']}）…")
+        beats = await _extract_beats(input_text)
+
+        # ② 重构
+        _update_state(task_id, stage=f"② 按导演模型重构逐镜提示词（目标：{'、'.join(PLATFORM_LABELS.get(p, p) for p in platforms)}）…")
+        md_text = await _reforge_prompts(director_key, beats, platforms)
+
+        # ③ 组装落盘
+        _update_state(task_id, stage="③ 组装提示词集并落盘…")
+        result = _pack_outputs(task_id, input_text, beats, md_text, platforms)
+
+        _update_state(
+            task_id,
+            status="success",
+            stage=f"完成：{result['shot_count']} 个镜头提示词，{len(platforms)} 个平台",
+            output_md=md_text,
+            report={"beats": beats, "platforms": platforms, "shot_count": result["shot_count"]},
+        )
+        print(f"[PromptReforge] {task_id} 完成：{result['shot_count']} 镜 / {','.join(platforms)}")
+    except Exception as exc:
+        import traceback
+        traceback.print_exc()
+        _update_state(task_id, status="failed", stage="重构失败", error=str(exc)[:2000])

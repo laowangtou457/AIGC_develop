@@ -1,4 +1,4 @@
-// 导航翻译
+﻿// 导航翻译
 export default {
   // 导航
   nav: {
@@ -15,5 +15,7 @@ export default {
     llmLogs: '大模型日志',
         taskMonitor: '任务进程监控',
     martialArts: '武术指导',
-    videoAssetSwap: '视频资源替换',},
+    videoAssetSwap: '视频资源替换',
+    promptReforge: '提示词提取与重构',
+  },
 };

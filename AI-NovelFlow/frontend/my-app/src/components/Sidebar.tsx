@@ -16,7 +16,8 @@ import {
   ChevronRight,
   Activity,
   Swords,
-  Clapperboard
+  Clapperboard,
+  Wand2
 } from 'lucide-react';
 import clsx from 'clsx';
 import { useTranslation } from '../stores/i18nStore';
@@ -37,6 +38,7 @@ export default function Sidebar() {
     { name: t('nav.taskMonitor'), href: '/monitor', icon: Activity },
     { name: t('nav.martialArts'), href: '/martial-arts', icon: Swords },
     { name: t('nav.videoAssetSwap'), href: '/video-asset-swap', icon: Clapperboard },
+    { name: t('nav.promptReforge'), href: '/prompt-reforge', icon: Wand2 },
     { name: t('nav.testCases'), href: '/test-cases', icon: FlaskConical },
     { name: t('nav.systemSettings'), href: '/settings', icon: Settings },
     { name: t('nav.promptConfig'), href: '/prompt-config', icon: FileText },

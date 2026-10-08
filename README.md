@@ -1,10 +1,11 @@
 # AIGC 影视智能创作平台
 
-基于 **AI-NovelFlow**（FastAPI + React）本地化改造的影视智能创作平台，集成 **ComfyUI-H3-Prompt-Builder** 漫剧引擎与 **ManjuToSplitFrameAndProperty** 视频解析管线，提供三条可独立运行的创作工作流：
+基于 **AI-NovelFlow**（FastAPI + React）本地化改造的影视智能创作平台，集成 **ComfyUI-H3-Prompt-Builder** 漫剧引擎与 **ManjuToSplitFrameAndProperty** 视频解析管线，提供四条可独立运行的创作工作流：
 
 1. **小说生成视频**：导入小说 → AI 解析角色/场景/道具 → H3 分镜 → 关键帧 → 音频 → 视频成片
 2. **AI 武术指导**：一句话需求 → 16 宫格武打分镜 → 角色形象图/分镜图 → 武打视频
 3. **视频资源替换**：上传参考成片 → 切镜/抽资产 → 替换原创形象 → 重导出多平台逐镜提示词
+4. **提示词提取与重构**：上传提示词/剧本/小说 → 导演模型提取节拍 → 重构为 AI 工具可生成级多平台提示词集
 
 全部能力本地运行（Ollama + ComfyUI），数据不出本机。
 
@@ -54,13 +55,29 @@
 - **资产替换**：把参考图换成无版权问题的原创形象（3D 扫描脸型、原创立绘），重跑导出 → 得到"剧情结构、台词、音乐与原片接近，但人物、场景、服装全部替换"的成片
 - 内置合规自检清单（自有/授权素材、实质性改写、非盈利使用）
 
+### ④ 提示词提取与重构工作流
+
+```
+上传文件 / 直接输入（提示词·剧本·小说）→ 导演模型提取剧本节拍（角色/场景/动作/对白）
+  → 按导演模型重构逐镜提示词 → 按目标平台组装提示词集（在线查看/复制/下载）
+```
+
+- **4 个导演模型抽象**（参考 AI 视频提示词导演技能安装的提示词升级经验）：
+  - `h3_ref2va`：MiniMax 官方 Ref2VA 六段式（subject_definitions / summary / retention_analysis / detailed_description / overall_soundscape / non_diegetic_music）
+  - `h3_i2v`：MiniMax 官方 I2VA 三字段（首帧对齐指令 + integrated_multimodal_description / overall_soundscape / non_diegetic_music）
+  - `martial_arts`：武术指导（动作 7 原则 / 人物清点 / 姿态配额 / 天气氛围 / 场景尺度 / 武器约束）
+  - `general_cinematic`：通用影视导演（主体构图 / 动作表演 / 场景道具 / 运镜 / 光线氛围 / 技术规格）
+- 输出【AI 工具可生成级】逐镜提示词集，按平台分区：MiniMax H3 / Seedance / Kling / Veo / 即梦
+- 产物：prompts.md + report.json + 逐镜 payload JSON，可下载复用
+- 全流程 qwen3:8b 轻量分流，提取→重构→组装串行执行（30s 级完成）
+
 ---
 
 ## 架构
 
 ```
 ┌─────────────────────────── 浏览器（React :5173）───────────────────────────┐
-│  欢迎页 / 小说管理 / 武术指导 / 视频资源替换 / 任务进程监控                    │
+│  欢迎页 / 小说管理 / 武术指导 / 视频资源替换 / 提示词提取与重构 / 任务进程监控      │
 └───────────────────────────────┬────────────────────────────────────────────┘
                                  │ /api 代理
 ┌───────────────────────────────▼────────────────────────────────────────────┐
@@ -68,6 +85,7 @@
 │  h3_workflow 路由 ── H3ManjuService ── h3_prompt_builder 规则库              │
 │  martial_arts 路由 ── 锚定卡/16宫格/生图/生视频编排                           │
 │  video_asset 路由 ── 子进程调用 ManjuToSplitFrameAndProperty 管线            │
+│  prompt_reforge 路由 ── 导演模型抽象/节拍提取/多平台提示词重构                 │
 │  gpu_scheduler（GPU 串行调度） / 任务监控 / 历史任务持久化                    │
 └───────┬──────────────────┬──────────────────────┬───────────────────────────┘
         │                  │                      │
@@ -96,11 +114,11 @@
 NewAIProductionWorkflow/
 ├── AI-NovelFlow/                        # 主程序（FastAPI + React）
 │   ├── backend/app/
-│   │   ├── api/                         # h3_workflow / martial_arts / video_asset 等路由
-│   │   ├── services/                    # H3 引擎 / 武术指导编排 / GPU 串行调度
+│   │   ├── api/                         # h3_workflow / martial_arts / video_asset / prompt_reforge 路由
+│   │   ├── services/                    # H3 引擎 / 武术指导编排 / GPU 串行调度 / 提示词重构
 │   │   └── models/                      # 数据模型
 │   └── frontend/my-app/src/
-│       ├── pages/                       # Welcome / ChapterGenerate / MartialArts / VideoAssetSwap / Monitor
+│       ├── pages/                       # Welcome / ChapterGenerate / MartialArts / VideoAssetSwap / PromptReforge / Monitor
 │       └── components/  api/  stores/
 ├── ManjuToSplitFrameAndProperty/        # 视频解析替换管线（独立 venv）
 │   ├── run_all.py                       # 四阶段主入口
@@ -169,6 +187,7 @@ npm run dev
 | 小说生成视频 | 小说管理 → 章节生成页 | 分镜拆分 → 分镜提示词(H3) → 分镜图 → 音频 → 视频 → 合并 |
 | AI 武术指导 | 侧边栏【武术指导】 | 一句话需求 → 16 宫格分镜 → 形象图/分镜图/武打视频 |
 | 视频资源替换 | 侧边栏【视频资源替换】 | 上传成片 → 浏览分镜/资产 → 替换 → 下载提示词包 |
+| 提示词提取与重构 | 侧边栏【提示词提取与重构】 | 上传/输入提示词·剧本·小说 → 导演模型重构 → 多平台提示词集 |
 | 任务监控 | 侧边栏【任务进程监控】 | 任务状态、显存占用、LLM pending 时长 |
 
 ## 模型分工
@@ -204,7 +223,7 @@ npm run dev
 
 | 文档 | 位置 |
 |---|---|
-| 三工作流集成说明 | `H3漫剧工作流集成说明.md`（根目录） |
+| 四工作流集成说明 | `H3漫剧工作流集成说明.md`（根目录） |
 | 平台开发文档（UML/变更） | `docs/` |
 | 管线开发文档/操作手册 | `ManjuToSplitFrameAndProperty/docs/` |
 | H3 六段式提示词框架控制 | `ManjuToSplitFrameAndProperty/docs/六段式提示词框架控制.md` |

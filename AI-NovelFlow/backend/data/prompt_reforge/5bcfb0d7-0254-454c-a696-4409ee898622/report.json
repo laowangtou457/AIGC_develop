@@ -1,0 +1,110 @@
+{
+  "task_id": "5bcfb0d7-0254-454c-a696-4409ee898622",
+  "beats": {
+    "title": "断桥之战",
+    "style": "写实电影质感",
+    "characters": [
+      {
+        "name": "白衣剑客",
+        "gender": "男",
+        "age": "青年",
+        "appearance": "白衣飘飘，长剑出鞘，面容冷峻"
+      },
+      {
+        "name": "黑衣刀客",
+        "gender": "男",
+        "age": "中年",
+        "appearance": "黑衣裹身，短刀在手，神情冷酷"
+      }
+    ],
+    "scenes": [
+      {
+        "name": "断桥对峙",
+        "setting": "暴雨中的断桥，湿滑桥面，怒江奔涌，光线昏暗"
+      }
+    ],
+    "beats": [
+      {
+        "beat_no": 1,
+        "scene": "断桥对峙",
+        "summary": "白衣剑客与黑衣刀客在暴雨中对峙",
+        "characters": [
+          "白衣剑客",
+          "黑衣刀客"
+        ],
+        "action": "两人在断桥上对峙，剑光与刀风交织",
+        "camera": "低角度仰拍，突出桥面与人物对抗",
+        "atmosphere": "暴雨倾盆，桥面湿滑，光线昏暗",
+        "dialogue": []
+      },
+      {
+        "beat_no": 2,
+        "scene": "断桥对峙",
+        "summary": "两人在桥面缠斗",
+        "characters": [
+          "白衣剑客",
+          "黑衣刀客"
+        ],
+        "action": "剑客与刀客在湿滑桥面激烈交手",
+        "camera": "环绕镜头，展现动作与环境",
+        "atmosphere": "暴雨如注，桥面湿滑，光线昏暗",
+        "dialogue": []
+      },
+      {
+        "beat_no": 3,
+        "scene": "断,桥对峙",
+        "summary": "刀客侧身格挡，桥栏溅起火星",
+        "characters": [
+          "白衣剑客",
+          "黑衣刀客"
+        ],
+        "action": "剑客一剑刺出，刀客侧身格挡，刀锋划过桥栏溅起火星",
+        "camera": "特写镜头，聚焦桥栏与火星飞溅",
+        "atmosphere": "暴雨中火星飞溅，光线昏暗",
+        "dialogue": []
+      },
+      {
+        "beat_no": 4,
+        "scene": "断桥对峙",
+        "summary": "剑客以一招回身刺结束战斗",
+        "characters": [
+          "白衣剑客",
+          "黑衣刀客"
+        ],
+        "action": "剑客回身一剑刺出，刀客单膝跪地",
+        "camera": "中景镜头，突出剑客动作与刀客倒地",
+        "atmosphere": "暴雨渐歇，雾气升起，光线微弱",
+        "dialogue": []
+      },
+      {
+        "beat_no": 5,
+        "scene": "断桥对峙",
+        "summary": "暴雨渐歇，雾气升起",
+        "characters": [
+          "白衣剑客",
+          "黑衣刀客"
+        ],
+        "action": "战斗结束，暴雨渐歇，雾气弥漫",
+        "camera": "远景镜头，展现断桥与怒江全景",
+        "atmosphere": "暴雨渐歇，雾气弥漫，光线朦胧",
+        "dialogue": []
+      }
+    ]
+  },
+  "platforms": [
+    "minimax_h3",
+    "seedance",
+    "kling",
+    "veo",
+    "jimeng"
+  ],
+  "shot_count": 12,
+  "platform_parts": {
+    "minimax_h3": "<Subject 1> is the young male swordswoman in white robes, with flowing hair, a long sword, and a cold expression. <Subject 2> is the middle-aged male dagger-wielding warrior in black robes, with a short dagger and a cruel expression.  \n[reference generation] A swordswoman and a dagger-wielding warrior stand face to face on a stormy bridge.  \n<Subject 1> (appears in [Shot 1]): fully_preserved - retains white robes, long sword, and cold expression. <Subject 2> (appears in [Shot 1]): fully_preserved - retains black robes, short dagger, and cruel expression.  \ndetailed_description: A stormy bridge under dark skies, with rain pouring heavily. [Shot 1] Low-angle仰拍, the young male swordswoman in white robes stands on the wet bridge, facing the middle-aged male dagger-wielding warrior in black robes. The bridge is slick, and the river below is raging. <d>无对白</d>  \noverall_soundscape: Thunder rumbling in the distance, rain hitting the bridge, the sound of the river flowing.  \nnon_diegetic_music: A low, steady drumbeat with a haunting violin melody.  \n\nAt MM:05.000, the shot cuts to [Shot 2]. detailed_description: A stormy bridge under dark skies, with rain pouring heavily. [Shot 2] A环绕镜头, the young male swordswoman in white robes and the middle-aged male dagger-wielding warrior in black robes fight on the wet bridge. The bridge is slick, and the river below is raging. <d>无对白</d>  \noverall_soundscape: Thunder rumbling in the distance, rain hitting the bridge, the sound of the river flowing.  \nnon_diegetic_music: A low, steady drumbeat with a haunting violin melody.  \n\nAt MM:10.000, the shot cuts to [Shot 3]. detailed_description: A stormy bridge under dark skies, with rain pouring heavily. [Shot 3] A特写镜头, the young male swordswoman in white robes and the middle-aged male dagger-wielding warrior in black robes fight on the wet bridge. The bridge is slick, and the river below is raging. The dagger-wielding warrior blocks the sword, and sparks fly from the bridge railing. <d>无对白</d>  \noverall_soundscape: Thunder rumbling in the distance, rain hitting the bridge, the sound of the river flowing.  \nnon_diegetic_music: A low, steady drumbeat with a haunting violin melody.  \n\nAt MM:15.000, the shot cuts to [Shot 4]. detailed_description: A stormy bridge under dark skies, with rain pouring heavily. [Shot 4] A中景镜头, the young male swordswoman in white robes and the middle-aged male dagger-wielding warrior in black robes fight on the wet bridge. The bridge is slick, and the river below is raging. The swordswoman turns and strikes the dagger-wielding warrior, who kneels on the wet bridge. <d>无对白</d>  \noverall_soundscape: Thunder rumbling in the distance, rain hitting the bridge, the sound of the river flowing.  \nnon_diegetic_music: A low, steady drumbeat with a haunting violin melody.  \n\nAt MM:20.000, the shot cuts to [Shot 5]. detailed_description: A stormy bridge under dark skies, with rain pouring heavily. [Shot 5] A远景镜头, the young male swordswoman in white robes and the middle-aged male dagger-wielding warrior in black robes fight on the wet bridge. The bridge is slick, and the river below is raging. The rain has eased, and a mist rises from the river. <d>无对白</d>  \noverall_soundscape: Thunder rumbling in the distance, rain hitting the bridge, the sound of the river flowing.  \nnon_diegetic_music: A low, steady drumbeat with a haunting violin melody.",
+    "seedance": "Shot 1: 4-8 seconds, 9:16 aspect ratio. subject: young male swordswoman in white robes, middle-aged male dagger-wielding warrior in black robes. action: stand face to face on a stormy bridge. scene: stormy bridge under dark skies, rain pouring heavily. camera: low-angle仰拍. lighting: dark, with rain and river sounds. technical: no subtitles, no text.  \nShot 2: 4-8 seconds, 9:16 aspect ratio. subject: young male swordswoman in white robes, middle-aged male dagger-wielding warrior in black robes. action: fight on a stormy bridge. scene: stormy bridge under dark skies, rain pouring heavily. camera:环绕镜头. lighting: dark, with rain and river sounds. technical: no subtitles, no text.  \nShot 3: 4-8 seconds, 9:16 aspect ratio. subject: young male swordswoman in white robes, middle-aged male dagger-wielding warrior in black robes. action: fight on a stormy bridge, sparks fly from the bridge railing. scene: stormy bridge under dark skies, rain pouring heavily. camera:特写镜头. lighting: dark, with rain and river sounds. technical: no subtitles, no text.  \nShot 4: 4-8 seconds, 9:16 aspect ratio. subject: young male swordswoman in white robes, middle-aged male dagger-wielding warrior in black robes. action: fight on a stormy bridge, swordswoman strikes the dagger-wielding warrior, who kneels on the wet bridge. scene: stormy bridge under dark skies, rain pouring heavily. camera:中景镜头. lighting: dark, with rain and river sounds. technical: no subtitles, no text.  \nShot 5: 4-8 seconds, 9:16 aspect ratio. subject: young male swordswoman in white robes, middle-aged male dagger-wielding warrior in black robes. action: fight on a stormy bridge, rain has eased, mist rises from the river. scene: stormy bridge under dark skies, rain pouring heavily. camera:远景镜头. lighting: dark, with rain and river sounds. technical: no subtitles, no text.  \n\n### Black衣刀客\nShot 1: 4-8 seconds, 9:16 aspect ratio. subject: young male swordswoman in white robes, middle-aged male dagger-wielding warrior in black robes. action: stand face to face on a stormy bridge. scene: stormy bridge under dark skies, rain pouring heavily. camera: low-angle仰拍. lighting: dark, with rain and river sounds. technical: no subtitles, no text.  \nShot 2: 4-8 seconds, 9:16 aspect ratio. subject: young male swordswoman in white robes, middle-aged male dagger-wielding warrior in black robes. action: fight on a stormy bridge. scene: stormy bridge under dark skies, rain pouring heavily. camera:环绕镜头. lighting: dark, with rain and river sounds. technical: no subtitles, no text.  \nShot 3: 4-8 seconds, 9:16 aspect ratio. subject: young male swordswoman in white robes, middle-aged male dagger-wielding warrior in black robes. action: fight on a stormy bridge, sparks fly from the bridge railing. scene: stormy bridge under dark skies, rain pouring heavily. camera:特写镜头. lighting: dark, with rain and river sounds. technical: no subtitles, no text.  \nShot 4: 4-8 seconds, 9:16 aspect ratio. subject: young male swordswoman in white robes, middle-aged male dagger-wielding warrior in black robes. action: fight on a stormy bridge, swordswoman strikes the dagger-wielding warrior, who kneels on the wet bridge. scene: stormy bridge under dark skies, rain pouring heavily. camera:中景镜头. lighting: dark, with rain and river sounds. technical: no subtitles, no text.  \nShot 5: 4-8 seconds, 9:16 aspect ratio. subject: young male swordswoman in white robes, middle-aged male dagger-wielding warrior in black robes. action: fight on a stormy bridge, rain has eased, mist rises from the river. scene: stormy bridge under dark skies, rain pouring heavily. camera:远景镜头. lighting: dark, with rain and river sounds. technical: no subtitles, no text.  \n\n### Black衣刀客\nShot 1: 4-8 seconds, 9:16 aspect ratio. subject: young male swordswoman in white robes, middle-aged male dagger-wielding warrior in black robes. action: stand face to face on a stormy bridge. scene: stormy bridge under dark skies, rain pouring heavily. camera: low-angle仰拍. lighting: dark, with rain and river sounds. technical: no subtitles, no text.  \nShot 2: 4-8 seconds, 9:16 aspect ratio. subject: young male swordswoman in white robes, middle-aged male dagger-wielding warrior in black robes. action: fight on a stormy bridge. scene: stormy bridge under dark skies, rain pouring heavily. camera:环绕镜头. lighting: dark, with rain and river sounds. technical: no subtitles, no text.  \nShot 3: 4-8 seconds, 9:16 aspect ratio. subject: young male swordswoman in white robes, middle-aged male dagger-wielding warrior in black robes. action: fight on a stormy bridge, sparks fly from the bridge railing. scene: stormy bridge under dark skies, rain pouring heavily. camera:特写镜头. lighting: dark, with rain and river sounds. technical: no subtitles, no text.  \nShot 4: 4-8 seconds, 9:16 aspect ratio. subject: young male swordswoman in white robes, middle-aged male dagger-wielding warrior in black robes. action: fight on a stormy bridge, swordswoman strikes the dagger-wielding warrior, who kneels on the wet bridge. scene: stormy bridge under dark skies, rain pouring heavily. camera:中景镜头. lighting: dark, with rain and river sounds. technical: no subtitles, no text.  \nShot 5: 4-8 seconds, 9:16 aspect ratio. subject: young male swordswoman in white robes, middle-aged male dagger-wielding warrior in black robes. action: fight on a stormy bridge, rain has eased, mist rises from the river. scene: stormy bridge under dark skies, rain pouring heavily. camera:远景镜头. lighting: dark, with rain and river sounds. technical: no subtitles, no text.",
+    "kling": "<Subject 1> is the young male swordswoman in white robes, with flowing hair, a long sword, and a cold expression. <Subject 2> is the middle-aged male dagger-wielding warrior in black robes, with a short dagger and a cruel expression.  \n[reference generation] A swordswoman and a dagger-wielding warrior stand face to face on a stormy bridge.  \n<Subject 1> (appears in [Shot 1]): fully_preserved - retains white robes, long sword, and cold expression. <Subject 2> (appears in [Shot 1]): fully_preserved - retains black robes, short dagger, and cruel expression.  \ndetailed_description: A stormy bridge under dark skies, with rain pouring heavily. [Shot 1] Low-angle仰拍, the young male swordswoman in white robes stands on the wet bridge, facing the middle-aged male dagger-wielding warrior in black robes. The bridge is slick, and the river below is raging. <d>无对白</d>  \noverall_soundscape: Thunder rumbling in the distance, rain hitting the bridge, the sound of the river flowing.  \nnon_diegetic_music: A low, steady drumbeat with a haunting violin melody.  \n\nAt MM:05.000, the shot cuts to [Shot 2]. detailed_description: A stormy bridge under dark skies, with rain pouring heavily. [Shot 2] A环绕镜头, the young male swordswoman in white robes and the middle-aged male dagger-wielding warrior in black robes fight on the wet bridge. The bridge is slick, and the river below is raging. <d>无对白</d>  \noverall_soundscape: Thunder rumbling in the distance, rain hitting the bridge, the sound of the river flowing.  \nnon_diegetic_music: A low, steady drumbeat with a haunting violin melody.  \n\nAt MM:10.000, the shot cuts to [Shot 3]. detailed_description: A stormy bridge under dark skies, with rain pouring heavily. [Shot 3] A特写镜头, the young male swordswoman in white robes and the middle-aged male dagger-wielding warrior in black robes fight on the wet bridge. The bridge is slick, and the river below is raging. The dagger-wielding warrior blocks the sword, and sparks fly from the bridge railing. <d>无对白</d>  \noverall_soundscape: Thunder rumbling in the distance, rain hitting the bridge, the sound of the river flowing.  \nnon_diegetic_music: A low, steady drumbeat with a haunting violin melody.  \n\nAt MM:15.000, the shot cuts to [Shot 4]. detailed_description: A stormy bridge under dark skies, with rain pouring heavily. [Shot 4] A中景镜头, the young male swordswoman in white robes and the middle-aged male dagger-wielding warrior in black robes fight on the wet bridge. The bridge is slick, and the river below is raging. The swordswoman turns and strikes the dagger-wielding warrior, who kneels on the wet bridge. <d>无对白</d>  \noverall_soundscape: Thunder rumbling in the distance, rain hitting the bridge, the sound of the river flowing.  \nnon_diegetic_music: A low, steady drumbeat with a haunting violin melody.  \n\nAt MM:20.000, the shot cuts to [Shot 5]. detailed_description: A stormy bridge under dark skies, with rain pouring heavily. [Shot 5] A远景镜头, the young male swordswoman in white robes and the middle-aged male dagger-wielding warrior in black robes fight on the wet bridge. The bridge is slick, and the river below is raging. The rain has eased, and a mist rises from the river. <d>无对白</d>  \noverall_soundscape: Thunder rumbling in the distance, rain hitting the bridge, the sound of the river flowing.  \nnon_diegetic_music: A low, steady drumbeat with a haunting violin melody.",
+    "veo": "<Subject 1> is the young male swordswoman in white robes, with flowing hair, a long sword, and a cold expression. <Subject 2> is the middle-aged male dagger-wielding warrior in black robes, with a short dagger and a cruel expression.  \n[reference generation] A swordswoman and a dagger-wielding warrior stand face to face on a stormy bridge.  \n<Subject 1> (appears in [Shot 1]): fully_preserved - retains white robes, long sword, and cold expression. <Subject 2> (appears in [Shot 1]): fully_preserved - retains black robes, short dagger, and cruel expression.  \ndetailed_description: A stormy bridge under dark skies, with rain pouring heavily. [Shot 1] Low-angle仰拍, the young male swordswoman in white robes stands on the wet bridge, facing the middle-aged male dagger-wielding warrior in black robes. The bridge is slick, and the river below is raging. <d>无对白</d>  \noverall_soundscape: Thunder rumbling in the distance, rain hitting the bridge, the sound of the river flowing.  \nnon_diegetic_music: A low, steady drumbeat with a haunting violin melody.  \n\nAt MM:05.000, the shot cuts to [Shot 2]. detailed_description: A stormy bridge under dark skies, with rain pouring heavily. [Shot 2] A环绕镜头, the young male swordswoman in white robes and the middle-aged male dagger-wielding warrior in black robes fight on the wet bridge. The bridge is slick, and the river below is raging. <d>无对白</d>  \noverall_soundscape: Thunder rumbling in the distance, rain hitting the bridge, the sound of the river flowing.  \nnon_diegetic_music: A low, steady drumbeat with a haunting violin melody.  \n\nAt MM:10.000, the shot cuts to [Shot 3]. detailed_description: A stormy bridge under dark skies, with rain pouring heavily. [Shot 3] A特写镜头, the young male swordswoman in white robes and the middle-aged male dagger-wielding warrior in black robes fight on the wet bridge. The bridge is slick, and the river below is raging. The dagger-wielding warrior blocks the sword, and sparks fly from the bridge railing. <d>无对白</d>  \noverall_soundscape: Thunder rumbling in the distance, rain hitting the bridge, the sound of the river flowing.  \nnon_diegetic_music: A low, steady drumbeat with a haunting violin melody.  \n\nAt MM:15.000, the shot cuts to [Shot 4]. detailed_description: A stormy bridge under dark skies, with rain pouring heavily. [Shot 4] A中景镜头, the young male swordswoman in white robes and the middle-aged male dagger-wielding warrior in black robes fight on the wet bridge. The bridge is slick, and the river below is raging. The swordswoman turns and strikes the dagger-wielding warrior, who kneels on the wet bridge. <d>无对白</d>  \noverall_soundscape: Thunder rumbling in the distance, rain hitting the bridge, the sound of the river flowing.  \nnon_diegetic_music: A low, steady drumbeat with a haunting violin melody.  \n\nAt MM:20.000, the shot cuts to [Shot 5]. detailed_description: A stormy bridge under dark skies, with rain pouring heavily. [Shot 5] A远景镜头, the young male swordswoman in white robes and the middle-aged male dagger-wielding warrior in black robes fight on the wet bridge. The bridge is slick, and the river below is raging. The rain has eased, and a mist rises from the river. <d>无对白</d>  \noverall_soundscape: Thunder rumbling in the distance, rain hitting the bridge, the sound of the river flowing.  \nnon_diegetic_music: A low, steady drumbeat with a haunting violin melody.",
+    "jimeng": "<Subject 1> is the young male swordswoman in white robes, with flowing hair, a long sword, and a cold expression. <Subject 2> is the middle-aged male dagger-wielding warrior in black robes, with a short dagger and a cruel expression.  \n[reference generation] A swordswoman and a dagger-wielding warrior stand face to face on a stormy bridge.  \n<Subject 1> (appears in [Shot 1]): fully_preserved - retains white robes, long sword, and cold expression. <Subject 2> (appears in [Shot 1]): fully_preserved - retains black robes, short dagger, and cruel expression.  \ndetailed_description: A stormy bridge under dark skies, with rain pouring heavily. [Shot 1] Low-angle仰拍, the young male swordswoman in white robes stands on the wet bridge, facing the middle-aged male dagger-wielding warrior in black robes. The bridge is slick, and the river below is raging. <d>无对白</d>  \noverall_soundscape: Thunder rumbling in the distance, rain hitting the bridge, the sound of the river flowing.  \nnon_diegetic_music: A low, steady drumbeat with a haunting violin melody.  \n\nAt MM:05.000, the shot cuts to [Shot 2]. detailed_description: A stormy bridge under dark skies, with rain pouring heavily. [Shot 2] A环绕镜头, the young male swordswoman in white robes and the middle-aged male dagger-wielding warrior in black robes fight on the wet bridge. The bridge is slick, and the river below is raging. <d>无对白</d>  \noverall_soundscape: Thunder rumbling in the distance, rain hitting the bridge, the sound of the river flowing.  \nnon_diegetic_music: A low, steady drumbeat with a haunting violin melody.  \n\nAt MM:10.000, the shot cuts to [Shot 3]. detailed_description: A stormy bridge under dark skies, with rain pouring heavily. [Shot 3] A特写镜头, the young male swordswoman in white robes and the middle-aged male dagger-wielding warrior in black robes fight on the wet bridge. The bridge is slick, and the river below is raging. The dagger-wielding warrior blocks the sword, and sparks fly from the bridge railing. <d>无对白</d>  \noverall_soundscape: Thunder rumbling in the distance, rain hitting the bridge, the sound of the river flowing.  \nnon_diegetic_music: A low, steady drumbeat with a haunting violin melody.  \n\nAt MM:15.000, the shot cuts to [Shot 4]. detailed_description: A stormy bridge under dark skies, with rain pouring heavily. [Shot 4] A中景镜头, the young male swordswoman in white robes and the middle-aged male dagger-wielding warrior in black robes fight on the wet bridge. The bridge is slick, and the river below is raging. The swordswoman turns and strikes the dagger-wielding warrior, who kneels on the wet bridge. <d>无对白</d>  \noverall_soundscape: Thunder rumbling in the distance, rain hitting the bridge, the sound of the river flowing.  \nnon_diegetic_music: A low, steady drumbeat with a haunting violin melody.  \n\nAt MM:20.000, the shot cuts to [Shot 5]. detailed_description: A stormy bridge under dark skies, with rain pouring heavily. [Shot 5] A远景镜头, the young male swordswoman in white robes and the middle-aged male dagger-wielding warrior in black robes fight on the wet bridge. The bridge is slick, and the river below is raging. The rain has eased, and a mist rises from the river. <d>无对白</d>  \noverall_soundscape: Thunder rumbling in the distance, rain hitting the bridge, the sound of the river flowing.  \nnon_diegetic_music: A low, steady drumbeat with a haunting violin melody."
+  },
+  "generated_at": "2026-10-08 11:13:17"
+}

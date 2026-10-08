@@ -1,4 +1,4 @@
-// 繁体中文导航翻译
+﻿// 繁体中文导航翻译
 export default {
   nav: {
     welcome: '歡迎',
@@ -14,5 +14,7 @@ export default {
     llmLogs: '大模型日誌',
         taskMonitor: '任務進程監控',
     martialArts: '武術指導',
-    videoAssetSwap: '影片資源替換',},
+    videoAssetSwap: '影片資源替換',
+    promptReforge: '提示詞提取與重構',
+  },
 };

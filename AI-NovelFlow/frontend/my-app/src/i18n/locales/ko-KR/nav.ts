@@ -1,4 +1,4 @@
-// Navigation translations - Korean
+﻿// Navigation translations - Korean
 export default {
   nav: {
     welcome: '환영합니다',
@@ -14,5 +14,7 @@ export default {
     llmLogs: 'LLM 로그',
     taskMonitor: '작업 모니터링',
     martialArts: '무술 지도',
-    videoAssetSwap: '동영상 자산 교체',},
+    videoAssetSwap: '동영상 자산 교체',
+    promptReforge: '프롬프트 추출·재구성',
+  },
 };

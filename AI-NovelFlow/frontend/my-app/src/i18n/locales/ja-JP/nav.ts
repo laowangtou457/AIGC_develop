@@ -1,4 +1,4 @@
-// 日语导航翻译
+﻿// 日语导航翻译
 export default {
   nav: {
     welcome: 'ようこそ',
@@ -14,5 +14,7 @@ export default {
     llmLogs: 'LLMログ',
     taskMonitor: 'タスク監視',
     martialArts: '武術指導',
-    videoAssetSwap: '動画資産置換',},
+    videoAssetSwap: '動画資産置換',
+    promptReforge: 'プロンプト抽出・再構築',
+  },
 };

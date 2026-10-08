@@ -1,4 +1,4 @@
-// Navigation translations
+﻿// Navigation translations
 export default {
   // Navigation
   nav: {
@@ -15,5 +15,7 @@ export default {
     llmLogs: 'LLM Logs',
         taskMonitor: 'Task Monitor',
     martialArts: 'Martial Arts',
-    videoAssetSwap: 'Video Asset Swap',},
+    videoAssetSwap: 'Video Asset Swap',
+    promptReforge: 'Prompt Reforge',
+  },
 };

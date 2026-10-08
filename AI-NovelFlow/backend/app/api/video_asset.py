@@ -28,6 +28,8 @@ from datetime import datetime
 
 from app.core.database import SessionLocal
 from app.models.video_asset_history import VideoAssetHistory
+from app.services.background_workers import worker_manager
+from app.services.video_asset_video_service import run_generate_new_video, NEW_VIDEO_DIR
 
 router = APIRouter()
 
@@ -280,6 +282,7 @@ async def list_jobs():
                 "status": j.status,
                 "stage": j.stage,
                 "error": j.error,
+                "video_status": j.video_status or "idle",
                 "summary": summary,
                 "created_at": j.created_at.strftime("%Y-%m-%d %H:%M:%S") if j.created_at else None,
                 "updated_at": j.updated_at.strftime("%Y-%m-%d %H:%M:%S") if j.updated_at else None,
@@ -314,6 +317,12 @@ async def get_job(job_id: str):
     except Exception:
         pass
 
+    video_summary = {}
+    try:
+        video_summary = json.loads(job.video_summary_json or "{}")
+    except Exception:
+        pass
+
     return {
         "success": True,
         "data": {
@@ -323,6 +332,12 @@ async def get_job(job_id: str):
             "stage": job.stage,
             "error": job.error,
             "summary": summary,
+            "video": {
+                "status": job.video_status or "idle",
+                "stage": job.video_stage,
+                "error": job.video_error,
+                "summary": video_summary,
+            },
             "created_at": job.created_at.strftime("%Y-%m-%d %H:%M:%S") if job.created_at else None,
             "updated_at": job.updated_at.strftime("%Y-%m-%d %H:%M:%S") if job.updated_at else None,
             "shots": _read_json_or_none(output_dir / "shots.json"),
@@ -450,4 +465,88 @@ async def swap_asset(
         "success": True,
         "message": f"资产 {asset_id} 已替换，H3 提示词已重新导出",
         "prompts_url": f"/api/video-asset/jobs/{job_id}/files/minimax_h3/prompts.md",
+    }
+
+
+# ═══════════════════════════ 生成新视频 ═══════════════════════════
+
+@router.post("/jobs/{job_id}/generate-video")
+async def generate_video(job_id: str):
+    """
+    生成新视频（替换资产后）：逐镜 H3 提示词 + 资产参考图 → ComfyUI H3 视频工作流
+    → 全部镜头串行生成 → ffmpeg 合并成片（output/<stem>/new_video/final_video.mp4）
+
+    主动点击触发；后台 worker 串行执行，进度写入 job.video_summary_json。
+    """
+    job = _load_job(job_id)
+    if job.status != "success":
+        raise HTTPException(status_code=400, detail="任务尚未完成分析，不能生成视频")
+    if (job.video_status or "idle") == "running":
+        raise HTTPException(status_code=400, detail="视频生成已在进行中，请勿重复提交")
+
+    output_dir = _output_dir_of(job)
+    if not (output_dir / "minimax_h3" / "payloads").exists() and not (output_dir / "minimax_h3" / "prompts.md").exists():
+        raise HTTPException(status_code=400, detail="缺少逐镜提示词（minimax_h3 产物），请先完成分析")
+
+    # 重置视频生成状态（注意：commit 后 ORM 实例属性过期，Session 关闭后再访问
+    # 会触发 DetachedInstanceError，因此 video_path/output_dir 必须在 commit 前取值）
+    db = SessionLocal()
+    try:
+        job = db.query(VideoAssetHistory).filter(VideoAssetHistory.id == job_id).first()
+        job.video_status = "running"
+        job.video_stage = "任务已提交，等待执行…"
+        job.video_error = None
+        job.video_summary_json = None
+        _video_path = str(job.video_path)
+        _output_dir = str(job.output_dir)
+        db.commit()
+    finally:
+        db.close()
+
+    # 后台串行执行（独立 worker，避免与小说/武术指导视频生成并发抢显存）
+    worker_manager.worker("video_asset_video").enqueue(
+        lambda: run_generate_new_video(job_id, _video_path, _output_dir)
+    )
+
+    return {
+        "success": True,
+        "message": "视频生成已提交，逐镜串行执行中",
+    }
+
+
+@router.get("/jobs/{job_id}/video")
+async def get_job_video(job_id: str):
+    """视频生成状态：逐镜进度 + 合并结果 + new_video 产物文件树"""
+    job = _load_job(job_id)
+    output_dir = _output_dir_of(job)
+
+    video_summary = {}
+    try:
+        video_summary = json.loads(job.video_summary_json or "{}")
+    except Exception:
+        pass
+
+    # new_video 产物文件树（逐镜视频 + 合并成片）
+    video_files = []
+    new_video_dir = output_dir / NEW_VIDEO_DIR
+    if new_video_dir.exists():
+        for root, dirs, files in os.walk(new_video_dir):
+            rel_root = Path(root).relative_to(output_dir)
+            for fn in sorted(files):
+                rel = str(rel_root / fn) if str(rel_root) != "." else fn
+                video_files.append({
+                    "path": rel.replace("\\", "/"),
+                    "size": os.path.getsize(os.path.join(root, fn)),
+                })
+
+    return {
+        "success": True,
+        "data": {
+            "id": job.id,
+            "video_status": job.video_status or "idle",
+            "video_stage": job.video_stage,
+            "video_error": job.video_error,
+            "summary": video_summary,
+            "files": video_files,
+        },
     }

@@ -25,6 +25,7 @@ const LLMLogs = lazy(() => import('./pages/LLMLogs'));
 const Monitor = lazy(() => import('./pages/Monitor'));
 const MartialArts = lazy(() => import('./pages/MartialArts'));
 const VideoAssetSwap = lazy(() => import('./pages/VideoAssetSwap'));
+const PromptReforge = lazy(() => import('./pages/PromptReforge'));
 
 /**
  * 加载中占位组件
@@ -88,8 +89,10 @@ function App() {
           <Route path="prompt-config" element={<LazyPage><PromptConfig /></LazyPage>} />
           <Route path="ui-config" element={<LazyPage><UIConfig /></LazyPage>} />
           <Route path="llm-logs" element={<LazyPage><LLMLogs /></LazyPage>} />
-          <Route path="monitor" element={<LazyPage><Monitor /></LazyPage>} />`r`n          <Route path="martial-arts" element={<LazyPage><MartialArts /></LazyPage>} />
+          <Route path="monitor" element={<LazyPage><Monitor /></LazyPage>} />
+          <Route path="martial-arts" element={<LazyPage><MartialArts /></LazyPage>} />
           <Route path="video-asset-swap" element={<LazyPage><VideoAssetSwap /></LazyPage>} />
+          <Route path="prompt-reforge" element={<LazyPage><PromptReforge /></LazyPage>} />
         </Route>
       </Routes>
       <ToastContainer toasts={toasts} onRemove={removeToast} />
