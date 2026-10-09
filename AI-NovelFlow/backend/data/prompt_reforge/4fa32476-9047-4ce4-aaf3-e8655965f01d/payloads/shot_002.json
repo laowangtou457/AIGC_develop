@@ -1,0 +1,11 @@
+{
+  "shot": 2,
+  "chapter": 1,
+  "prompt_text": "Shot 2（8s｜9:16）→ subject/composition：黑衣人（男，中年，黑衣蒙面，左脸烧伤）从对岸突袭，陆离侧身闪避，中景，两人对峙  \n→ action/performance：黑衣人挥刀劈向陆离，刀光如练，陆离侧身让过，左手护住腰间，右脚后撤  \n→ scene/props：桥面与对岸对峙，闪电映刀，雨滴飞溅，铁索在风中震颤，桥板泛着水光  \n→ camera/motion：快速推近，镜头从黑衣人视角移向陆离，突出刀光与动作  \n→ lighting/atmosphere：闪电映刀，雨滴在刀身上滑落，呼吸可闻，环境紧张  \n→ technical/spec：8s｜9:16｜4K  \n",
+  "duration": 4,
+  "ratio": "9:16",
+  "platforms": [
+    "seedance",
+    "kling"
+  ]
+}

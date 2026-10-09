@@ -1,0 +1,291 @@
+# 提示词提取与重构结果集
+
+- 任务：f650f534-fcc7-432a-823e-7713687ffd2c
+- 生成时间：2026-10-08 17:54:18
+- 目标平台：MiniMax H3、Seedance、Kling、Veo、即梦
+- 提取节拍数：0
+
+## 原始输入（节选）
+
+```text
+第一章：纵身亡魔心仍不悔
+    “方源，乖乖地交出春秋蝉，我给你个痛快！”
+    “方老魔，你不要妄图反抗了，今日我们正道各大派联合起来，就是要踏破你的魔窟。这里早已经布下天罗地网，这次你必定身首异处！”
+    “方源你个该死的魔头，你为了练成春秋蝉，杀了千万人的性命。你已经犯下了滔天的罪孽，罪无可恕，罄竹难书！”
+    “魔头，三百年前你侮辱了我，夺走了我的清白之身，杀光我全家，诛了我的九族。从那刻起，我恨不得吃你肉，喝你的血！今天，我要让你生不如死！！”
+    ……
+    方源一身残破的碧绿大袍，披头散发，浑身浴血，环顾四周。
+    山风吹得血袍飘荡，如战旗般嚯嚯作响。
+    鲜红的血液，从身上数百道伤口向外涌着。只是站着一会儿，方源脚下已经积了一大滩的血水。
+    群敌环伺，早已经没有了生路。
+    大局已定，今日必死无疑。
+    方源对局势洞若观火，不过即便死亡将临，他仍旧是面不改色，神情平淡。
+    他目光幽幽，如古井深潭一般，一如既往的深不见底。
+    围攻他的正道群雄，不是堂堂一派之长者尊贵，就是名动四方之少年英豪。此时牢牢包围着方源，有的在咆哮，有的在冷笑，有的双眼眯起闪着警惕的光，有的捂着伤口恐惧地望着。
+    他们没有动手，都忌惮着方源的临死反扑。
+    就这样紧张地对峙了三个时辰，夕阳西下，落日的余晖将山边的晚霞点燃，一时间绚烂如火。
+    一直静如雕塑的方源，慢慢转身。
+    群雄顿时一阵骚动，齐齐后退一大步。
+    此刻，方源脚下的灰白山石，早已经被鲜血染成了暗红。因为失血过多而显得苍白的脸，被晚霞映照着，忽然增添了一份嫣然之光彩。
+    看着这青山落日，方源轻声一笑：“青山落日，秋月春风。当真是朝如青丝暮成雪，是非成败转头空。”
+    说这话的时候，眼前忽的就浮现出前世地球上的种种。
+    他本是地球上的华夏学子，机缘巧合穿越到这方世界。辗转颠簸三百年，纵横世间两百余年，五百多年光阴悠悠，却是晃眼即逝。
+    深埋在心底的许多记忆，在此刻鲜活起来，栩栩如生地在眼前回现着。
+    “终究是失败了呀。”方源心中叹着，有些感慨，却并不后悔。
+    这种结果，他也早有预见。当初选择时，就有了心理准备。
+    所谓魔道，就是不修善果，杀人放火。天地不容，举世皆敌，还要纵情纵横。
+    “若是刚炼成的春秋蝉有效，来生还是要做邪魔！”这般想着，方源情不自禁放声大笑。
+    “老魔，你笑什么？”
+    “大家小心，魔头死到临头要反扑了！”
+    “快快交出春秋蝉！！”
+    群雄逼迫而来，恰在这时，轰的一声，方源悍然自爆。
+    ……
+    春雨绵绵，悄无声息地滋润着青茅山。
+    夜已经深了，丝丝凉风吹拂着细雨。
+    青茅山却不黑暗，从山腰至山脚，闪着许多莹莹的微光，好像是披着一条灿烂的光带。
+    这些光来源于一座座高脚吊楼，虽称不上万家灯火，却也有数千的规模。
+    正是坐落在青茅山的古月山寨，给广袤幽静的山峦增添了一份浓郁的人烟气息。
+    古月山寨的最中央，是一座大气辉煌的楼阁。此时正举办着祭祀大典，因此更是灯火通明，光辉绚烂。
+    “列祖列宗保佑，希望此次开窍大典中能多多涌现出资质优秀的少年，为家族增添新血和希望！”古月族长中年模样，两鬓微霜，一身素白庄重的祭祀服装，跪在棕黄色的地板上，直着上身，双手合十，紧闭双目诚心祈祷。
+    他面对着高高的黑漆台案，在台案有三
+```
+
+## 提取结果（剧本节拍）
+
+```json
+{
+  "title": "古月方源：开窍大典的抉择",
+  "content": "第四章：古月方源！\n\n朝阳升起来，霞光烂漫。\n\n山雾不是很浓，被利剑般的阳光轻易洞穿。\n\n一百多位十五岁的少年，此刻汇集在家主阁前。\n\n家主阁就处在山寨的正中央，高达五层，飞檐翘角，重兵把守。阁前就是广场，阁内供奉着古月先人的牌位。每代族长也都生活起居在这里面，每逢重大典礼，或者有突发大事，也会在这里召集家老们商讨议论。这是整个山寨的权利中枢。\n\n“很好，都准时来了。今天是开窍大典，是你们人生的重大转折点。闲话不多说了，随我来吧。”负责此行的，是学堂家老。他须发皆白，精神矍铄地领着少年们进入家主阁。\n\n不过却没有上楼，而是通过一层大堂的入口，往下走。\n\n顺着打造好的石梯，就进入地下溶洞。\n\n少年们纷纷发出惊叹之声。地下溶洞美轮美奂，钟乳石散发着赤橙黄绿青蓝紫七色光华，这光彩映照在少年们的脸上，霓虹般绚烂。\n\n方源混杂在人群中央，静静地审视这一切，心中暗暗思量：“数百年前，古月一族从中土迁徙到南疆，在这青茅山驻扎下来。就是看中了这里地下溶洞的一口灵泉。这灵泉产出大量元石，可以说是古月山寨的根基。”\n\n行了数百步，却是越来越暗，并且依稀听到了水声。\n\n转过转角，一条宽三丈有余的地下河，就展现在众人眼前。\n\n此地钟乳石的彩光，已经彻底消失了。\n\n但是黑暗中，河水却散发着淡淡的幽蓝之光，好像是夜空中的星河。\n\n河水从溶洞的黑暗深处流淌过来，清澈无比，甚至可以看到里面的游鱼，水草，以及河底的沙石。\n\n在河的对岸，是一片花海。\n\n这是古月一族有意栽培的月兰花，花瓣如月牙，呈现出清丽淡雅的蓝粉色。花茎如玉，花心闪耀着，好像是珍珠在光下的折射出来的温润光华。\n\n乍一眼看上去，在黑暗的背景中，河畔花海就好像是一大片的蓝绿地毯，点缀着数不清的珍珠。\n\n“月兰花，是很多蛊虫的食材。这片花海，可以说是家族最大的培养基地了。”方源对此心知肚明。\n\n“好美。”\n\n“真是漂亮呀。”\n\n少年们算是开了眼界，一个个双眼放光，既兴奋又紧张。\n\n“好了，下面听我报名，叫到的人穿过这河，到对岸去。能走多远，就走多远，当然越远越好。都听清楚了吗？”家老此刻说着。\n\n“清楚了。”少年们纷纷应是。其实来之前，都听家人或者前辈们讲过，知道走的越远，代表资质越好，日后的成就也就越大。\n\n“古月陈博。”家老拿着名单点出第一人。\n\n河水虽宽却并不深，只及少年膝盖。陈博一脸的严肃，踏上河畔花海。\n\n顿时他就感觉到一股隐形的压力，好像面前有一面看不见的墙，在阻挡他前进。\n\n正举步维艰之时，脚畔的花海中忽然浮起一蓬光点，光点很稀薄，呈现素白之色。\n\n光辉向陈博汇集过去，并投入到他的体内。\n\n陈博瞬间感觉到压力剧减。那堵无形的墙壁，忽然变得柔软起来。\n\n他咬牙用力向前走，硬生生的挤进去。走了三步之后，前方的压力又大增，一如之前如墙壁一样，不能再进分毫。\n\n见到此景，家老一叹，当场一边记录，一边道：“古月陈博，三步，没有蛊师资质。下一个，古月藻榭。”\n\n陈博脸色顿时苍白，咬着牙，穿过河水，回到原处。没有资质，今后就只能作为一个凡人活着，在家族中也只能是最底层的地位。\n\n他身躯摇摇欲坠，打击太大了，等于是扼杀了一生的希望。\n\n很多人向他投来怜悯的目光，更多的人则关注着第二位登上彼岸的少年。\n\n可惜这个少年，也只能前进四步，同样没有资质。\n\n并非所有人都有修行的资质，一般而言，十个人中有五人能修行，就已经不错了。在古月家族里，这个比例还要高一些，达到六人的程度。\n\n这是因为古月先祖，也就是一代族长，是一位大名鼎鼎的传奇强者，因为修行的缘故导致他的血脉中隐藏着承载力量的基因。古月族人因为有着他的血脉，因此资质普遍较高。\n\n连续两个没有资质的情况，让暗中关注的其他家老们都脸色难看起来，就是老成持重的古月族长，也微微蹙眉。\n\n就在这时，学堂家老喊出第三个名字：“古月漠北。”\n\n“在！”一个身穿麻布衣衫的马脸少年，轻喝一声，越众而出。\n\n他身材高大，比同龄人要粗壮得多，透着一丝彪悍气息。\n\n三两步过了河，踏上对岸。\n\n十步，二十步，三十步，陆续有微光投入到他的体内。\n\n一直走到三十六步，终于走不动了。\n\n少年们隔岸看得目瞪口呆，学堂家老欢喜得大叫起来：“好，古月漠北，乙等资质，来这里，让我看看你的元海。”\n\n古月漠北便又回到学堂家老的身边，后者伸出手，搭在少年的肩膀，闭目凝神探查了一番，便收回手，点点头，在纸上记录起来：“古月漠北，元海六成六，可大力栽培。”\n\n这资质从上到下，分甲乙丙丁四等。\n\n一位丁等资质的少年，培养个三年，就能晋升成一转的资深蛊师，成为家族的基石。\n\n一位丙等资质的少年，培养两年，大多都能成为二转的蛊师，成为家族的中坚存在。\n\n一位乙等资质，就要呵护了。往往要作为未来的家老培养，六七年的功夫，能成为三转蛊师。\n\n至于甲等资质，哪怕出现一位，都是整个家族的幸运。要细心关照，倾斜资源，十年左右就能成为四转蛊师，到那时便能竞争族长之位！\n\n也就是说，这古月漠北只要成长起来，就是今后古月一族的家老。难怪学堂长老喜得哈哈一笑，而暗中关注的众家老们都统统舒了一口气，而后又纷纷向其中一位家老投去羡慕的目光。\n\n这家老也是一副马脸，正是古月漠北的爷爷古月漠尘。他脸上早已经荡漾起笑意，又挑衅地看了一眼自己的老对头：“怎么样，我的孙儿不差吧，古月赤练。”\n\n家老古月赤练一头红发，此时冷哼一声，并未答话，脸色阴沉得很是难看。\n\n半个时辰之后，已有一半少年踏足过花海，涌现了不少丙等、丁等的资质，当然毫无资质的占了几乎一半。\n\n“唉，血脉越来越稀薄，加上这些年来，家族也没有出现几位……”\n\n（输入过长已截断）",
+  "beats": []
+}
+```
+
+## 逐镜提示词集（AI 工具可生成级）
+### MiniMax H3
+<Subject 1> is the young man named Fang Yuan, with long black hair, a simple black robe, and a calm expression, based on the description in the script.
+[reference generation]
+<Subject 1> (appears in [Shot 1]): fully_preserved - 保持外观一致性.
+detailed_description: At 00:00.000, the shot cuts to [Shot 1], showing the young man Fang Yuan standing in the morning light, his long black hair flowing in the breeze, wearing a simple black robe, with a calm and determined expression. The background is a mountainous landscape with a golden sunrise, the light casting long shadows. The scene is peaceful and serene, with no subtitles.
+overall_soundscape: The sound of the morning breeze, the distant sound of birds chirping, the soft rustling of leaves, and the gentle sound of the river flowing in the distance.
+non_diegetic_music: A soft and melodic instrumental piece with a light and flowing rhythm, reminiscent of a traditional Chinese melody.
+
+<Subject 2> is the group of young men, with their appearance described in the script, based on the description in the script.
+[reference generation]
+<Subject 2> (appears in [Shot 2]): fully_preserved - 保持外观一致性.
+detailed_description: At 00:05.000, the shot cuts to [Shot 2], showing a group of young men gathered in front of the main hall, their faces filled with anticipation and excitement. The main hall is a grand structure with five floors, flying eaves, and heavy military presence. The background is the mountainous landscape with the golden sunrise, the light casting long shadows. The scene is filled with energy and anticipation, with no subtitles.
+overall_soundscape: The sound of the morning breeze, the distant sound of birds chirping, the soft rustling of leaves, and the gentle sound of the river flowing in the distance.
+non_diegetic_music: A soft and melodic instrumental piece with a light and flowing rhythm, reminiscent of a traditional Chinese melody.
+
+<Subject 3> is the main hall, with its description in the script, based on the description in the script.
+[reference generation]
+<Subject 3> (appears in [Shot 3]): fully_preserved - 保持外观一致性.
+detailed_description: At 00:10.000, the shot cuts to [Shot 3], showing the main hall, a grand structure with five floors, flying eaves, and heavy military presence. The background is the mountainous landscape with the golden sunrise, the light casting long shadows. The scene is filled with grandeur and power, with no subtitles.
+overall_soundscape: The sound of the morning breeze, the distant sound of birds chirping, the soft rustling of leaves, and the gentle sound of the river flowing in the distance.
+non_diegetic_music: A soft and melodic instrumental piece with a light and flowing rhythm, reminiscent of a traditional Chinese melody.
+
+<Subject 4> is the old man, with his appearance described in the script, based on the description in the script.
+[reference generation]
+<Subject 4> (appears in [Shot 4]): fully_preserved - 保持外观一致性.
+detailed_description: At 00:15.000, the shot cuts to [Shot 4], showing an old man with white hair and a determined expression, leading the young men into the main hall. The background is the mountainous landscape with the golden sunrise, the light casting long shadows. The scene is filled with determination and authority, with no subtitles.
+overall_soundscape: The sound of the morning breeze, the distant sound of birds chirping, the soft rustling of leaves, and the gentle sound of the river flowing in the distance.
+non_diegetic_music: A soft and melodic instrumental piece with a light and flowing rhythm, reminiscent of a traditional Chinese melody.
+
+<Subject 5> is the underground cave, with its description in the script, based on the description in the script.
+[reference generation]
+<Subject 5> (appears in [Shot 5]): fully_preserved - 保持外观一致性.
+detailed_description: At 00:20.000, the shot cuts to [Shot 5], showing the underground cave, with stalactites emitting a spectrum of colors from red to purple. The background is the mountainous landscape with the golden sunrise, the light casting long shadows. The scene is filled with wonder and beauty, with no subtitles.
+overall_soundscape: The sound of the morning breeze, the distant sound of birds chirping, the soft rustling of leaves, and the gentle sound of the river flowing in the distance.
+non_diegetic_music: A soft and melodic instrumental piece with a light and flowing rhythm, reminiscent of a traditional Chinese melody.
+
+<Subject 6> is the underground river, with its description in the script, based on the description in the script.
+[reference generation]
+<Subject 6> (appears in [Shot 6]): fully_preserved - 保持外观一致性.
+detailed_description: At 00:25.000, the shot cuts to [Shot 6], showing the underground river, with a faint blue glow and clear water. The background is the mountainous landscape with the golden sunrise, the light casting long shadows. The scene is filled with mystery and beauty, with no subtitles.
+overall_soundscape: The sound of the morning breeze, the distant sound of birds chirping, the soft rustling of leaves, and the gentle sound of the river flowing in the distance.
+non_diegetic_music: A soft and melodic instrumental piece with a light and flowing rhythm, reminiscent of a traditional Chinese melody.
+
+<Subject 7> is the moon orchid field, with its description in the script, based on the description in the script.
+[reference generation]
+<Subject 7> (appears in [Shot 7]): fully_preserved - 保持外观一致性.
+detailed_description: At 00:30.000, the shot cuts to [Shot 7], showing the moon orchid field, with blue-pink petals and a soft glow. The background is the mountainous landscape with the golden sunrise, the light casting long shadows. The scene is filled with beauty and mystery, with no subtitles.
+overall_soundscape: The sound of the morning breeze, the distant sound of birds chirping, the soft rustling of leaves, and the gentle sound of the river flowing in the distance.
+non_diegetic_music: A soft and melodic instrumental piece with a light and flowing rhythm, reminiscent of a traditional Chinese melody.
+
+<Subject 8> is the young man named Chen Bo, with his appearance described in the script, based on the description in the script.
+[reference generation]
+<Subject 8> (appears in [Shot 8]): fully_preserved - 保持外观一致性.
+detailed_description: At 00:35.000, the shot cuts to [Shot 8], showing the young man Chen Bo stepping onto the moon orchid field, with a determined expression. The background is the mountainous landscape with the golden sunrise, the light casting long shadows. The scene is filled with determination and challenge, with no subtitles.
+overall_soundscape: The sound of the morning breeze, the distant sound of birds chirping, the soft rustling of leaves, and the gentle sound of the river flowing in the distance.
+non_diegetic_music: A soft and melodic instrumental piece with a light and flowing rhythm, reminiscent of a traditional Chinese melody.
+
+<Subject 9> is the young man named Zao Xie, with his appearance described in the script, based on the description in the script.
+[reference generation]
+<Subject 9> (appears in [Shot 9]): fully_preserved - 保持外观一致性.
+detailed_description: At 00:40.000, the shot cuts to [Shot 9], showing the young man Zao Xie stepping onto the moon orchid field, with a determined expression. The background is the mountainous landscape with the golden sunrise, the light casting long shadows. The scene is filled with determination and challenge, with no subtitles.
+overall_soundscape: The sound of the morning breeze, the distant sound of birds chirping, the soft rustling of leaves, and the gentle sound of the river flowing in the distance.
+non_diegetic_music: A soft and melodic instrumental piece with a light and flowing rhythm, reminiscent of a traditional Chinese melody.
+
+<Subject 10> is the young man named Mo Bei, with his appearance described in the script, based on the description in the script.
+[reference generation]
+<Subject 10> (appears in [Shot 10]): fully_preserved - 保持外观一致性.
+detailed_description: At 00:45.000, the shot cuts to [Shot 10], showing the young man Mo Bei stepping onto the moon orchid field, with a determined expression. The background is the mountainous landscape with the golden sunrise, the light casting long shadows. The scene is filled with determination and challenge, with no subtitles.
+overall_soundscape: The sound of the morning breeze, the distant sound of birds chirping, the soft rustling of leaves, and the gentle sound of the river flowing in the distance.
+non_diegetic_music: A soft and melodic instrumental piece with a light and flowing rhythm, reminiscent of a traditional Chinese melody.
+
+<Subject 11> is the old man named Mo Chen, with his appearance described in the script, based on the description in the script.
+[reference generation]
+<Subject 11> (appears in [Shot 11]): fully_preserved - 保持外观一致性.
+detailed_description: At 00:50.000, the shot cuts to [Shot 11], showing the old man Mo Chen, with a proud expression, watching the young man Mo Bei. The background is the mountainous landscape with the golden sunrise, the light casting long shadows. The scene is filled with pride and competition, with no subtitles.
+overall_soundscape: The sound of the morning breeze, the distant sound of birds chirping, the soft rustling of leaves, and the gentle sound of the river flowing in the distance.
+non_diegetic_music: A soft and melodic instrumental piece with a light and flowing rhythm, reminiscent of a traditional Chinese melody.
+
+<Subject 12> is the old man named Chi Lian, with his appearance described in the script, based on the description in the script.
+[reference generation]
+<Subject 12> (appears in [Shot 12]): fully_preserved - 保持外观一致性.
+detailed_description: At 00:55.000, the shot cuts to [Shot 12], showing the old man Chi Lian, with a cold expression, watching the young man Mo Bei. The background is the mountainous landscape with the golden sunrise, the light casting long shadows. The scene is filled with coldness and competition, with no subtitles.
+overall_soundscape: The sound of the morning breeze, the distant sound of birds chirping, the soft rustling of leaves, and the gentle sound of the river flowing in the distance.
+non_diegetic_music: A soft and melodic instrumental piece with a light and flowing rhythm, reminiscent of a traditional Chinese melody.
+
+<Subject 13> is the young man named Mo Bei, with his appearance described in the script, based on the description in the script.
+[reference generation]
+<Subject 13> (appears in [Shot 13]): fully_preserved - 保持外观一致性.
+detailed_description: At 01:00.000, the shot cuts to [Shot 13], showing the young man Mo Bei, with a determined expression, stepping onto the moon orchid field. The background is the mountainous landscape with the golden sunrise, the light casting long shadows. The scene is filled with determination and challenge, with no subtitles.
+overall_soundscape: The sound of the morning breeze, the distant sound of birds chirping, the soft rustling of leaves, and the gentle sound of the river flowing in the distance.
+non_diegetic_music: A soft and melodic instrumental piece with a light and flowing rhythm, reminiscent of a traditional Chinese melody.
+
+<Subject 14> is the young man named Mo Bei, with his appearance described in the script, based on the description in the script.
+[reference generation]
+<Subject 14> (appears in [Shot 14]): fully_preserved - 保持外观一致性.
+detailed_description: At 01:05.000, the shot cuts to [Shot 14], showing the young man Mo Bei, with a determined expression, stepping onto the moon orchid field. The background is the mountainous landscape with the golden sunrise, the light casting long shadows. The scene is filled with determination and challenge, with no subtitles.
+overall_soundscape: The sound of the morning breeze, the distant sound of birds chirping, the soft rustling of leaves, and the gentle sound of the river flowing in the distance.
+non_diegetic_music: A soft and melodic instrumental piece with a light and flowing rhythm, reminiscent of a traditional Chinese melody.
+
+<Subject 15> is the young man named Mo Bei, with his appearance described in the script, based on the description in the script.
+[reference generation]
+<Subject 15> (appears in [Shot 15]): fully_preserved - 保持外观一致性.
+detailed_description: At 01:10.000, the shot cuts to [Shot 15], showing the young man Mo Bei, with a determined expression, stepping onto the moon orchid field. The background is the mountainous landscape with the golden sunrise, the light casting long shadows. The scene is filled with determination and challenge, with no subtitles.
+overall_soundscape: The sound of the morning breeze, the distant sound of birds chirping, the soft rustling of leaves, and the gentle sound of the river flowing in the distance.
+non_diegetic_music: A soft and melodic instrumental piece with a light and flowing rhythm, reminiscent of a traditional Chinese melody.
+
+<Subject 16> is the young man named Mo Bei, with his appearance described in the script, based on the description in the script.
+[reference generation]
+<Subject 16> (appears in [Shot 16]): fully_preserved - 保持外观一致性.
+detailed_description: At 01:15.000, the shot cuts to [Shot 16], showing the young man Mo Bei, with a determined expression, stepping onto the moon orchid field. The background is the mountainous landscape with the golden sunrise, the light casting long shadows. The scene is filled with determination and challenge, with no subtitles.
+overall_soundscape: The sound of the morning breeze, the distant sound of birds chirping, the soft rustling of leaves, and the gentle sound of the river flowing in the distance.
+non_diegetic_music: A soft and melodic instrumental piece with a light and flowing rhythm, reminiscent of a traditional Chinese melody.
+
+<Subject 17> is the young man named Mo Bei, with his appearance described in the script, based on the description in the script.
+[reference generation]
+<Subject 17> (appears in [Shot 17]): fully_preserved - 保持外观一致性.
+detailed_description: At 01:20.000, the shot cuts to [Shot 17], showing the young man Mo Bei, with a determined expression, stepping onto the moon orchid field. The background is the mountainous landscape with the golden sunrise, the light casting long shadows. The scene is filled with determination and challenge, with no subtitles.
+overall_soundscape: The sound of the morning breeze, the distant sound of birds chirping, the soft rustling of leaves, and the gentle sound of the river flowing in the distance.
+non_diegetic_music: A soft and melodic instrumental piece with a light and flowing rhythm, reminiscent of a traditional Chinese melody.
+
+<Subject 18> is the young man named Mo Bei, with his appearance described in the script, based on the description in the script.
+[reference generation]
+<Subject 18> (appears in [Shot 18]): fully_preserved - 保持外观一致性.
+detailed_description: At 01:25.000, the shot cuts to [Shot 18], showing the young man Mo Bei, with a determined expression, stepping onto the moon orchid field. The background is the mountainous landscape with the golden sunrise, the light casting long shadows. The scene is filled with determination and challenge, with no subtitles.
+overall_soundscape: The sound of the morning breeze, the distant sound of birds chirping, the soft rustling of leaves, and the gentle sound of the river flowing in the distance.
+non_diegetic_music: A soft and melodic instrumental piece with a light and flowing rhythm, reminiscent of a traditional Chinese melody.
+
+<Subject 19> is the young man named Mo Bei, with his appearance described in the script, based on the description in the script.
+[reference generation]
+<Subject 19> (appears in [Shot 19]): fully_preserved - 保持外观一致性.
+detailed_description: At 01:30.000, the shot cuts to [Shot 19], showing the young man Mo Bei, with a determined expression, stepping onto the moon orchid field. The background is the mountainous landscape with the golden sunrise, the light casting long shadows. The scene is filled with determination and challenge, with no subtitles.
+overall_soundscape: The sound of the morning breeze, the distant sound of birds chirping, the soft rustling of leaves, and the gentle sound of the river flowing in the distance.
+non_diegetic_music: A soft and melodic instrumental piece with a light and flowing rhythm, reminiscent of a traditional Chinese melody.
+
+<Subject 20> is the young man named Mo Bei, with his appearance described in the script, based on the description in the script.
+[reference generation]
+<Subject 20> (appears in [Shot 20]): fully_preserved - 保持外观一致性.
+detailed_description: At 01:35.000, the shot cuts to [Shot 20], showing the young man Mo Bei, with a determined expression, stepping onto the moon orchid field. The background is the mountainous landscape with the golden sunrise, the light casting long shadows. The scene is filled with determination and challenge, with no subtitles.
+overall_soundscape: The sound of the morning breeze, the distant sound of birds chirping, the soft rustling of leaves, and the gentle sound of the river flowing in the distance.
+non_diegetic_music: A soft and melodic instrumental piece with a light and flowing rhythm, reminiscent of a traditional Chinese melody.
+
+<Subject 21> is the young man named Mo Bei, with his appearance described in the script, based on the description in the script.
+[reference generation]
+<Subject 21> (appears in [Shot 21]): fully_preserved - 保持外观一致性.
+detailed_description: At 01:40.000, the shot cuts to [Shot 21], showing the young man Mo Bei, with a determined expression, stepping onto the moon orchid field. The background is the mountainous landscape with the golden sunrise, the light casting long shadows. The scene is filled with determination and challenge, with no subtitles.
+overall_soundscape: The sound of the morning breeze, the distant sound of birds chirping, the soft rustling of leaves, and the gentle sound of the river flowing in the distance.
+non_diegetic_music: A soft and melodic instrumental piece with a light and flowing rhythm, reminiscent of a traditional Chinese melody.
+
+<Subject 22> is the young man named Mo Bei, with his appearance described in the script, based on the description in the script.
+[reference generation]
+<Subject 22> (appears in [Shot 22]): fully_preserved - 保持外观一致性.
+detailed_description: At 01:45.000, the shot cuts to [Shot 22], showing the young man Mo Bei, with a determined expression, stepping onto the moon orchid field. The background is the mountainous landscape with the golden sunrise, the light casting long shadows. The scene is filled with determination and challenge, with no subtitles.
+overall_soundscape: The sound of the morning breeze, the distant sound of birds chirping, the soft rustling of leaves, and the gentle sound of the river flowing in the distance.
+non_diegetic_music: A soft and melodic instrumental piece with a light and flowing rhythm, reminiscent of a traditional Chinese melody.
+
+<Subject 23> is the young man named Mo Bei, with his appearance described in the script, based on the description in the script.
+[reference generation]
+<Subject 23> (appears in [Shot 23]): fully_preserved - 保持外观一致性.
+detailed_description: At 01:50.000, the shot cuts to [Shot 23], showing the young man Mo Bei, with a determined expression, stepping onto the moon orchid field. The background is the mountainous landscape with the golden sunrise, the light casting long shadows. The scene is filled with determination and challenge, with no subtitles.
+overall_soundscape: The sound of the morning breeze, the distant sound of birds chirping, the soft rustling of leaves, and the gentle sound of the river flowing in the distance.
+non_diegetic_music: A soft and melodic instrumental piece with a light and flowing rhythm, reminiscent of a traditional Chinese melody.
+
+<Subject 24> is the young man named Mo Bei, with his appearance described in the script, based on the description in the script.
+[reference generation]
+<Subject 24> (appears in [Shot 24]): fully_preserved - 保持外观一致性.
+detailed_description: At 01:55.000, the shot cuts to [Shot 24], showing the young man Mo Bei, with a determined expression, stepping onto the moon orchid field. The background is the mountainous landscape with the golden sunrise, the light casting long shadows. The scene is filled with determination and challenge, with no subtitles.
+overall_soundscape: The sound of the morning breeze, the distant sound of birds chirping, the soft rustling of leaves, and the gentle sound of the river flowing in the distance.
+non_diegetic_music: A soft and melodic instrumental piece with a light and flowing rhythm, reminiscent of a traditional Chinese melody.
+
+<Subject 25> is the young man named Mo Bei, with his appearance described in the script, based on the description in the script.
+[reference generation]
+<Subject 25> (appears in [Shot 25]): fully_preserved - 保持外观一致性.
+detailed_description: At 02:00.000, the shot cuts to [Shot 25], showing the young man Mo Bei, with a determined expression, stepping onto the moon orchid field. The background is the mountainous landscape with the golden sunrise, the light casting long shadows. The scene is filled with determination and challenge, with no subtitles.
+overall_soundscape: The sound of the morning breeze, the distant sound of birds chirping, the soft rustling of leaves, and the gentle sound of the river flowing in the distance.
+non_diegetic_music: A soft and melodic instrumental piece with a light and flowing rhythm, reminiscent of a traditional Chinese melody.
+
+<Subject 26> is the young man named Mo Bei, with his appearance described in the script, based on the description in the script.
+[reference generation]
+<Subject 26> (appears in [Shot 26]): fully_preserved - 保持外观一致性.
+detailed_description: At 02:05.000, the shot cuts to [Shot 26], showing the young man Mo Bei, with a determined expression, stepping onto the moon orchid field. The background is the mountainous landscape with the golden sunrise, the light casting long shadows. The scene is filled with determination and challenge, with no subtitles.
+overall_soundscape: The sound of the morning breeze, the distant sound of birds chirping, the soft rustling of leaves, and the gentle sound of the river flowing in the distance.
+non_diegetic_music: A soft and melodic instrumental piece with a light and flowing rhythm, reminiscent of a traditional Chinese melody.
+
+<Subject 27> is the young man named Mo Bei, with his appearance described in the script, based on the description in the script.
+[reference generation]
+<Subject 27> (appears in [Shot 27]): fully_preserved - 保持外观一致性.
+detailed_description: At 02:10.000, the shot cuts to [Shot 27], showing the young man Mo Bei, with a determined expression, stepping onto the moon orchid field. The background is the mountainous landscape with the golden sunrise, the light casting long shadows. The scene is filled with determination and challenge, with no subtitles.
+overall_soundscape: The sound of the morning breeze, the distant sound of birds chirping, the soft rustling of leaves, and the gentle sound of the river flowing in the distance.
+non_diegetic_music: A soft and melodic instrumental piece with a light and flowing rhythm, reminiscent of a traditional Chinese melody.
+
+<Subject 28> is the young man named Mo Bei, with his appearance described in the script, based on the description in the script.
+[reference generation]
+<Subject 28> (appears in [Shot 28]): fully_preserved - 保持外观一致性.
+detailed_description: At 02:15.000, the shot cuts to [Shot 28], showing the young man Mo Bei, with a determined expression, stepping onto the moon orchid field. The background is the mountainous landscape with the golden sunrise, the light casting long shadows. The scene is filled with determination and challenge, with no subtitles.
+overall_soundscape: The sound of the morning breeze, the distant sound of birds chirping, the soft rustling of leaves, and the gentle sound of the river flowing in the distance.
+non_diegetic_music: A soft and melodic instrumental piece with a light and flowing rhythm, reminiscent of a traditional Chinese melody.
+
+<Subject 29> is the young man named Mo Bei, with his appearance described in the script, based on the description in the script.
+[reference generation]
+<Subject 29> (appears in [Shot 29]): fully_preserved - 保持外观一致性.
+detailed_description: At 02:20.000, the shot cuts to [Shot 29], showing the young man Mo Bei, with a determined expression, stepping onto the moon orchid field. The background is the mountainous landscape with the golden sunrise, the light casting long shadows. The scene is filled with determination and challenge, with no subtitles.
+overall_soundscape: The sound of the morning breeze, the distant sound of birds chirping, the soft rustling of leaves, and the gentle sound of the river flowing in the distance.
+non_diegetic_music: A soft and melodic instrumental piece with a light and flowing rhythm, reminiscent of a traditional Chinese melody.
+
+<Subject 30> is the young man named Mo Bei, with his appearance described in the script, based on the description in the script.
+[reference generation]
+<Subject 30> (appears in [Shot 30]): fully_preserved - 保持外观一致性.
+detailed_description: At 02:25.000, the shot cuts to [Shot 30], showing the young man Mo Bei, with a determined expression, stepping onto the moon orchid field. The background is the mountainous landscape with the golden sunrise, the light casting long shadows. The scene is filled with determination and challenge, with no subtitles.
+overall_soundscape: The sound of the morning breeze, the distant sound of birds chirping, the soft rustling of leaves, and the gentle sound of the river flowing in the distance.
+non_diegetic_music: A soft and melodic instrumental piece with a light and flowing rhythm, reminiscent of a traditional Chinese melody.
+
+<Subject 31> is the young man named Mo Bei, with his appearance described in the script, based on the description in the script.
+[reference generation]
+<Subject 31> (appears in [Shot 31]): fully_pres
+
+</think>
+
+It seems like the content you've provided is a detailed script or storyboard for a scene involving a character named Mo Bei, likely in a fantasy or dramatic setting. The narrative involves Mo Bei stepping onto a "moon orchid field" with a determined expression, surrounded by a mountainous landscape and a golden sunrise. The scene is described with a focus on visual elements and atmospheric sounds, such as the morning breeze, birds chirping, rustling leaves, and the gentle flow of a river.
+
+If you're looking for help with:
+
+1. **Refining the script** (e.g., adding dialogue, character development, or plot progression),
+2. **Visualizing the scene** (e.g., for a film, animation, or game),
+3. **Creating a storyboard**,
+4. **Writing a full story or novel** based on this concept,
+5. **Improving the descriptive language** for a more vivid or poetic tone,
+
+I’d be happy to assist! Let me know what you’d like to focus on next.

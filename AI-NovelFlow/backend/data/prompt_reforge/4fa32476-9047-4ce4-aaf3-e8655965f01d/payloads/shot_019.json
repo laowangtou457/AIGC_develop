@@ -1,0 +1,11 @@
+{
+  "shot": 19,
+  "chapter": 2,
+  "prompt_text": "Shot 6（10s｜9:16）→ subject/composition：沈夜（中年，黑衣，手持黑鞘长刀）位于客栈内，中景，画面居中；action/performance：沈夜取出信件，阅读内容，手指轻抚信纸；scene/props：夜晚客栈内，昏黄灯光，桌椅与信件；camera/motion：特写沈夜手部动作，镜头拉远展示信件内容；lighting/atmosphere：昏黄灯光，阴影柔和，气氛沉静；technical/spec：10秒｜9:16｜4K\n",
+  "duration": 4,
+  "ratio": "9:16",
+  "platforms": [
+    "seedance",
+    "kling"
+  ]
+}

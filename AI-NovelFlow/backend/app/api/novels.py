@@ -460,7 +460,7 @@ async def _run_novel_parse(task_id: str, novel_id: str, type_: str, is_increment
                 "queued": queued,
                 "failed": failed_items,
             },
-            finished_at=format_datetime(_datetime.utcnow()),
+            finished_at=format_datetime(_datetime.now()),
         )
     except Exception as exc:
         import traceback
@@ -487,7 +487,7 @@ async def parse_and_generate_novel(
     _set_parse_task(
         task_id, status="running",
         message="全本解析任务已启动", novel_id=novel_id, type=type,
-        created_at=format_datetime(_datetime.utcnow()),
+        created_at=format_datetime(_datetime.now()),
     )
     _asyncio.create_task(_run_novel_parse(task_id, novel_id, type, is_incremental))
     return {"success": True, "task_id": task_id, "message": "全本解析任务已启动"}

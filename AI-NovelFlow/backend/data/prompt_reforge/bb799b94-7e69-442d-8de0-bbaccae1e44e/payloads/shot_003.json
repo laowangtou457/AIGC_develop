@@ -1,0 +1,10 @@
+{
+  "shot": 3,
+  "chapter": 1,
+  "prompt_text": "Shot 2（12s｜9:16）→ subject/composition：黑衣人（男，中年，黑衣蒙面，左脸烧伤）站在断桥另一端，中景，铁索震颤；action/performance：黑衣人猛然拔刀，刀锋划破雨幕，右脚跨步逼近陆离；scene/props：暴雨中刀光闪烁，铁索因震动而摇晃，桥下河水轰鸣；camera/motion：侧面俯拍，镜头快速推进至黑衣人刀锋；lighting/atmosphere：雨幕中刀光与闪电交织，铁索因震动而泛光；technical/spec：12s｜9:16｜4K  \n",
+  "duration": 4,
+  "ratio": "9:16",
+  "platforms": [
+    "seedance"
+  ]
+}

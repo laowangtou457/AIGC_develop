@@ -1,0 +1,10 @@
+{
+  "shot": 5,
+  "chapter": 1,
+  "prompt_text": "Shot 4 (04-15 sec, 9:16):  \n1. subject_definitions: <Subject 1> is the young man陆离 in <Picture 1>, with long dark hair, a black qipao, and a long knife; <Subject 2> is the middle-aged man黑衣人 in <Picture 2>, with a black robe, burned face, and a long knife.  \n2. summary: [reference generation] 黑衣人 reveals his identity, 陆离 explains the truth about the massacre.  \n3. retention_analysis: <Subject 1> (appears in [Shot 4]): fully_preserved; <Subject 2> (appears in [Shot 4]): fully_preserved.  \n4. detailed_description: Style: Realistic movie texture, stormy weather, dramatic lighting. At 00:12.000, the shot cuts to a medium shot of the two facing each other, with 陆离 explaining the truth. The atmosphere is heavy rain, and the tension is thick. <speaker>黑衣人: <text>你终于认出我了。五年前青石镇那一夜，我全家十三口死在你的刀下。</text> <speaker>陆离: <text>那夜我杀的，是屠镇的悍匪十三人。你父亲是他们的头目。</text> No subtitles.  \n5. overall_soundscape: The sound of heavy rain, the sound of wind, and the low voice of the two men.  \n6. non_diegetic_music: A slow, tense string melody with a steady rhythm, matching the emotional weight of the scene.  \n",
+  "duration": 4,
+  "ratio": "9:16",
+  "platforms": [
+    "minimax_h3"
+  ]
+}

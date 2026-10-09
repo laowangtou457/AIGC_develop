@@ -1,0 +1,10 @@
+{
+  "shot": 16,
+  "chapter": 2,
+  "prompt_text": "Shot 6 (04-15 sec, 9:16):  \n1. subject_definitions: <Subject 1> is the middle-aged man in <Picture 1>, wearing a black robe, holding a black sheathed long knife, with a cold and stern face. <Subject 3> is the old man in <Picture 3>, wearing a blue robe, with a long beard and white hair, carrying a long sword, with a calm and steady demeanor. <Subject 4> is the rider in <Picture 4>, wearing armor, with a long spear.  \n2. summary: [reference generation] <Subject 4> charges with a spear, <Subject 3> blocks, and <Subject 1> retreats.  \n3. retention_analysis: <Subject 1> (appears in [Shot 6]): fully_preserved - keeps his appearance and actions. <Subject 3> (appears in [Shot 6]): fully_preserved - keeps his appearance and demeanor. <Subject 4> (appears in [Shot 6]): fully_preserved - keeps his appearance and actions.  \n4. detailed_description: The camera starts with a low-angle shot, focusing on <Subject 4> charging with a spear. The wind blows the flags, and the lanterns flicker. <Subject 3> blocks the spear, and <Subject 1> retreats. <Subject 3> speaks, his voice calm and firm. <d>老夫与人比武，谁准你插手？</d>  \n5. overall_soundscape: The sound of wind, the flickering of lanterns, the distant echo of footsteps.  \n6. non_diegetic_music: A deep, resonant string sound with a soft, mysterious melody.  \n",
+  "duration": 4,
+  "ratio": "9:16",
+  "platforms": [
+    "minimax_h3"
+  ]
+}

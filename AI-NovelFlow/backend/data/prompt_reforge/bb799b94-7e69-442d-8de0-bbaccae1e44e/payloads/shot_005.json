@@ -1,0 +1,10 @@
+{
+  "shot": 5,
+  "chapter": 1,
+  "prompt_text": "Shot 4（12s｜9:16）→ subject/composition：陆离（男，青年，黑色劲装，斗笠遮面）挑飞黑衣人面罩，特写，黑衣人左脸烧伤；action/performance：陆离右手挑飞黑衣人面罩，左手紧握长刀，黑衣人震惊后退；scene/props：雨中对峙，黑衣人刀尖微垂，雨水混着血水；camera/motion：特写黑衣人面罩破碎，镜头拉远展现陆离神情；lighting/atmosphere：雨中凝重，黑衣人刀尖微垂，雨水混着血水；technical/spec：12s｜9:16｜4K  \n",
+  "duration": 4,
+  "ratio": "9:16",
+  "platforms": [
+    "seedance"
+  ]
+}

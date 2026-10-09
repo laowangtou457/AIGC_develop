@@ -1,0 +1,11 @@
+{
+  "shot": 10,
+  "chapter": 1,
+  "prompt_text": "Shot 4（15s｜9:16）→ subject/composition：黑衣人（男，中年，黑衣蒙面，左脸烧伤）揭露过往，陆离震惊，中景，两人对峙  \n→ action/performance：黑衣人揭露五年前的杀戮，陆离握刀紧握，眼神凝视，身体微微前倾  \n→ scene/props：雨中对峙，闪电映亮黑衣人半张脸，雨滴在刀身上滑落，桥板泛着水光  \n→ camera/motion：中景，镜头缓慢平移，突出人物表情与动作  \n→ lighting/atmosphere：雨中对峙，情绪压抑，闪电映亮黑衣人半张脸，环境阴沉  \n→ technical/spec：15s｜9:16｜4K  \n",
+  "duration": 4,
+  "ratio": "9:16",
+  "platforms": [
+    "seedance",
+    "kling"
+  ]
+}

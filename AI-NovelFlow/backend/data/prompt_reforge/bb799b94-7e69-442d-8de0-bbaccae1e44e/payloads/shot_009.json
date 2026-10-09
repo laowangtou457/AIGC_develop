@@ -1,0 +1,10 @@
+{
+  "shot": 9,
+  "chapter": 2,
+  "prompt_text": "Shot 1（10s｜9:16）→ subject/composition：沈夜（中年，暗色劲装，黑鞘长刀）与店小二（青年，朴素衣衫）在客栈二楼窗边，中景，窗边构图  \n→ action/performance：沈夜手持酒杯饮酒，店小二冲上楼，急促报告镇口大队人马寻找沈夜  \n→ scene/props：夜色笼罩的小镇客栈，二楼窗边，昏黄灯光，窗外火把通明，木质窗框与桌椅  \n→ camera/motion：俯拍客栈二楼，镜头聚焦沈夜与店小二，缓慢推进至窗边  \n→ lighting/atmosphere：昏黄灯光，夜色沉静，阴影笼罩窗边，气氛紧张  \n→ technical/spec：10秒｜9:16｜4K  \n",
+  "duration": 4,
+  "ratio": "9:16",
+  "platforms": [
+    "seedance"
+  ]
+}

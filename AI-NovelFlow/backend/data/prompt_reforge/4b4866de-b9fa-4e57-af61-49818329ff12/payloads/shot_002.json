@@ -1,0 +1,11 @@
+{
+  "shot": 2,
+  "chapter": 1,
+  "prompt_text": "Shot 2（12s｜9:16）→ subject/composition：女性战士（22岁，银色战斗服）从悬崖左侧缓步走来，中景，画面左三分之一，背景为雪山。  \n→ action/performance：女性战士抬起右臂，掌心朝前，手指微微张开，随后迅速收回，眼神坚定。  \n→ scene/props：雪山背景，极光隐约可见，地面有积雪，女性战士脚边有冰晶。  \n→ camera/motion：侧面机位，镜头从女性战士脚部缓缓上移至面部，速度中等。  \n→ lighting/atmosphere：冷色调，极光反射在雪地上，氛围紧张。  \n→ technical/spec：12s｜9:16｜4K  \n",
+  "duration": 4,
+  "ratio": "9:16",
+  "platforms": [
+    "seedance",
+    "kling"
+  ]
+}

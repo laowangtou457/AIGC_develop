@@ -1,0 +1,11 @@
+{
+  "shot": 14,
+  "chapter": 2,
+  "prompt_text": "Shot 1（10s｜9:16）→ subject/composition：沈夜（中年，黑衣，手持黑鞘长刀）位于客栈二楼窗边，中景，画面居中；action/performance：沈夜手持酒杯饮酒，店小二（青年，朴素衣着）冲上楼，脚步急促；scene/props：夜晚客栈二楼，昏暗灯光，窗外火把通明，桌椅与酒壶；camera/motion：俯拍镜头从天花板向下聚焦，镜头缓慢推进至沈夜与店小二；lighting/atmosphere：昏暗灯光，夜风微凉，阴影拉长；technical/spec：10秒｜9:16｜4K\n",
+  "duration": 4,
+  "ratio": "9:16",
+  "platforms": [
+    "seedance",
+    "kling"
+  ]
+}

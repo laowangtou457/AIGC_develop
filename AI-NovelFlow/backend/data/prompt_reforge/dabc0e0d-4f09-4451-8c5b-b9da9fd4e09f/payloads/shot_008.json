@@ -1,0 +1,10 @@
+{
+  "shot": 8,
+  "chapter": 1,
+  "prompt_text": "Shot 7 (04-15 sec, 9:16):  \n1. subject_definitions: <Subject 1> is the young man陆离 in <Picture 1>, with long dark hair, a black qipao, and a long knife; <Subject 2> is the middle-aged man黑衣人 in <Picture 2>, with a black robe, burned face, and a long knife.  \n2. summary: [reference generation] 陆离 turns away, 黑衣人 falls to his knees in the rain.  \n3. retention_analysis: <Subject 1> (appears in [Shot 7]): fully_preserved; <Subject 2> (appears in [Shot 7]): fully_preserved.  \n4. detailed_description: Style: Realistic movie texture, stormy weather, dramatic lighting. At 00:24.000, the shot cuts to a wide shot of 陆离 turning away, 黑衣人 falling to his knees in the rain. The atmosphere is light rain, mist, and the distant mountains. No subtitles.  \n5. overall_soundscape: The sound of light rain, the sound of wind, and the distant sound of the mountains.  \n6. non_diegetic_music: A calm, reflective string melody with a steady rhythm, matching the emotional resolution of the scene.  \n",
+  "duration": 4,
+  "ratio": "9:16",
+  "platforms": [
+    "minimax_h3"
+  ]
+}

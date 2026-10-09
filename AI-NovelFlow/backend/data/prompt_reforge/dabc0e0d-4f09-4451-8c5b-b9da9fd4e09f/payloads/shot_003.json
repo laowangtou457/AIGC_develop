@@ -1,0 +1,10 @@
+{
+  "shot": 3,
+  "chapter": 1,
+  "prompt_text": "Shot 2 (04-15 sec, 9:16):  \n1. subject_definitions: <Subject 1> is the young man陆离 in <Picture 1>, with long dark hair, a black qipao, and a long knife; <Subject 2> is the middle-aged man黑衣人 in <Picture 2>, with a black robe, burned face, and a long knife.  \n2. summary: [reference generation] The two swords clash, sparks fly in the rain.  \n3. retention_analysis: <Subject 1> (appears in [Shot 2]): fully_preserved; <Subject 2> (appears in [Shot 2]): fully_preserved.  \n4. detailed_description: Style: Realistic movie texture, stormy weather, dramatic lighting. At 00:04.000, the shot cuts to quick cuts of the two swords clashing, sparks flying in the rain. The atmosphere is lightning illuminating the swords, sparks flying in the rain curtain. No subtitles.  \n5. overall_soundscape: The sound of clashing swords, the sound of rain, and the crack of lightning.  \n6. non_diegetic_music: A fast-paced, intense string melody with a driving rhythm, matching the dynamic action.  \n",
+  "duration": 4,
+  "ratio": "9:16",
+  "platforms": [
+    "minimax_h3"
+  ]
+}

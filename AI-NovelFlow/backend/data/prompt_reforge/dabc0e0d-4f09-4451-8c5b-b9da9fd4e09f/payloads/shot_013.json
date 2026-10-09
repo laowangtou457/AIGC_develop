@@ -1,0 +1,10 @@
+{
+  "shot": 13,
+  "chapter": 2,
+  "prompt_text": "Shot 3 (04-15 sec, 9:16):  \n1. subject_definitions: <Subject 1> is the middle-aged man in <Picture 1>, wearing a black robe, holding a black sheathed long knife, with a cold and stern face. <Subject 3> is the old man in <Picture 3>, wearing a blue robe, with a long beard and white hair, carrying a long sword, with a calm and steady demeanor.  \n2. summary: [reference generation] <Subject 1> explains the origin of the black knife, while <Subject 3> doubts his sincerity.  \n3. retention_analysis: <Subject 1> (appears in [Shot 3]): fully_preserved - keeps his appearance and actions. <Subject 3> (appears in [Shot 3]): fully_preserved - keeps his appearance and demeanor.  \n4. detailed_description: The camera starts with a medium shot, focusing on <Subject 1> and <Subject 3> facing each other. The wind blows the flags, and the lanterns flicker. <Subject 1> speaks, his voice calm and firm. <d>刀是帮主当年亲手送我的，为谢我救他女儿一命。</d> <Subject 3> shakes his head, his eyes filled with doubt. <d>可你手上那把黑刀，正是漕帮帮主的佩刀。</d>  \n5. overall_soundscape: The sound of wind, the flickering of lanterns, the distant echo of footsteps.  \n6. non_diegetic_music: A soft, melancholic melody with a low, steady rhythm.  \n",
+  "duration": 4,
+  "ratio": "9:16",
+  "platforms": [
+    "minimax_h3"
+  ]
+}

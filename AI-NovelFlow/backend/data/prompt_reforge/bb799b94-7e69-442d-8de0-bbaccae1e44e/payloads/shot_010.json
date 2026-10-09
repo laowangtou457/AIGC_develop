@@ -1,0 +1,10 @@
+{
+  "shot": 10,
+  "chapter": 2,
+  "prompt_text": "Shot 2（8s｜9:16）→ subject/composition：沈夜（中年，暗色劲装，黑鞘长刀）在窗边，特写，眼神凝视窗外  \n→ action/performance：沈夜放下酒杯，抬头望向窗外火把通明的镇口，眼神冷峻  \n→ scene/props：夜色笼罩的小镇客栈，二楼窗边，昏黄灯光，窗外火把通明，木质窗框  \n→ camera/motion：特写沈夜眼神，镜头拉远展示镇口火光，缓慢平移  \n→ lighting/atmosphere：昏黄灯光，夜色沉静，阴影笼罩窗边，气氛紧张  \n→ technical/spec：8秒｜9:16｜4K  \n",
+  "duration": 4,
+  "ratio": "9:16",
+  "platforms": [
+    "seedance"
+  ]
+}

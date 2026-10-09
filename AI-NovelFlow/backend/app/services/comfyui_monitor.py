@@ -185,7 +185,7 @@ class ComfyUIMonitor:
             print("[ComfyUIMonitor] 任务失败")
             self.stats["gpu_usage"] = max(0, self.stats["gpu_usage"] - 30)
         
-        self.stats["last_update"] = datetime.utcnow().isoformat()
+        self.stats["last_update"] = datetime.now().isoformat()
     
     async def _update_system_stats(self):
         """通过 HTTP 获取系统状态"""
@@ -238,7 +238,7 @@ class ComfyUIMonitor:
                     # 没有任务，GPU 应该空闲，逐渐衰减
                     self.stats["gpu_usage"] = max(0, self.stats["gpu_usage"] - 15)
                 
-                self.stats["last_update"] = datetime.utcnow().isoformat()
+                self.stats["last_update"] = datetime.now().isoformat()
                 
         except Exception as e:
             print(f"[ComfyUIMonitor] HTTP 获取状态失败: {e}")

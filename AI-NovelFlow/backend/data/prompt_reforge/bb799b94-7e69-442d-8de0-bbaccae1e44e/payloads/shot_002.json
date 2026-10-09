@@ -1,0 +1,10 @@
+{
+  "shot": 2,
+  "chapter": 1,
+  "prompt_text": "Shot 1（10s｜9:16）→ subject/composition：陆离（男，青年，黑色劲装，斗笠遮面）站在断桥中央，中景，桥板湿滑，铁索摇晃；action/performance：陆离踏上断桥，斗笠滑落，右手紧握长刀，左脚试探桥板；scene/props：暴雨中的断桥横跨河谷，铁索在风中摇晃，桥下河水奔腾；camera/motion：低角度仰拍，镜头从桥下缓缓推进至陆离；lighting/atmosphere：暴雨昏暗，闪电照亮断桥，水雾弥漫；technical/spec：10s｜9:16｜4K  \n",
+  "duration": 4,
+  "ratio": "9:16",
+  "platforms": [
+    "seedance"
+  ]
+}

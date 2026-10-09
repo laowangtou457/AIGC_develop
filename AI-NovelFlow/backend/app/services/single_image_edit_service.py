@@ -77,7 +77,7 @@ class SingleImageEditService:
             workflow_name=workflow.name,
             prompt_text=prompt,
             reference_images=json.dumps([{"label": "原图", "url": source_image_url}], ensure_ascii=False),
-            started_at=datetime.now(timezone.utc),
+            started_at=datetime.now(),
             **task_kwargs,
         ))
 
@@ -120,7 +120,7 @@ class SingleImageEditService:
         task.progress = 100
         task.current_step = "编辑完成"
         task.result_url = image_url
-        task.completed_at = datetime.now(timezone.utc)
+        task.completed_at = datetime.now()
         self.db.commit()
 
         return {"success": True, "image_url": image_url, "task_id": task.id}
@@ -130,5 +130,5 @@ class SingleImageEditService:
         task.progress = 100
         task.current_step = "编辑失败"
         task.error_message = message or "编辑图片失败"
-        task.completed_at = datetime.now(timezone.utc)
+        task.completed_at = datetime.now()
         self.db.commit()

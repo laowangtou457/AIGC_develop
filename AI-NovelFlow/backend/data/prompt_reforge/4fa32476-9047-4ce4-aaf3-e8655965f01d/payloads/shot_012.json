@@ -1,0 +1,11 @@
+{
+  "shot": 12,
+  "chapter": 1,
+  "prompt_text": "Shot 6（12s｜9:16）→ subject/composition：黑衣人跪倒，陆离转身离去，远景，桥头与远山  \n→ action/performance：黑衣人跪倒，陆离转身走向桥头，雨势渐小，刀锋收回，身体微微前倾  \n→ scene/props：雨后静谧，远山朦胧，桥头静谧，铁索在风中轻微震颤，雨滴滑落  \n→ camera/motion：远景，镜头缓慢拉远，突出环境与人物离去  \n→ lighting/atmosphere：雨后静谧，远山朦胧，桥头静谧，光线微弱，环境肃穆  \n→ technical/spec：12s｜9:16｜4K  \n\n### Seedance  \n",
+  "duration": 4,
+  "ratio": "9:16",
+  "platforms": [
+    "seedance",
+    "kling"
+  ]
+}

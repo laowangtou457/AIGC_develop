@@ -1,0 +1,11 @@
+{
+  "shot": 7,
+  "chapter": 1,
+  "prompt_text": "Shot 1（10s｜9:16）→ subject/composition：陆离（男，青年，黑色劲装，斗笠遮面）站在湿滑断桥中央，全景，桥面险峻，人物居中  \n→ action/performance：陆离踏上湿滑桥面，右脚微微后撤保持平衡，黑衣人从对岸拔刀，刀尖指向陆离  \n→ scene/props：暴雨中的断桥横跨湍急河谷，铁索摇晃，桥板湿滑，远处山峦隐于雨幕，闪电映亮桥面  \n→ camera/motion：低角度仰拍，镜头缓慢推近至桥面，突出人物对峙  \n→ lighting/atmosphere：暴雨如注，铁索在风中摇晃，桥板泛着水光，光线昏暗，仅靠闪电短暂照亮  \n→ technical/spec：10s｜9:16｜4K  \n",
+  "duration": 4,
+  "ratio": "9:16",
+  "platforms": [
+    "seedance",
+    "kling"
+  ]
+}

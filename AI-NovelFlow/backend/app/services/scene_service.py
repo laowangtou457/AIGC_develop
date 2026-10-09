@@ -175,7 +175,7 @@ class SceneService:
 
             # 更新任务状态为运行中
             task.status = "running"
-            task.started_at = datetime.utcnow()
+            task.started_at = datetime.now()
             scene = scene_repo.get_by_id(scene_id)
             if scene:
                 scene.generating_status = "running"
@@ -296,7 +296,7 @@ class SceneService:
 
                 task.status = "completed"
                 task.progress = 100
-                task.completed_at = datetime.utcnow()
+                task.completed_at = datetime.now()
 
                 # 更新场景图片和状态
                 scene = scene_repo.get_by_id(scene_id)

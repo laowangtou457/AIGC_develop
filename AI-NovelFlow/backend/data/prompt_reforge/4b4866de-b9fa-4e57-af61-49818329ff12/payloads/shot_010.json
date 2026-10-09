@@ -1,0 +1,11 @@
+{
+  "shot": 10,
+  "chapter": 2,
+  "prompt_text": "Shot 1（10s｜9:16）→ subject/composition：男性战士（25岁，黑色战斗服）位于悬崖边缘，中景，画面居中，战士背对镜头，双手握剑，剑尖指向地面  \n→ action/performance：战士缓缓抬起右臂，剑身从地面缓缓升起，剑刃反射出晨光，战士眼神坚定，肌肉紧绷，准备出击  \n→ scene/props：悬崖边，晨光微弱，远处有山脉，剑身有锈迹，地面有碎石，空间层次分明，尺度宏大  \n→ camera/motion：正面机位，镜头从地面缓缓上摇至战士面部，速度缓慢，突出人物气势  \n→ lighting/atmosphere：晨光微弱，色调偏冷，氛围肃穆，光线从左上方照射  \n→ technical/spec：10s｜9:16｜4K  \n",
+  "duration": 4,
+  "ratio": "9:16",
+  "platforms": [
+    "seedance",
+    "kling"
+  ]
+}

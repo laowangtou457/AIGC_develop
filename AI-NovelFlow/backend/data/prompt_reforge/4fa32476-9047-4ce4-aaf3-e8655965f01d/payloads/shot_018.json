@@ -1,0 +1,11 @@
+{
+  "shot": 18,
+  "chapter": 2,
+  "prompt_text": "Shot 5（10s｜9:16）→ subject/composition：沈夜（中年，黑衣，手持黑鞘长刀）与青衫老者（老年，青衫，白须白发，腰悬长剑）位于街心，中景，画面居中；action/performance：青衫老者格开长枪，劝沈夜离开，长剑收回；scene/props：夜晚街道，灯笼摇晃，夜风凛冽，铁骑环绕；camera/motion：中景拍摄两人对峙，镜头聚焦青衫老者；lighting/atmosphere：夜风呼啸，阴影交错，气氛紧张；technical/spec：10秒｜9:16｜4K\n",
+  "duration": 4,
+  "ratio": "9:16",
+  "platforms": [
+    "seedance",
+    "kling"
+  ]
+}

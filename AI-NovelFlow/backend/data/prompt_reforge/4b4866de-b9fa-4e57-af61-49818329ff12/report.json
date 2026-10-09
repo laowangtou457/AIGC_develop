@@ -1,0 +1,49 @@
+{
+  "task_id": "4b4866de-b9fa-4e57-af61-49818329ff12",
+  "chapter_count": 3,
+  "chapters": [
+    {
+      "index": 1,
+      "heading": "第1部分",
+      "beat_count": 0,
+      "shot_count": 9,
+      "md_file": "chapters/chapter_01.md",
+      "platform_parts": {
+        "seedance": "Shot 1（10s｜9:16）→ subject/composition：男性战士（25岁，黑色战术服）站在悬崖边缘，中景，画面居中，背景为雪山。  \n→ action/performance：战士缓缓抬起左手，掌心朝下，指尖微微颤抖，随后猛然握紧拳头，肌肉绷紧。  \n→ scene/props：雪山背景，天空灰暗，远处有极光，地面覆盖积雪，战士脚下有冰裂缝。  \n→ camera/motion：正面机位，镜头从战士腰部缓缓上移至面部，速度缓慢。  \n→ lighting/atmosphere：冷色调，雪地反射微弱蓝光，天空有暗云，氛围肃穆。  \n→ technical/spec：10s｜9:16｜4K  \n\nShot 2（12s｜9:16）→ subject/composition：女性战士（22岁，银色战斗服）从悬崖左侧缓步走来，中景，画面左三分之一，背景为雪山。  \n→ action/performance：女性战士抬起右臂，掌心朝前，手指微微张开，随后迅速收回，眼神坚定。  \n→ scene/props：雪山背景，极光隐约可见，地面有积雪，女性战士脚边有冰晶。  \n→ camera/motion：侧面机位，镜头从女性战士脚部缓缓上移至面部，速度中等。  \n→ lighting/atmosphere：冷色调，极光反射在雪地上，氛围紧张。  \n→ technical/spec：12s｜9:16｜4K  \n\nShot 3（15s｜9:16）→ subject/composition：两人对峙，中景，画面居中，背景为雪山。  \n→ action/performance：男性战士向前跨出一步，右手握拳，女性战士后退半步，左手抬起，掌心朝前。  \n→ scene/props：雪山背景，极光闪烁，地面有积雪，两人之间有冰裂缝。  \n→ camera/motion：低角度机位，镜头从两人脚部缓缓上移至面部，速度中等。  \n→ lighting/atmosphere：冷色调，极光反射在雪地上，氛围肃穆。  \n→ technical/spec：15s｜9:16｜4K",
+        "kling": "Shot 1（10s｜9:16）→ subject/composition：男性战士（25岁，黑色战术服）站在悬崖边缘，中景，画面居中，背景为雪山。  \n→ action/performance：战士缓缓抬起左手，掌心朝下，指尖微微颤抖，随后猛然握紧拳头，肌肉绷紧。  \n→ scene/props：雪山背景，天空灰暗，远处有极光，地面覆盖积雪，战士脚下有冰裂缝。  \n→ camera/motion：正面机位，镜头从战士腰部缓缓上移至面部，速度缓慢。  \n→ lighting/atmosphere：冷色调，雪地反射微弱蓝光，天空有暗云，氛围肃穆。  \n→ technical/spec：10s｜9:16｜4K  \n\nShot 2（12s｜9:16）→ subject/composition：女性战士（22岁，银色战斗服）从悬崖左侧缓步走来，中景，画面左三分之一，背景为雪山。  \n→ action/performance：女性战士抬起右臂，掌心朝前，手指微微张开，随后迅速收回，眼神坚定。  \n→ scene/props：雪山背景，极光隐约可见，地面有积雪，女性战士脚边有冰晶。  \n→ camera/motion：侧面机位，镜头从女性战士脚部缓缓上移至面部，速度中等。  \n→ lighting/atmosphere：冷色调，极光反射在雪地上，氛围紧张。  \n→ technical/spec：12s｜9:16｜4K  \n\nShot 3（15s｜9:16）→ subject/composition：两人对峙，中景，画面居中，背景为雪山。  \n→ action/performance：男性战士向前跨出一步，右手握拳，女性战士后退半步，左手抬起，掌心朝前。  \n→ scene/props：雪山背景，极光闪烁，地面有积雪，两人之间有冰裂缝。  \n→ camera/motion：低角度机位，镜头从两人脚部缓缓上移至面部，速度中等。  \n→ lighting/atmosphere：冷色调，极光反射在雪地上，氛围肃穆。  \n→ technical/spec：15s｜9:16｜4K"
+      }
+    },
+    {
+      "index": 2,
+      "heading": "第2部分",
+      "beat_count": 0,
+      "shot_count": 9,
+      "md_file": "chapters/chapter_02.md",
+      "platform_parts": {
+        "seedance": "Shot 1（10s｜9:16）→ subject/composition：男性战士（25岁，黑色战斗服）位于悬崖边缘，中景，画面居中，战士背对镜头，双手握剑，剑尖指向地面  \n→ action/performance：战士缓缓抬起右臂，剑身从地面缓缓升起，剑刃反射出晨光，战士眼神坚定，肌肉紧绷，准备出击  \n→ scene/props：悬崖边，晨光微弱，远处有山脉，剑身有锈迹，地面有碎石，空间层次分明，尺度宏大  \n→ camera/motion：正面机位，镜头从地面缓缓上摇至战士面部，速度缓慢，突出人物气势  \n→ lighting/atmosphere：晨光微弱，色调偏冷，氛围肃穆，光线从左上方照射  \n→ technical/spec：10s｜9:16｜4K  \n\nShot 2（12s｜9:16）→ subject/composition：男性战士（25岁，黑色战斗服）位于悬崖边缘，中景，画面居中，战士背对镜头，双手握剑，剑尖指向地面  \n→ action/performance：战士猛然挥剑，剑刃划出弧线，剑光刺破晨雾，战士身体后仰，剑尖划过空中，留下残影  \n→ scene/props：悬崖边，晨光微弱，远处有山脉，剑身有锈迹，地面有碎石，空间层次分明，尺度宏大  \n→ camera/motion：正面机位，镜头跟随剑刃轨迹，速度中等，突出动作轨迹  \n→ lighting/atmosphere：晨光微弱，色调偏冷，氛围肃穆，光线从左上方照射  \n→ technical/spec：12s｜9:16｜4K  \n\nShot 3（10s｜9:16）→ subject/composition：男性战士（25岁，黑色战斗服）位于悬崖边缘，中景，画面居中，战士背对镜头，双手握剑，剑尖指向地面  \n→ action/performance：战士猛然转身，剑刃直指天空，剑身反射出晨光，战士眼神坚定，肌肉紧绷，准备出击  \n→ scene/props：悬崖边，晨光微弱，远处有山脉，剑身有锈迹，地面有碎石，空间层次分明，尺度宏大  \n→ camera/motion：侧面机位，镜头从地面缓缓上摇至战士面部，速度缓慢，突出人物气势  \n→ lighting/atmosphere：晨光微弱，色调偏冷，氛围肃穆，光线从左上方照射  \n→ technical/spec：10s｜9:16｜4K",
+        "kling": "Shot 1（10s｜9:16）→ subject/composition：男性战士（25岁，黑色战斗服）位于悬崖边缘，中景，画面居中，战士背对镜头，双手握剑，剑尖指向地面  \n→ action/performance：战士缓缓抬起右臂，剑身从地面缓缓升起，剑刃反射出晨光，战士眼神坚定，肌肉紧绷，准备出击  \n→ scene/props：悬崖边，晨光微弱，远处有山脉，剑身有锈迹，地面有碎石，空间层次分明，尺度宏大  \n→ camera/motion：正面机位，镜头从地面缓缓上摇至战士面部，速度缓慢，突出人物气势  \n→ lighting/atmosphere：晨光微弱，色调偏冷，氛围肃穆，光线从左上方照射  \n→ technical/spec：10s｜9:16｜4K  \n\nShot 2（12s｜9:16）→ subject/composition：男性战士（25岁，黑色战斗服）位于悬崖边缘，中景，画面居中，战士背对镜头，双手握剑，剑尖指向地面  \n→ action/performance：战士猛然挥剑，剑刃划出弧线，剑光刺破晨雾，战士身体后仰，剑尖划过空中，留下残影  \n→ scene/props：悬崖边，晨光微弱，远处有山脉，剑身有锈迹，地面有碎石，空间层次分明，尺度宏大  \n→ camera/motion：正面机位，镜头跟随剑刃轨迹，速度中等，突出动作轨迹  \n→ lighting/atmosphere：晨光微弱，色调偏冷，氛围肃穆，光线从左上方照射  \n→ technical/spec：12s｜9:16｜4K  \n\nShot 3（10s｜9:16）→ subject/composition：男性战士（25岁，黑色战斗服）位于悬崖边缘，中景，画面居中，战士背对镜头，双手握剑，剑尖指向地面  \n→ action/performance：战士猛然转身，剑刃直指天空，剑身反射出晨光，战士眼神坚定，肌肉紧绷，准备出击  \n→ scene/props：悬崖边，晨光微弱，远处有山脉，剑身有锈迹，地面有碎石，空间层次分明，尺度宏大  \n→ camera/motion：侧面机位，镜头从地面缓缓上摇至战士面部，速度缓慢，突出人物气势  \n→ lighting/atmosphere：晨光微弱，色调偏冷，氛围肃穆，光线从左上方照射  \n→ technical/spec：10s｜9:16｜4K"
+      }
+    },
+    {
+      "index": 3,
+      "heading": "第3部分",
+      "beat_count": 0,
+      "shot_count": 9,
+      "md_file": "chapters/chapter_03.md",
+      "platform_parts": {
+        "seedance": "Shot 1（10s｜9:16）→ subject/composition：女战士（25岁，黑色战术服，手持双刃）位于悬崖边缘，中景，构图突出人物与背景山峰。  \n→ action/performance：女战士缓缓抬起双刃，刃尖指向天空，肌肉紧绷，呼吸平稳，眼神坚定。  \n→ scene/props：悬崖边，远处有雪山，近处有岩石与风化痕迹，空间层次分明，尺度宏大。  \n→ camera/motion：正面机位，缓慢推近至人物面部，速度控制在0.5秒/帧。  \n→ lighting/atmosphere：晨光穿透云层，金色光线洒在刃上，色调偏暖，氛围肃穆。  \n→ technical/spec：10秒｜9:16｜4K超清。  \n\nShot 2（12s｜9:16）→ subject/composition：女战士（25岁，黑色战术服，手持双刃）位于悬崖边缘，中景，构图突出人物与背景山峰。  \n→ action/performance：女战士猛然挥动双刃，刃锋划破空气，发出嗡鸣，身体后仰，动作连贯有力。  \n→ scene/props：悬崖边，远处有雪山，近处有岩石与风化痕迹，空间层次分明，尺度宏大。  \n→ camera/motion：侧面机位，快速拉远，速度控制在1秒/帧。  \n→ lighting/atmosphere：晨光穿透云层，金色光线洒在刃上，色调偏暖，氛围肃穆。  \n→ technical/spec：12秒｜9:16｜4K超清。  \n\nShot 3（15s｜9:16）→ subject/composition：女战士（23岁，黑色战术服，手持双刃）位于悬崖边缘，近景，构图突出双刃与人物表情。  \n→ action/performance：女战士双刃插入地面，身体前倾，肌肉紧绷，眼神坚定，呼吸急促。  \n→ scene/props：悬崖边，远处有雪山，近处有岩石与风化痕迹，空间层次分明，尺度宏大。  \n→ camera/motion：低角度机位，缓慢环绕人物，速度控制在1秒/帧。  \n→ lighting/atmosphere：晨光穿透云层，金色光线洒在刃上，色调偏暖，氛围肃穆。  \n→ technical/spec：15秒｜9:16｜4K超清。",
+        "kling": "Shot 1（10s｜9:16）→ subject/composition：女战士（25岁，黑色战术服，手持双刃）位于悬崖边缘，中景，构图突出人物与背景山峰。  \n→ action/performance：女战士缓缓抬起双刃，刃尖指向天空，肌肉紧绷，呼吸平稳，眼神坚定。  \n→ scene/props：悬崖边，远处有雪山，近处有岩石与风化痕迹，空间层次分明，尺度宏大。  \n→ camera/motion：正面机位，缓慢推近至人物面部，速度控制在0.5秒/帧。  \n→ lighting/atmosphere：晨光穿透云层，金色光线洒在刃上，色调偏暖，氛围肃穆。  \n→ technical/spec：10秒｜9:16｜4K超清。  \n\nShot 2（12s｜9:16）→ subject/composition：女战士（25岁，黑色战术服，手持双刃）位于悬崖边缘，中景，构图突出人物与背景山峰。  \n→ action/performance：女战士猛然挥动双刃，刃锋划破空气，发出嗡鸣，身体后仰，动作连贯有力。  \n→ scene/props：悬崖边，远处有雪山，近处有岩石与风化痕迹，空间层次分明，尺度宏大。  \n→ camera/motion：侧面机位，快速拉远，速度控制在1秒/帧。  \n→ lighting/atmosphere：晨光穿透云层，金色光线洒在刃上，色调偏暖，氛围肃穆。  \n→ technical/spec：12秒｜9:16｜4K超清。  \n\nShot 3（15s｜9:16）→ subject/composition：女战士（23岁，黑色战术服，手持双刃）位于悬崖边缘，近景，构图突出双刃与人物表情。  \n→ action/performance：女战士双刃插入地面，身体前倾，肌肉紧绷，眼神坚定，呼吸急促。  \n→ scene/props：悬崖边，远处有雪山，近处有岩石与风化痕迹，空间层次分明，尺度宏大。  \n→ camera/motion：低角度机位，缓慢环绕人物，速度控制在1秒/帧。  \n→ lighting/atmosphere：晨光穿透云层，金色光线洒在刃上，色调偏暖，氛围肃穆。  \n→ technical/spec：15秒｜9:16｜4K超清。"
+      }
+    }
+  ],
+  "platforms": [
+    "seedance",
+    "kling"
+  ],
+  "shot_count": 27,
+  "platform_parts": {
+    "seedance": "Shot 1（10s｜9:16）→ subject/composition：女战士（25岁，黑色战术服，手持双刃）位于悬崖边缘，中景，构图突出人物与背景山峰。  \n→ action/performance：女战士缓缓抬起双刃，刃尖指向天空，肌肉紧绷，呼吸平稳，眼神坚定。  \n→ scene/props：悬崖边，远处有雪山，近处有岩石与风化痕迹，空间层次分明，尺度宏大。  \n→ camera/motion：正面机位，缓慢推近至人物面部，速度控制在0.5秒/帧。  \n→ lighting/atmosphere：晨光穿透云层，金色光线洒在刃上，色调偏暖，氛围肃穆。  \n→ technical/spec：10秒｜9:16｜4K超清。  \n\nShot 2（12s｜9:16）→ subject/composition：女战士（25岁，黑色战术服，手持双刃）位于悬崖边缘，中景，构图突出人物与背景山峰。  \n→ action/performance：女战士猛然挥动双刃，刃锋划破空气，发出嗡鸣，身体后仰，动作连贯有力。  \n→ scene/props：悬崖边，远处有雪山，近处有岩石与风化痕迹，空间层次分明，尺度宏大。  \n→ camera/motion：侧面机位，快速拉远，速度控制在1秒/帧。  \n→ lighting/atmosphere：晨光穿透云层，金色光线洒在刃上，色调偏暖，氛围肃穆。  \n→ technical/spec：12秒｜9:16｜4K超清。  \n\nShot 3（15s｜9:16）→ subject/composition：女战士（23岁，黑色战术服，手持双刃）位于悬崖边缘，近景，构图突出双刃与人物表情。  \n→ action/performance：女战士双刃插入地面，身体前倾，肌肉紧绷，眼神坚定，呼吸急促。  \n→ scene/props：悬崖边，远处有雪山，近处有岩石与风化痕迹，空间层次分明，尺度宏大。  \n→ camera/motion：低角度机位，缓慢环绕人物，速度控制在1秒/帧。  \n→ lighting/atmosphere：晨光穿透云层，金色光线洒在刃上，色调偏暖，氛围肃穆。  \n→ technical/spec：15秒｜9:16｜4K超清。",
+    "kling": "Shot 1（10s｜9:16）→ subject/composition：女战士（25岁，黑色战术服，手持双刃）位于悬崖边缘，中景，构图突出人物与背景山峰。  \n→ action/performance：女战士缓缓抬起双刃，刃尖指向天空，肌肉紧绷，呼吸平稳，眼神坚定。  \n→ scene/props：悬崖边，远处有雪山，近处有岩石与风化痕迹，空间层次分明，尺度宏大。  \n→ camera/motion：正面机位，缓慢推近至人物面部，速度控制在0.5秒/帧。  \n→ lighting/atmosphere：晨光穿透云层，金色光线洒在刃上，色调偏暖，氛围肃穆。  \n→ technical/spec：10秒｜9:16｜4K超清。  \n\nShot 2（12s｜9:16）→ subject/composition：女战士（25岁，黑色战术服，手持双刃）位于悬崖边缘，中景，构图突出人物与背景山峰。  \n→ action/performance：女战士猛然挥动双刃，刃锋划破空气，发出嗡鸣，身体后仰，动作连贯有力。  \n→ scene/props：悬崖边，远处有雪山，近处有岩石与风化痕迹，空间层次分明，尺度宏大。  \n→ camera/motion：侧面机位，快速拉远，速度控制在1秒/帧。  \n→ lighting/atmosphere：晨光穿透云层，金色光线洒在刃上，色调偏暖，氛围肃穆。  \n→ technical/spec：12秒｜9:16｜4K超清。  \n\nShot 3（15s｜9:16）→ subject/composition：女战士（23岁，黑色战术服，手持双刃）位于悬崖边缘，近景，构图突出双刃与人物表情。  \n→ action/performance：女战士双刃插入地面，身体前倾，肌肉紧绷，眼神坚定，呼吸急促。  \n→ scene/props：悬崖边，远处有雪山，近处有岩石与风化痕迹，空间层次分明，尺度宏大。  \n→ camera/motion：低角度机位，缓慢环绕人物，速度控制在1秒/帧。  \n→ lighting/atmosphere：晨光穿透云层，金色光线洒在刃上，色调偏暖，氛围肃穆。  \n→ technical/spec：15秒｜9:16｜4K超清。"
+  },
+  "generated_at": "2026-10-08 18:06:39"
+}

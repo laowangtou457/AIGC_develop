@@ -1,0 +1,11 @@
+{
+  "shot": 7,
+  "chapter": 1,
+  "prompt_text": "Shot 1（10s｜9:16）→ subject/composition：男性战士（25岁，黑色战术服）站在悬崖边缘，中景，画面居中，背景为雪山。  \n→ action/performance：战士缓缓抬起左手，掌心朝下，指尖微微颤抖，随后猛然握紧拳头，肌肉绷紧。  \n→ scene/props：雪山背景，天空灰暗，远处有极光，地面覆盖积雪，战士脚下有冰裂缝。  \n→ camera/motion：正面机位，镜头从战士腰部缓缓上移至面部，速度缓慢。  \n→ lighting/atmosphere：冷色调，雪地反射微弱蓝光，天空有暗云，氛围肃穆。  \n→ technical/spec：10s｜9:16｜4K  \n",
+  "duration": 4,
+  "ratio": "9:16",
+  "platforms": [
+    "seedance",
+    "kling"
+  ]
+}

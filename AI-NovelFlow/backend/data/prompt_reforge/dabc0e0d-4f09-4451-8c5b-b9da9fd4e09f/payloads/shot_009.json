@@ -1,0 +1,10 @@
+{
+  "shot": 9,
+  "chapter": 1,
+  "prompt_text": "Shot 8 (04-15 sec, 9:16):  \n1. subject_definitions: <Subject 1> is the young man陆离 in <Picture 1>, with long dark hair, a black qipao, and a long knife; <Subject 2> is the middle-aged man黑衣人 in <Picture 2>, with a black robe, burned face, and a long knife.  \n2. summary: [reference generation] 陆离 steps onto the broken bridge, 黑衣人 draws his knife and faces him.  \n3. retention_analysis: <Subject 1> (appears in [Shot 8]): fully_preserved; <Subject 2> (appears in [Shot 8]): fully_preserved.  \n4. detailed_description: Style: Realistic movie texture, stormy weather, dramatic lighting. At 00:28.000, the shot cuts to a low-angle仰拍 of the broken bridge, showing 陆离 walking onto the bridge, 黑衣人 drawing his knife and facing him. The atmosphere is heavy rain, dim light, shaking iron chains, and a misty rain curtain. No subtitles.  \n5. overall_soundscape: The sound of heavy rain, the creaking of iron chains, distant thunder, and the sound of wind.  \n6. non_diegetic_music: A low, tense string melody with a steady rhythm, matching the tension of the scene.",
+  "duration": 4,
+  "ratio": "9:16",
+  "platforms": [
+    "minimax_h3"
+  ]
+}

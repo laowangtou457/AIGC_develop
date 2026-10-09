@@ -1,3 +1,4 @@
+from datetime import datetime
 from sqlalchemy import Column, String, DateTime, Text
 from sqlalchemy.sql import func
 import uuid
@@ -27,5 +28,5 @@ class VideoAssetHistory(Base):
     video_stage = Column(String, nullable=True)         # 视频生成阶段文案
     video_error = Column(Text, nullable=True)           # 视频生成失败原因
     video_summary_json = Column(Text, nullable=True)    # 逐镜进度与合并结果 JSON
-    created_at = Column(DateTime(timezone=True), server_default=func.now())
-    updated_at = Column(DateTime(timezone=True), onupdate=func.now())
+    created_at = Column(DateTime(timezone=True), default=datetime.now)
+    updated_at = Column(DateTime(timezone=True), onupdate=datetime.now)

@@ -125,7 +125,7 @@ async def run_chapter_video_merge_task(task_id: str) -> None:
         task.status = "running"
         task.progress = 5
         task.current_step = "准备合并章节视频..."
-        task.started_at = datetime.utcnow()
+        task.started_at = datetime.now()
         db.commit()
 
         try:
@@ -248,7 +248,7 @@ async def run_chapter_video_merge_task(task_id: str) -> None:
         task.result_url = video_url
         task.error_message = None
         task.current_step = "合并完成（使用缓存）" if cache_hit else "合并完成"
-        task.completed_at = datetime.utcnow()
+        task.completed_at = datetime.now()
         task.metadata_json = json.dumps(metadata, ensure_ascii=False)
         db.commit()
     except Exception as exc:
@@ -258,7 +258,7 @@ async def run_chapter_video_merge_task(task_id: str) -> None:
             task.status = "failed"
             task.error_message = str(exc)
             task.current_step = "合并失败"
-            task.completed_at = datetime.utcnow()
+            task.completed_at = datetime.now()
             db.commit()
     finally:
         db.close()
@@ -828,7 +828,7 @@ async def run_shot_image_batch_task(batch_task_id: str) -> None:
         skip_llm_when_prompt_exists = bool(metadata.get("skip_llm_when_prompt_exists", True))
 
         batch_task.status = "running"
-        batch_task.started_at = batch_task.started_at or datetime.utcnow()
+        batch_task.started_at = batch_task.started_at or datetime.now()
         batch_task.current_step = "批量分镜图生成中"
         db.commit()
 
@@ -877,7 +877,7 @@ async def run_shot_image_batch_task(batch_task_id: str) -> None:
                 shot = db.query(Shot).filter(Shot.id == child_task.shot_id).first()
                 prompt_text = (shot.shot_image_prompt or "").strip() if shot and skip_llm_when_prompt_exists else None
                 child_task.status = "running"
-                child_task.started_at = child_task.started_at or datetime.utcnow()
+                child_task.started_at = child_task.started_at or datetime.now()
                 child_task.current_step = "准备提交分镜图工作流" if prompt_text else "正在生成分镜图提示词"
                 batch_task.current_step = f"正在处理 {index}/{total}：{child_task.current_step}"
                 db.commit()
@@ -914,7 +914,7 @@ async def run_shot_image_batch_task(batch_task_id: str) -> None:
         if batch_task:
             batch_task.status = "completed" if failed == 0 and cancelled == 0 else "failed"
             batch_task.progress = 100
-            batch_task.completed_at = datetime.utcnow()
+            batch_task.completed_at = datetime.now()
             batch_task.current_step = f"完成：成功 {completed}，失败 {failed}，取消 {cancelled}"
             batch_task.error_message = None if failed == 0 and cancelled == 0 else batch_task.current_step
             db.commit()
@@ -924,7 +924,7 @@ async def run_shot_image_batch_task(batch_task_id: str) -> None:
             batch_task.status = "failed"
             batch_task.error_message = str(exc)
             batch_task.current_step = "批量生成失败"
-            batch_task.completed_at = datetime.utcnow()
+            batch_task.completed_at = datetime.now()
             db.commit()
         print(f"[ShotImageBatch] task {batch_task_id} failed: {exc}")
     finally:
@@ -2670,7 +2670,7 @@ def _build_shot_image_data_response(
             "version": 1,
             "novel_id": novel_id,
             "chapter_id": chapter_id,
-            "generated_at": datetime.utcnow().isoformat(),
+            "generated_at": datetime.now().isoformat(),
             "shots": [],
         }
 

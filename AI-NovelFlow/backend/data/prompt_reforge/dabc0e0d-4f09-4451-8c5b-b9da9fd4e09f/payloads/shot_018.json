@@ -1,0 +1,10 @@
+{
+  "shot": 18,
+  "chapter": 2,
+  "prompt_text": "Shot 8 (04-15 sec, 9:16):  \n1. subject_definitions: <Subject 1> is the middle-aged man in <Picture 1>, wearing a black robe, holding a black sheathed long knife, with a cold and stern face.  \n2. summary: [reference generation] <Subject 1> takes out a letter, prepares to leave the town.  \n3. retention_analysis: <Subject 1> (appears in [Shot 8]): fully_preserved - keeps his appearance and actions.  \n4. detailed_description: The camera starts with a close-up shot of <Subject 1>'s hand, focusing on the letter. The candlelight flickers, casting shadows on his face. The camera slowly zooms out, showing <Subject 1> standing in the dimly lit inn. <d>刀在人在，勿负当年之托。</d>  \n5. overall_soundscape: The sound of a candle flickering, the distant echo of footsteps.  \n6. non_diegetic_music: A soft, melancholic melody with a low, steady rhythm.  \n",
+  "duration": 4,
+  "ratio": "9:16",
+  "platforms": [
+    "minimax_h3"
+  ]
+}

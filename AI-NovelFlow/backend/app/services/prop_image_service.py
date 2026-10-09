@@ -180,7 +180,7 @@ class PropService:
 
             # 更新任务状态为运行中
             task.status = "running"
-            task.started_at = datetime.utcnow()
+            task.started_at = datetime.now()
             prop = prop_repo.get_by_id(prop_id)
             if prop:
                 prop.generating_status = "running"
@@ -316,7 +316,7 @@ class PropService:
 
                 task.status = "completed"
                 task.progress = 100
-                task.completed_at = datetime.utcnow()
+                task.completed_at = datetime.now()
 
                 # 更新道具图片和状态
                 prop = prop_repo.get_by_id(prop_id)

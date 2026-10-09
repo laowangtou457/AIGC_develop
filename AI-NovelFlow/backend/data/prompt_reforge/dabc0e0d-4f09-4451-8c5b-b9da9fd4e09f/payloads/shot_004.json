@@ -1,0 +1,10 @@
+{
+  "shot": 4,
+  "chapter": 1,
+  "prompt_text": "Shot 3 (04-15 sec, 9:16):  \n1. subject_definitions: <Subject 1> is the young man陆离 in <Picture 1>, with long dark hair, a black qipao, and a long knife; <Subject 2> is the middle-aged man黑衣人 in <Picture 2>, with a black robe, burned face, and a long knife.  \n2. summary: [reference generation] 陆离 lifts his knife to remove 黑衣人's mask, revealing his burned face.  \n3. retention_analysis: <Subject 1> (appears in [Shot 3]): fully_preserved; <Subject 2> (appears in [Shot 3]): fully_preserved.  \n4. detailed_description: Style: Realistic movie texture, stormy weather, dramatic lighting. At 00:08.000, the shot cuts to a close-up of the mask falling, followed by a wide shot showing 黑衣人's burned face. The atmosphere is sparks in the rain, and 黑衣人's fierce expression. No subtitles.  \n5. overall_soundscape: The sound of the mask falling, the sound of rain, and the crack of lightning.  \n6. non_diegetic_music: A tense, dramatic string melody with a steady rhythm, matching the tension of the scene.  \n",
+  "duration": 4,
+  "ratio": "9:16",
+  "platforms": [
+    "minimax_h3"
+  ]
+}

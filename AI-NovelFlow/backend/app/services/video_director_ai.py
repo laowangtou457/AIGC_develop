@@ -82,7 +82,7 @@ def append_video_ai_call(shot, call: dict) -> dict:
         "workflow_type": call.get("workflow_type"),
         "workflow_name": call.get("workflow_name"),
         "reference_images": call.get("reference_images"),
-        "created_at": call.get("created_at") or datetime.utcnow().isoformat(),
+        "created_at": call.get("created_at") or datetime.now().isoformat(),
     })
     plan["ai_calls"] = calls[-80:]
     shot.video_director_plan = json.dumps(plan, ensure_ascii=False)

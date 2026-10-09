@@ -1,0 +1,10 @@
+{
+  "shot": 14,
+  "chapter": 2,
+  "prompt_text": "Shot 4 (04-15 sec, 9:16):  \n1. subject_definitions: <Subject 1> is the middle-aged man in <Picture 1>, wearing a black robe, holding a black sheathed long knife, with a cold and stern face. <Subject 3> is the old man in <Picture 3>, wearing a blue robe, with a long beard and white hair, carrying a long sword, with a calm and steady demeanor.  \n2. summary: [reference generation] <Subject 1> draws his knife, <Subject 3> draws his sword, and they face each other.  \n3. retention_analysis: <Subject 1> (appears in [Shot 4]): fully_preserved - keeps his appearance and actions. <Subject 3> (appears in [Shot 4]): fully_preserved - keeps his appearance and demeanor.  \n4. detailed_description: The camera starts with a 360-degree shot, focusing on <Subject 1> and <Subject 3> facing each other. The wind blows the flags, and the lanterns flicker. The camera slowly zooms in on their faces, showing their determination.  \n5. overall_soundscape: The sound of wind, the flickering of lanterns, the distant echo of footsteps.  \n6. non_diegetic_music: A deep, resonant string sound with a soft, mysterious melody.  \n",
+  "duration": 4,
+  "ratio": "9:16",
+  "platforms": [
+    "minimax_h3"
+  ]
+}

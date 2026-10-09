@@ -1,0 +1,11 @@
+{
+  "shot": 20,
+  "chapter": 2,
+  "prompt_text": "Shot 7（12s｜9:16）→ subject/composition：沈夜（中年，黑衣，手持黑鞘长刀）位于镇口石碑，远景，画面居中；action/performance：沈夜撕下悬赏令，翻身上马，马蹄扬起尘土；scene/props：清晨镇口石碑，悬赏令贴于石上，马匹与尘土；camera/motion：俯拍沈夜动作，镜头跟随马匹远去；lighting/atmosphere：清晨阳光，阴影柔和，气氛肃穆；technical/spec：12秒｜9:16｜4K\n\n### Kling",
+  "duration": 4,
+  "ratio": "9:16",
+  "platforms": [
+    "seedance",
+    "kling"
+  ]
+}

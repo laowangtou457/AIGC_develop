@@ -1,0 +1,10 @@
+{
+  "shot": 4,
+  "chapter": 1,
+  "prompt_text": "Shot 3（15s｜9:16）→ subject/composition：陆离（男，青年，黑色劲装，斗笠遮面）侧身闪避，近景，刀锋相撞；action/performance：陆离侧身闪避，左手格挡，右脚后撤，刀锋与黑衣人刀刃相撞，火花四溅；scene/props：雨幕中刀光闪烁，铁索震颤，桥下河水轰鸣；camera/motion：快速切换镜头，聚焦刀光与铁索震颤；lighting/atmosphere：雨幕中刀光与闪电交织，铁索因震动而泛光；technical/spec：15s｜9:16｜4K  \n",
+  "duration": 4,
+  "ratio": "9:16",
+  "platforms": [
+    "seedance"
+  ]
+}

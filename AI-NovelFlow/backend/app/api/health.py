@@ -503,7 +503,7 @@ async def get_system_monitor():
     from app.models.task import Task
     from app.models.llm_log import LLMLog
 
-    now = datetime.utcnow()
+    now = datetime.now()
 
     async def probe(url, timeout=10.0):
         """探测服务是否在线，返回 (ok, detail)"""
@@ -632,7 +632,7 @@ async def get_system_monitor():
         "success": True,
         "data": {
             "status": "ok",
-            "generated_at": datetime.now(timezone.utc).isoformat(),
+            "generated_at": datetime.now().isoformat(),
             "services": {
                 "comfyui": {"status": comfy_status, "queue_running": queue_running, "queue_pending": queue_pending},
                 "ollama": {"status": ollama_status, "models": ollama_models},

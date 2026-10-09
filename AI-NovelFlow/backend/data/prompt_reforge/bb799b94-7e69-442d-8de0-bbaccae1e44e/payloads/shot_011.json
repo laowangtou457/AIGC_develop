@@ -1,0 +1,10 @@
+{
+  "shot": 11,
+  "chapter": 2,
+  "prompt_text": "Shot 3（12s｜9:16）→ subject/composition：沈夜（中年，暗色劲装，黑鞘长刀）跃下窗台，青衫老者（老年，青衫，长剑）下马，中景，两人对峙  \n→ action/performance：沈夜从窗台跃下，青衫老者下马，两人对峙，刀剑出鞘  \n→ scene/props：小镇街心，夜风卷起酒旗，灯笼摇晃，光影明灭不定，石板路  \n→ camera/motion：低角度拍摄两人对峙，镜头缓慢推进至沈夜与老者  \n→ lighting/atmosphere：夜风凛冽，灯笼微光，阴影交错，气氛剑拔弩张  \n→ technical/spec：12秒｜9:16｜4K  \n",
+  "duration": 4,
+  "ratio": "9:16",
+  "platforms": [
+    "seedance"
+  ]
+}

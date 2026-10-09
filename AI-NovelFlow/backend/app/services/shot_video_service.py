@@ -402,7 +402,7 @@ async def generate_shot_video_task(
             return
 
         task.status = "running"
-        task.started_at = datetime.utcnow()
+        task.started_at = datetime.now()
         task.current_step = "准备生成视频..."
         db.commit()
 
@@ -1074,7 +1074,7 @@ async def _generate_multi_clip_video_task(
             "local_path": local_path,
             "source_video_url": result.get("video_url"),
             "error_message": None,
-            "generated_at": datetime.utcnow().isoformat(),
+            "generated_at": datetime.now().isoformat(),
             "generated_by_task_id": task.id,
         }, db, task=task)
 
@@ -1100,7 +1100,7 @@ async def _generate_multi_clip_video_task(
         task.status = "completed"
         task.progress = 100
         task.current_step = "生成完成"
-        task.completed_at = datetime.utcnow()
+        task.completed_at = datetime.now()
         db.commit()
         return
 
@@ -1141,14 +1141,14 @@ async def _generate_multi_clip_video_task(
     local_url = _local_url_from_path(output_path)
     plan = safe_json_dict(shot.video_director_plan)
     plan["merged_video_url"] = local_url
-    plan["merged_at"] = datetime.utcnow().isoformat()
+    plan["merged_at"] = datetime.now().isoformat()
     shot.video_director_plan = json.dumps(plan, ensure_ascii=False)
     _clear_shot_video_error(shot, shot_repo, video_url=local_url, video_status="completed", video_task_id=task.id)
     task.status = "completed"
     task.progress = 100
     task.result_url = local_url
     task.current_step = "生成完成"
-    task.completed_at = datetime.utcnow()
+    task.completed_at = datetime.now()
     db.commit()
 
 
@@ -1194,7 +1194,7 @@ async def merge_video_director_clip_videos(db, shot, shot_repo: ShotRepository, 
 
     local_url = _local_url_from_path(output_path)
     plan["merged_video_url"] = local_url
-    plan["merged_at"] = datetime.utcnow().isoformat()
+    plan["merged_at"] = datetime.now().isoformat()
     shot.video_director_plan = json.dumps(plan, ensure_ascii=False)
     _clear_shot_video_error(shot, shot_repo, video_url=local_url, video_status="completed", video_task_id=None)
     db.commit()
@@ -1254,7 +1254,7 @@ async def _save_generated_video(
                 "video_url": local_url,
                 "local_path": local_path,
                 "source_video_url": video_url,
-                "generated_at": datetime.utcnow().isoformat(),
+                "generated_at": datetime.now().isoformat(),
                 "generated_by_task_id": task.id,
             }, db)
             _clear_shot_video_error(shot, shot_repo, video_url=local_url, video_status="completed")
@@ -1264,7 +1264,7 @@ async def _save_generated_video(
         task.progress = 100
         task.result_url = local_url
         task.current_step = "生成完成"
-        task.completed_at = datetime.utcnow()
+        task.completed_at = datetime.now()
         db.commit()
 
         print(f"[VideoTask {task_id}] Video saved: {local_url}")

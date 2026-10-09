@@ -1,0 +1,10 @@
+{
+  "shot": 19,
+  "chapter": 2,
+  "prompt_text": "Shot 9 (04-15 sec, 9:16):  \n1. subject_definitions: <Subject 1> is the middle-aged man in <Picture 1>, wearing a black robe, holding a black sheathed long knife, with a cold and stern face.  \n2. summary: [reference generation] <Subject 1> leaves the town, determined to fulfill his promise.  \n3. retention_analysis: <Subject 1> (appears in [Shot 9]): fully_preserved - keeps his appearance and actions.  \n4. detailed_description: The camera starts with a wide shot, focusing on <Subject 1> walking out of the inn. The wind blows the flags, and the lanterns flicker. The camera slowly zooms out, showing <Subject 1> walking into the dark night.  \n5. overall_soundscape: The sound of wind, the flickering of lanterns, the distant echo of footsteps.  \n6. non_diegetic_music: A deep, resonant string sound with a soft, mysterious melody.",
+  "duration": 4,
+  "ratio": "9:16",
+  "platforms": [
+    "minimax_h3"
+  ]
+}

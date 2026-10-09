@@ -494,7 +494,7 @@ class ShotKeyframeService:
 
         # 更新任务状态
         task.status = "running"
-        task.started_at = datetime.utcnow()
+        task.started_at = datetime.now()
         db.commit()
 
         try:
@@ -667,7 +667,7 @@ class ShotKeyframeService:
                     task.status = "completed"
                     task.result_url = local_url
                     task.current_step = "生成完成"
-                    task.completed_at = datetime.utcnow()
+                    task.completed_at = datetime.now()
                     db.commit()
                 else:
                     raise ValueError("下载图片失败")
@@ -678,7 +678,7 @@ class ShotKeyframeService:
             task.status = "failed"
             task.error_message = str(e)
             task.current_step = "生成失败"
-            task.completed_at = datetime.utcnow()
+            task.completed_at = datetime.now()
             db.commit()
             raise
 

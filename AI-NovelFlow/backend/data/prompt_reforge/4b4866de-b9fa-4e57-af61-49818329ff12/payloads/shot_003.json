@@ -1,0 +1,11 @@
+{
+  "shot": 3,
+  "chapter": 1,
+  "prompt_text": "Shot 3（15s｜9:16）→ subject/composition：两人对峙，中景，画面居中，背景为雪山。  \n→ action/performance：男性战士向前跨出一步，右手握拳，女性战士后退半步，左手抬起，掌心朝前。  \n→ scene/props：雪山背景，极光闪烁，地面有积雪，两人之间有冰裂缝。  \n→ camera/motion：低角度机位，镜头从两人脚部缓缓上移至面部，速度中等。  \n→ lighting/atmosphere：冷色调，极光反射在雪地上，氛围肃穆。  \n→ technical/spec：15s｜9:36｜4K  \n\n### Seedance  ",
+  "duration": 4,
+  "ratio": "9:16",
+  "platforms": [
+    "seedance",
+    "kling"
+  ]
+}

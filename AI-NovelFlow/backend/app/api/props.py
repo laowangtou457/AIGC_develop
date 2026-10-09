@@ -458,7 +458,7 @@ async def parse_props(
                     start_chapter=start_chapter or existing_prop.start_chapter,
                     end_chapter=end_chapter or existing_prop.end_chapter,
                     source_range=source_range,
-                    last_parsed_at=datetime.utcnow()
+                    last_parsed_at=datetime.now()
                 )
                 updated_props.append(updated_prop)
             else:

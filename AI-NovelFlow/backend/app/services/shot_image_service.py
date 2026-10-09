@@ -78,7 +78,7 @@ async def generate_shot_image_task(
 
         # 更新任务状态为运行中
         task.status = "running"
-        task.started_at = datetime.utcnow()
+        task.started_at = datetime.now()
         task.current_step = "准备生成环境..."
         db.commit()
 
@@ -687,7 +687,7 @@ async def _save_generated_image(
         task.progress = 100
         task.result_url = local_url
         task.current_step = "生成完成"
-        task.completed_at = datetime.utcnow()
+        task.completed_at = datetime.now()
         db.commit()
 
         # 更新 Shot 记录
@@ -701,7 +701,7 @@ async def _save_generated_image(
         task.progress = 100
         task.result_url = image_url
         task.current_step = "生成完成（使用远程图片）"
-        task.completed_at = datetime.utcnow()
+        task.completed_at = datetime.now()
         db.commit()
 
         # 更新 Shot 记录（使用远程URL）

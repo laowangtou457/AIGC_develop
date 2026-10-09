@@ -1,0 +1,10 @@
+{
+  "shot": 1,
+  "chapter": 1,
+  "prompt_text": "### MiniMax H3  ",
+  "duration": 4,
+  "ratio": "9:16",
+  "platforms": [
+    "minimax_h3"
+  ]
+}

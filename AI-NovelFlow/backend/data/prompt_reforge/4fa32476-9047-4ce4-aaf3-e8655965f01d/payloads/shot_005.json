@@ -1,0 +1,11 @@
+{
+  "shot": 5,
+  "chapter": 1,
+  "prompt_text": "Shot 5（10s｜9:16）→ subject/composition：陆离悬空对峙，黑衣人逼近，仰拍，桥面与铁索环境  \n→ action/performance：黑衣人逼近，陆离反手抓住铁索，刀锋对峙，身体微微前倾，眼神凌厉  \n→ scene/props：桥边悬空，铁索在风中震颤，河水轰鸣，雨幕中刀光闪烁，远处山峦隐于雨幕  \n→ camera/motion：仰拍，镜头缓慢平移，突出悬空与刀锋对峙  \n→ lighting/atmosphere：雨势渐弱，铁索在风中震颤，河水泛着白沫，环境肃杀  \n→ technical/spec：10s｜9:16｜4K  \n",
+  "duration": 4,
+  "ratio": "9:16",
+  "platforms": [
+    "seedance",
+    "kling"
+  ]
+}

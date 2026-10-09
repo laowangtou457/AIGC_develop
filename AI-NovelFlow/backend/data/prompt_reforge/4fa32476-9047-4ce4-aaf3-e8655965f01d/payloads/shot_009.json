@@ -1,0 +1,11 @@
+{
+  "shot": 9,
+  "chapter": 1,
+  "prompt_text": "Shot 3（12s｜9:16）→ subject/composition：两人刀锋相撞，火花在雨中闪现，俯拍，桥面与铁索环境  \n→ action/performance：两人刀锋相撞，火花在雨幕中一闪而灭，陆离后撤，黑衣人前冲，刀光交错  \n→ scene/props：桥面激战，铁索震颤，河水轰鸣，雨幕中刀光闪烁，远处山峦隐于雨幕  \n→ camera/motion：俯拍，镜头缓慢平移，突出刀光与桥面环境  \n→ lighting/atmosphere：雨幕中火花闪烁，铁索在风中震颤，河水泛着白沫，环境肃杀  \n→ technical/spec：12s｜9:16｜4K  \n",
+  "duration": 4,
+  "ratio": "9:16",
+  "platforms": [
+    "seedance",
+    "kling"
+  ]
+}

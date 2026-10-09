@@ -1,0 +1,10 @@
+{
+  "shot": 15,
+  "chapter": 2,
+  "prompt_text": "Shot 5 (04-15 sec, 9:16):  \n1. subject_definitions: <Subject 1> is the middle-aged man in <Picture 1>, wearing a black robe, holding a black sheathed long knife, with a cold and stern face. <Subject 3> is the old man in <Picture 3>, wearing a blue robe, with a long beard and white hair, carrying a long sword, with a calm and steady demeanor.  \n2. summary: [reference generation] <Subject 3> attacks first, <Subject 1> defends, and they exchange three blows.  \n3. retention_analysis: <Subject 1> (appears in [Shot 5]): fully_preserved - keeps his appearance and actions. <Subject 3> (appears in [Shot 5]): fully_preserved - keeps his appearance and demeanor.  \n4. detailed_description: The camera starts with a quick cut, focusing on <Subject 3> attacking first. The wind blows the flags, and the lanterns flicker. The camera quickly cuts between the two, showing their movements. <Subject 1> speaks, his voice calm and firm. <d>前辈剑法高明，晚辈领教了。</d>  \n5. overall_soundscape: The sound of wind, the flickering of lanterns, the distant echo of footsteps.  \n6. non_diegetic_music: A deep, resonant string sound with a soft, mysterious melody.  \n",
+  "duration": 4,
+  "ratio": "9:16",
+  "platforms": [
+    "minimax_h3"
+  ]
+}

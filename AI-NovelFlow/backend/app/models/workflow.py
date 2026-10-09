@@ -1,3 +1,4 @@
+from datetime import datetime
 from sqlalchemy import Column, String, DateTime, Text, Boolean, Integer
 from sqlalchemy.sql import func
 import uuid
@@ -41,5 +42,5 @@ class Workflow(Base):
     extension = Column(Text, nullable=True)
     
     # 时间戳
-    created_at = Column(DateTime(timezone=True), server_default=func.now())
-    updated_at = Column(DateTime(timezone=True), onupdate=func.now())
+    created_at = Column(DateTime(timezone=True), default=datetime.now)
+    updated_at = Column(DateTime(timezone=True), onupdate=datetime.now)

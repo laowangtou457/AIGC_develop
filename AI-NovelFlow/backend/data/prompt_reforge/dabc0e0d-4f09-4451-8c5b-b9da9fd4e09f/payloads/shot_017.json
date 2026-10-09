@@ -1,0 +1,10 @@
+{
+  "shot": 17,
+  "chapter": 2,
+  "prompt_text": "Shot 7 (04-15 sec, 9:16):  \n1. subject_definitions: <Subject 1> is the middle-aged man in <Picture 1>, wearing a black robe, holding a black sheathed long knife, with a cold and stern face. <Subject 3> is the old man in <Picture 3>, wearing a blue robe, with a long beard and white hair, carrying a long sword, with a calm and steady demeanor.  \n2. summary: [reference generation] <Subject 3> announces the end of the fight, and <Subject 1> returns to the inn.  \n3. retention_analysis: <Subject 1> (appears in [Shot 7]): fully_preserved - keeps his appearance and actions. <Subject 3> (appears in [Shot 7]): fully_preserved - keeps his appearance and demeanor.  \n4. detailed_description: The camera starts with a medium shot, focusing on <Subject 3> and <Subject 1> facing each other. The wind blows the flags, and the lanterns flicker. <Subject 3> speaks, his voice calm and firm. <d>沈先生，你最好尽快离开此地，江湖上有人悬赏你的人头。</d> <Subject 1> nods, his face showing determination.  \n5. overall_soundscape: The sound of wind, the flickering of lanterns, the distant echo of footsteps.  \n6. non_diegetic_music: A soft, melancholic melody with a low, steady rhythm.  \n",
+  "duration": 4,
+  "ratio": "9:16",
+  "platforms": [
+    "minimax_h3"
+  ]
+}

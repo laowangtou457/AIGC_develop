@@ -1,3 +1,4 @@
+from datetime import datetime
 from sqlalchemy import Column, String, DateTime, Text
 from sqlalchemy.sql import func
 import uuid
@@ -30,5 +31,5 @@ class MartialArtsHistory(Base):
     storyboard_image_url = Column(Text, nullable=True)  # ② 分镜图（图生图）
     video_url = Column(Text, nullable=True)             # ③ 武打视频（图生视频）
 
-    created_at = Column(DateTime(timezone=True), server_default=func.now())
-    updated_at = Column(DateTime(timezone=True), onupdate=func.now())
+    created_at = Column(DateTime(timezone=True), default=datetime.now)
+    updated_at = Column(DateTime(timezone=True), onupdate=datetime.now)

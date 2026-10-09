@@ -414,7 +414,7 @@ class ShotAudioService:
 
             # 更新任务状态为运行中
             task.status = "running"
-            task.started_at = datetime.utcnow()
+            task.started_at = datetime.now()
             db.commit()
 
             # 获取工作流JSON和节点映射
@@ -522,7 +522,7 @@ class ShotAudioService:
 
                 task.status = "completed"
                 task.progress = 100
-                task.completed_at = datetime.utcnow()
+                task.completed_at = datetime.now()
 
                 # 更新分镜数据中的 audio_url
                 self._update_shot_dialogue_audio_url(

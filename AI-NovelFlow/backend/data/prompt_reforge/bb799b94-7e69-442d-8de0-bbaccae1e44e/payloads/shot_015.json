@@ -1,0 +1,10 @@
+{
+  "shot": 15,
+  "chapter": 2,
+  "prompt_text": "Shot 7（12s｜9:16）→ subject/composition：沈夜（中年，暗色劲装，黑鞘长刀）在客栈内，特写手部动作，信件内容  \n→ action/performance：沈夜取出泛黄信件，回顾与漕帮的恩怨，眼神沉重  \n→ scene/props：客栈内，昏暗灯光，木质桌椅，泛黄信件，窗边微光  \n→ camera/motion：特写沈夜手部动作，镜头拉远展示信件内容，缓慢平移  \n→ lighting/atmosphere：昏暗灯光，阴影笼罩桌面，气氛沉重  \n→ technical/spec：12秒｜9:16｜4K  \n",
+  "duration": 4,
+  "ratio": "9:16",
+  "platforms": [
+    "seedance"
+  ]
+}

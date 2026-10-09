@@ -167,7 +167,7 @@ class CharacterService:
 
             # 更新任务状态为运行中
             task.status = "running"
-            task.started_at = datetime.utcnow()
+            task.started_at = datetime.now()
             db.commit()
 
             # 获取工作流JSON字符串
@@ -246,7 +246,7 @@ class CharacterService:
 
                 task.status = "completed"
                 task.progress = 100
-                task.completed_at = datetime.utcnow()
+                task.completed_at = datetime.now()
 
                 # 更新角色参考音频URL
                 character = character_repo.get_by_id(character_id)
@@ -396,7 +396,7 @@ class CharacterService:
 
             # 更新任务状态为运行中
             task.status = "running"
-            task.started_at = datetime.utcnow()
+            task.started_at = datetime.now()
             character = character_repo.get_by_id(character_id)
             if character:
                 character.generating_status = "running"
@@ -517,7 +517,7 @@ class CharacterService:
 
                 task.status = "completed"
                 task.progress = 100
-                task.completed_at = datetime.utcnow()
+                task.completed_at = datetime.now()
 
                 # 更新角色图片和状态
                 character = character_repo.get_by_id(character_id)

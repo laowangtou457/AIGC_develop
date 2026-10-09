@@ -488,7 +488,7 @@ async def edit_character_image(
         workflow_name=workflow.name,
         prompt_text=data.prompt,
         reference_images=json.dumps([{"label": "原图", "url": character.image_url}], ensure_ascii=False),
-        started_at=datetime.now(timezone.utc),
+        started_at=datetime.now(),
     ))
 
     def on_prompt_queued(prompt_id: str, submitted_workflow: dict):
@@ -510,7 +510,7 @@ async def edit_character_image(
         task.progress = 100
         task.current_step = "编辑失败"
         task.error_message = result.get("message", "编辑图片失败")
-        task.completed_at = datetime.now(timezone.utc)
+        task.completed_at = datetime.now()
         db.commit()
         raise HTTPException(status_code=500, detail=result.get("message", "编辑图片失败"))
 
@@ -529,7 +529,7 @@ async def edit_character_image(
         task.progress = 100
         task.current_step = "保存失败"
         task.error_message = "保存编辑结果失败"
-        task.completed_at = datetime.now(timezone.utc)
+        task.completed_at = datetime.now()
         db.commit()
         raise HTTPException(status_code=500, detail="保存编辑结果失败")
 
@@ -540,7 +540,7 @@ async def edit_character_image(
     task.progress = 100
     task.current_step = "编辑完成"
     task.result_url = image_url
-    task.completed_at = datetime.now(timezone.utc)
+    task.completed_at = datetime.now()
     db.commit()
     return {"success": True, "data": {"imageUrl": image_url, "taskId": task.id}, "message": "图片编辑成功"}
 

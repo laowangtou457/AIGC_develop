@@ -567,7 +567,7 @@ class TaskService:
             return 0
 
         queue_info = await self.comfyui_service.get_queue_info()
-        now = datetime.utcnow()
+        now = datetime.now()
         comfyui_timeout = int(getattr(get_settings(), "COMFYUI_TIMEOUT", 900) or 900)
         llm_timeout = int(getattr(get_settings(), "LLM_TIMEOUT", 300) or 300)
         updated_count = 0
@@ -639,7 +639,7 @@ class TaskService:
                                 task.status = "failed"
                                 task.error_message = "任务停留在 H3 提示词构建阶段过久，可能是 LLM 调用中断或后台任务已退出"
                                 task.current_step = "任务异常"
-                                task.completed_at = datetime.utcnow()
+                                task.completed_at = datetime.now()
                                 mark_related_shot_failed()
                                 updated_count += 1
                             continue
@@ -653,7 +653,7 @@ class TaskService:
                                 task.status = "failed"
                                 task.error_message = "ComfyUI 已完成当前 Clip，但后端后台任务长时间未继续；已保存完成的 Clip，请重新生成剩余 Clip"
                                 task.current_step = "任务异常"
-                                task.completed_at = datetime.utcnow()
+                                task.completed_at = datetime.now()
                                 mark_related_shot_failed()
                                 updated_count += 1
                             continue
@@ -759,7 +759,7 @@ class TaskService:
         task.result_url = local_url
         task.error_message = None
         task.current_step = "生成完成"
-        task.completed_at = datetime.utcnow()
+        task.completed_at = datetime.now()
         db.commit()
         return True
 
@@ -843,7 +843,7 @@ class TaskService:
         task.result_url = local_url
         task.error_message = None
         task.current_step = "生成完成"
-        task.completed_at = datetime.utcnow()
+        task.completed_at = datetime.now()
         db.commit()
         return True
 
@@ -917,7 +917,7 @@ class TaskService:
         task.status = "running"
         task.current_step = f"已重新入队，准备继续生成 Clip {window_index}..."
         task.error_message = None
-        task.updated_at = datetime.utcnow()
+        task.updated_at = datetime.now()
         ShotRepository(db).update(shot, video_status="generating", video_task_id=task.id)
         db.commit()
 
@@ -1013,7 +1013,7 @@ class TaskService:
             "local_path": local_path,
             "source_video_url": result.get("video_url"),
             "error_message": None,
-            "generated_at": datetime.utcnow().isoformat(),
+            "generated_at": datetime.now().isoformat(),
             "generated_by_task_id": task.id,
         })
         task.video_director_clips = json.dumps(window_plans, ensure_ascii=False)
@@ -1046,7 +1046,7 @@ class TaskService:
                 task.current_step = "生成完成"
                 task.result_url = merge_result.get("video_url")
                 task.error_message = None
-                task.completed_at = datetime.utcnow()
+                task.completed_at = datetime.now()
                 shot_repo.update(shot, video_status="completed", video_url=merge_result.get("video_url"), video_task_id=task.id)
             else:
                 task.status = "failed"
@@ -1122,7 +1122,7 @@ class TaskService:
         task.result_url = local_url
         task.error_message = None
         task.current_step = "生成完成"
-        task.completed_at = datetime.utcnow()
+        task.completed_at = datetime.now()
         db.commit()
         return True
 

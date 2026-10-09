@@ -217,7 +217,7 @@ class NovelService:
                             existing.voice_prompt = char_data.get("voice_prompt")
                         existing.source_range = source_range
                     
-                    existing.last_parsed_at = datetime.utcnow()
+                    existing.last_parsed_at = datetime.now()
                     updated_characters.append(existing)
                 else:
                     # 创建新角色
@@ -231,7 +231,7 @@ class NovelService:
                         end_chapter=end_chapter,
                         is_incremental=is_incremental,
                         source_range=source_range,
-                        last_parsed_at=datetime.utcnow()
+                        last_parsed_at=datetime.now()
                     )
                     self.db.add(character)
                     created_characters.append(character)
@@ -414,7 +414,7 @@ class NovelService:
                         existing.appearance = prop_data.get("appearance", existing.appearance)
                         existing.source_range = source_range
 
-                    existing.last_parsed_at = datetime.utcnow()
+                    existing.last_parsed_at = datetime.now()
                     updated_props.append(existing)
                 else:
                     # 创建新道具
@@ -427,7 +427,7 @@ class NovelService:
                         end_chapter=end_chapter,
                         is_incremental=is_incremental,
                         source_range=source_range,
-                        last_parsed_at=datetime.utcnow()
+                        last_parsed_at=datetime.now()
                     )
                     self.db.add(prop)
                     created_props.append(prop)
@@ -566,7 +566,7 @@ class NovelService:
                         end_chapter=max(existing.end_chapter, chapters[-1].number) if existing.end_chapter and mode == "incremental" else chapters[-1].number,
                         is_incremental=mode == "incremental",
                         source_range=source_range,
-                        last_parsed_at=datetime.utcnow()
+                        last_parsed_at=datetime.now()
                     )
                     updated_scenes.append(existing)
                 else:
@@ -583,7 +583,7 @@ class NovelService:
                     # 更新增量标记
                     if mode == "incremental":
                         scene.is_incremental = True
-                        scene.last_parsed_at = datetime.utcnow()
+                        scene.last_parsed_at = datetime.now()
                         self.db.commit()
                     created_scenes.append(scene)
             
@@ -704,7 +704,7 @@ class NovelService:
                         existing.source_range = source_range
                     
                     existing.is_incremental = is_incremental
-                    existing.last_parsed_at = datetime.utcnow()
+                    existing.last_parsed_at = datetime.now()
                     updated_scenes.append(existing)
                 else:
                     # 创建新场景
@@ -717,7 +717,7 @@ class NovelService:
                         end_chapter=chapter.number,
                         is_incremental=is_incremental,
                         source_range=source_range,
-                        last_parsed_at=datetime.utcnow()
+                        last_parsed_at=datetime.now()
                     )
                     self.db.add(scene)
                     created_scenes.append(scene)

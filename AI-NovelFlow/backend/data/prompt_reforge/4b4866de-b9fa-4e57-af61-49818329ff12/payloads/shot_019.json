@@ -1,0 +1,11 @@
+{
+  "shot": 19,
+  "chapter": 3,
+  "prompt_text": "Shot 1（10s｜9:16）→ subject/composition：女战士（25岁，黑色战术服，手持双刃）位于悬崖边缘，中景，构图突出人物与背景山峰。  \n→ action/performance：女战士缓缓抬起双刃，刃尖指向天空，肌肉紧绷，呼吸平稳，眼神坚定。  \n→ scene/props：悬崖边，远处有雪山，近处有岩石与风化痕迹，空间层次分明，尺度宏大。  \n→ camera/motion：正面机位，缓慢推近至人物面部，速度控制在0.5秒/帧。  \n→ lighting/atmosphere：晨光穿透云层，金色光线洒在刃上，色调偏暖，氛围肃穆。  \n→ technical/spec：10秒｜9:16｜4K超清。  \n",
+  "duration": 4,
+  "ratio": "9:16",
+  "platforms": [
+    "seedance",
+    "kling"
+  ]
+}
