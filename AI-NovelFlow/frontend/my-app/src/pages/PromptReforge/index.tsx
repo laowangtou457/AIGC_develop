@@ -142,8 +142,7 @@ export default function PromptReforge() {
   const platformParts: Record<string, string> = detail?.report?.platform_parts || {};
   const currentPlatformText = platformParts[activePlatform] || detail?.output_md || '';
 
-  const renderBeats = () => {
-    const beats = detail?.report?.beats;
+  const renderSingleBeats = (beats: any) => {
     if (!beats) return <p className="text-sm text-gray-500">暂无提取结果。</p>;
     return (
       <div className="space-y-4">
@@ -153,7 +152,7 @@ export default function PromptReforge() {
           <div>
             <p className="mb-1 text-sm font-medium flex items-center gap-1"><Users className="h-4 w-4" /> 角色（{beats.characters.length}）</p>
             <div className="grid grid-cols-2 gap-2">
-              {beats.characters.map((c, i) => (
+              {beats.characters.map((c: any, i: number) => (
                 <div key={i} className="rounded-md border border-gray-200 bg-gray-50 p-2 text-xs">
                   <b>{c.name}</b>{c.gender ? `（${c.gender}·${c.age || ''}）` : ''}
                   {c.appearance && <p className="mt-1 text-gray-600">{c.appearance}</p>}
@@ -165,7 +164,7 @@ export default function PromptReforge() {
         {!!beats.scenes?.length && (
           <div>
             <p className="mb-1 text-sm font-medium flex items-center gap-1"><MapPin className="h-4 w-4" /> 场景（{beats.scenes.length}）</p>
-            {beats.scenes.map((s, i) => (
+            {beats.scenes.map((s: any, i: number) => (
               <div key={i} className="rounded-md border border-gray-200 bg-gray-50 p-2 text-xs">
                 <b>{s.name}</b>
                 {s.setting && <p className="mt-1 text-gray-600">{s.setting}</p>}
@@ -177,7 +176,7 @@ export default function PromptReforge() {
           <div>
             <p className="mb-1 text-sm font-medium flex items-center gap-1"><Layers className="h-4 w-4" /> 剧本节拍（{beats.beats.length} 镜）</p>
             <div className="space-y-2">
-              {beats.beats.map((b, i) => {
+              {beats.beats.map((b: any, i: number) => {
                 const action = String(b.action || '');
                 const camera = String(b.camera || '');
                 const atmosphere = String(b.atmosphere || '');
@@ -198,6 +197,33 @@ export default function PromptReforge() {
         )}
       </div>
     );
+  };
+
+  const renderBeats = () => {
+    // 多章：智能断章后每章独立展示（每章有各自节拍/镜头数）
+    const chapters = detail?.report?.chapters;
+    if (Array.isArray(chapters) && chapters.length > 0) {
+      return (
+        <div className="space-y-4">
+          <p className="text-sm font-medium text-gray-700">
+            共 {chapters.length} 章（智能断章，每章 ≤ 1 万字；各章独立生成提示词集）
+          </p>
+          {chapters.map((ch: any) => (
+            <div key={ch.index} className="rounded-lg border border-gray-200 p-3">
+              <p className="mb-2 text-sm font-semibold">
+                第 {ch.index} 章：{ch.heading}
+                <span className="ml-2 text-xs font-normal text-gray-500">
+                  {ch.beat_count ?? '…'} 节拍 / {ch.shot_count ?? '…'} 镜
+                </span>
+              </p>
+              {renderSingleBeats(ch.beats)}
+            </div>
+          ))}
+        </div>
+      );
+    }
+    // 单章：兼容旧报告结构
+    return renderSingleBeats(detail?.report?.beats);
   };
 
   return (
@@ -397,6 +423,11 @@ export default function PromptReforge() {
                     {STATUS_META[detail.status]?.label}
                   </span>
                   <span className="text-xs text-gray-400">{detail.stage}</span>
+                  {!!detail.report?.chapter_count && (
+                    <span className="rounded-full bg-indigo-50 px-2 py-0.5 text-xs text-indigo-600">
+                      共 {detail.report.chapter_count} 章 · {detail.report.shot_count ?? '…'} 镜
+                    </span>
+                  )}
                 </div>
               </div>
 

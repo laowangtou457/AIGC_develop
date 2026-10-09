@@ -40,17 +40,31 @@ export interface ReforgeBeat {
   [k: string]: unknown;
 }
 
+export interface ReforgeBeats {
+  title?: string;
+  style?: string;
+  characters?: Array<{ name: string; gender?: string; age?: string; appearance?: string }>;
+  scenes?: Array<{ name: string; setting?: string }>;
+  beats?: ReforgeBeat[];
+}
+
+export interface ReforgeChapter {
+  index: number;
+  heading: string;
+  beat_count?: number;
+  shot_count?: number;
+  md_file?: string;
+  platform_parts?: Record<string, string>;
+  beats?: ReforgeBeats;
+}
+
 export interface PromptReforgeDetail extends PromptReforgeTask {
   input_text: string;
   output_md: string;
   report: {
-    beats?: {
-      title?: string;
-      style?: string;
-      characters?: Array<{ name: string; gender?: string; age?: string; appearance?: string }>;
-      scenes?: Array<{ name: string; setting?: string }>;
-      beats?: ReforgeBeat[];
-    };
+    beats?: ReforgeBeats;
+    chapters?: ReforgeChapter[];
+    chapter_count?: number;
     platforms?: string[];
     shot_count?: number;
     platform_parts?: Record<string, string>;

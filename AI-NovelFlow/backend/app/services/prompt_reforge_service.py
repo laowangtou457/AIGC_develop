@@ -27,6 +27,7 @@ import os
 import re
 from datetime import datetime
 from pathlib import Path
+from typing import Optional
 
 from app.core.database import SessionLocal
 from app.models.prompt_reforge_history import PromptReforgeHistory
@@ -36,8 +37,9 @@ from app.services.llm_service import LLMService
 H3_RULES_DIR = Path(r"F:\Develop\NewAIProductionWorkflow\ManjuToSplitFrameAndProperty\docs\references")
 REFORGE_DATA_DIR = Path(r"F:\Develop\NewAIProductionWorkflow\AI-NovelFlow\backend\data\prompt_reforge")
 
-MAX_INPUT_CHARS = 12000          # 输入文本截断（本地 8b 上下文有限）
-MAX_BEATS = 12                   # 提取节拍上限（超出按重要度取前 N，防止输出截断）
+MAX_CHAPTER_CHARS = 10000      # 智能断章：每章不超过 1 万字（中文字符按 len() 计）
+MAX_CHAPTERS = 30              # 断章上限：超出部分不再处理，并在报告/产物中说明
+MAX_BEATS = 12                 # 每章提取节拍上限（超出按重要度取前 N，防止输出截断）
 MIN_DURATION, MAX_DURATION = 4, 15   # H3 单段时长约束
 
 # 目标平台展示名
@@ -180,11 +182,109 @@ def get_director_model(key: str) -> dict:
 
 # ═══════════════════════════ 工具函数 ═══════════════════════════
 
-def _truncate_input(text: str) -> str:
-    text = (text or "").strip()
-    if len(text) > MAX_INPUT_CHARS:
-        return text[:MAX_INPUT_CHARS] + "\n…（输入过长已截断）"
-    return text
+# ── 智能断章 ─────────────────────────────────────────────────────
+# 显式章节标记：第N章/回/幕/卷/部/场、Chapter N、Scene N、中文序数小标题
+_CHAPTER_MARK_RE = re.compile(
+    r"^\s*(?:第\s*[0-9一二三四五六七八九十百千零]+\s*[章节回幕卷部场]|"
+    r"Chapter\s+\d+|Scene\s+\d+|"
+    r"[一二三四五六七八九十]{1,3}\s*[、.．])",
+    re.MULTILINE | re.IGNORECASE,
+)
+
+
+def _split_by_marks(text: str) -> list:
+    """按显式章节标记切分（标记行保留在所属章首）"""
+    matches = list(_CHAPTER_MARK_RE.finditer(text))
+    if len(matches) <= 1:
+        return [text.strip()]
+    chapters = []
+    for idx, m in enumerate(matches):
+        start = m.start()
+        end = matches[idx + 1].start() if idx + 1 < len(matches) else len(text)
+        chunk = text[start:end].strip()
+        if chunk:
+            chapters.append(chunk)
+    return chapters
+
+
+def _split_by_paragraphs(text: str, max_chars: int) -> list:
+    """按段落（空行/行首非空白）累积切分，每块 ≤ max_chars，单段超长按字符硬切"""
+    paras = [p.strip() for p in re.split(r"\n\s*\n|\n(?=\S)", text) if p.strip()]
+    chunks, cur = [], ""
+    for p in paras:
+        while len(p) > max_chars:
+            if cur:
+                chunks.append(cur)
+                cur = ""
+            chunks.append(p[:max_chars])
+            p = p[max_chars:]
+        if not cur or len(cur) + len(p) + 1 <= max_chars:
+            cur = (cur + "\n" + p).strip() if cur else p
+        else:
+            chunks.append(cur)
+            cur = p
+    if cur:
+        chunks.append(cur)
+    return chunks or [text[:max_chars]]
+
+
+def _chapter_heading(chunk: str, index: int) -> str:
+    """从章首行提取标题（无标记时回退『第N部分』）"""
+    first = next((l.strip() for l in chunk.splitlines() if l.strip()), "")
+    if re.match(r"^第\s*[0-9一二三四五六七八九十百千零]+\s*[章节回幕卷部场]", first):
+        return first[:40]
+    if re.match(r"^Chapter\s+\d+|^Scene\s+\d+", first, re.IGNORECASE):
+        return first[:40]
+    return f"第{index}部分"
+
+
+def _smart_split_chapters(
+    text: str,
+    max_chars: int = MAX_CHAPTER_CHARS,
+    max_chapters: int = MAX_CHAPTERS,
+) -> list:
+    """
+    智能断章：长文本按 章/回/幕/卷/部/场 显式标记优先切分，
+    超长块按段落二次切分，确保每章 ≤ max_chars（默认 1 万字）。
+    返回：[{"index": 1, "heading": "…", "text": "…"}, ...]
+    """
+    text = text or ""
+    # 剥 BOM：Windows 记事本/工具导出的 UTF-8 文件常带 \ufeff，
+    # 若不剥除会导致首个显式章节标记（第N章）匹配失败、整篇回退段落切分。
+    if text.startswith("\ufeff"):
+        text = text.lstrip("\ufeff")
+    text = text.strip()
+    if not text:
+        return []
+    # 1) 显式章节标记切
+    parts = _split_by_marks(text)
+    # 2) 超长块按段落二次切
+    chapters = []
+    for part in parts:
+        if len(part) <= max_chars:
+            chapters.append(part)
+        else:
+            chapters.extend(_split_by_paragraphs(part, max_chars))
+    # 3) 碎片合并：<300 字并入上一章，避免大量碎块
+    merged = []
+    for ch in chapters:
+        if merged and len(ch) < 300 and len(merged[-1]) + len(ch) <= max_chars + 1000:
+            merged[-1] = merged[-1] + "\n" + ch
+        else:
+            merged.append(ch)
+    # 4) 章节上限保护（避免极端长文产生数百个子任务）
+    if len(merged) > max_chapters:
+        kept = merged[:max_chapters]
+        kept.append(
+            f"（提示：输入文本超出断章上限 {max_chapters} 章，"
+            f"后续 {len(merged) - max_chapters} 段内容未处理；请拆分输入或分批提交）"
+        )
+        merged = kept
+    # 5) 生成带标题的结构
+    result = []
+    for i, ch in enumerate(merged, 1):
+        result.append({"index": i, "heading": _chapter_heading(ch, i), "text": ch})
+    return result
 
 
 def _update_state(task_id: str, *, status=None, stage=None, error=None, output_md=None, report=None):
@@ -234,32 +334,48 @@ EXTRACT_SYSTEM = """你是影视剧本结构化分析师。把输入的提示词
 
 
 async def _extract_beats(input_text: str) -> dict:
-    """调用本地 LLM 提取结构化节拍"""
-    result = await LLMService().chat_completion(
-        system_prompt=EXTRACT_SYSTEM,
-        user_content=f"请提取以下文本的剧本节拍（JSON）：\n\n{input_text}",
-        temperature=0.2,
-        max_tokens=4000,
-        response_format="json_object",
-        task_type="prompt_reforge_extract",
-        prompt_template_name="提示词重构-节拍提取",
-    )
-    if not result.get("success"):
-        raise RuntimeError(result.get("error") or "节拍提取失败")
-    raw = result.get("content") or ""
-    try:
-        data = json.loads(raw)
-    except Exception:
-        # 尝试剥离围栏/前后噪声
-        m = re.search(r"\{.*\}", raw, re.S)
-        if not m:
-            raise RuntimeError(f"节拍提取 JSON 解析失败: {raw[:300]}")
-        data = json.loads(m.group(0))
-    if not isinstance(data, dict):
-        raise RuntimeError("节拍提取返回非对象")
-    beats = data.get("beats") or []
-    data["beats"] = beats[:MAX_BEATS]
-    return data
+    """调用本地 LLM 提取结构化节拍（带 1 次自动重试）
+
+    重试原因：Ollama 在显存竞争/模型热加载等瞬时状态下可能返回
+    200 + {"error": "Invalid request..."} 占位 JSON，或直接 non-200；
+    重试一次可显著提高提取成功率，避免生成空节拍导致重构质量崩塌。
+    """
+    last_err: Optional[Exception] = None
+    for attempt in (1, 2):
+        try:
+            result = await LLMService().chat_completion(
+                system_prompt=EXTRACT_SYSTEM,
+                user_content=f"请提取以下文本的剧本节拍（JSON）：\n\n{input_text}",
+                temperature=0.2,
+                max_tokens=4000,
+                response_format="json_object",
+                task_type="prompt_reforge_extract",
+                prompt_template_name="提示词重构-节拍提取",
+            )
+            if not result.get("success"):
+                raise RuntimeError(result.get("error") or "节拍提取失败")
+            raw = result.get("content") or ""
+            try:
+                data = json.loads(raw)
+            except Exception:
+                # 尝试剥离围栏/前后噪声
+                m = re.search(r"\{.*\}", raw, re.S)
+                if not m:
+                    raise RuntimeError(f"节拍提取 JSON 解析失败: {raw[:300]}")
+                data = json.loads(m.group(0))
+            if not isinstance(data, dict):
+                raise RuntimeError("节拍提取返回非对象")
+            # 防御：模型/服务返回错误占位 JSON 或无节拍时视为失败并重试
+            if data.get("error") or not data.get("beats"):
+                raise RuntimeError(data.get("error") or "节拍提取返回空节拍")
+            beats = data.get("beats") or []
+            data["beats"] = beats[:MAX_BEATS]
+            return data
+        except Exception as e:
+            last_err = e
+            if attempt == 1:
+                await asyncio.sleep(3)
+    raise RuntimeError(f"节拍提取失败（重试后仍失败）：{last_err}")
 
 
 # ═══════════════════════════ ② 重构 ═══════════════════════════
@@ -362,60 +478,121 @@ def _split_platform_parts(md_text: str, platforms: list) -> dict:
     return parts
 
 
-def _pack_outputs(task_id: str, input_text: str, beats: dict, md_text: str, platforms: list) -> dict:
-    """落盘 prompts.md / payloads/*.json / report.json，返回文件树"""
+def _pack_outputs(
+    task_id: str,
+    input_text: str,
+    chapters: list,
+    chapter_outputs: list,
+    platforms: list,
+) -> dict:
+    """
+    组装落盘（分章版）：
+      prompts.md            汇总提示词集（按章分区，可整体复制）
+      chapters/chapter_NN.md 每章独立提示词集（含该章节拍与平台分区）
+      payloads/shot_NNN.json 全部镜头全局连续编号
+      report.json           含 chapters 元信息（每章节拍数/镜头数/平台分区）
+    返回 {"file_tree": [...], "shot_count": N, "chapter_count": M}
+    """
     out_dir = REFORGE_DATA_DIR / task_id
     payload_dir = out_dir / "payloads"
+    chapter_dir = out_dir / "chapters"
     payload_dir.mkdir(parents=True, exist_ok=True)
+    chapter_dir.mkdir(parents=True, exist_ok=True)
 
-    # prompts.md：头部 + 提取摘要 + 逐镜提示词集
+    merged_platform_parts: dict[str, str] = {}
+    full_parts, output_md_parts = [], []
+    shot_global = 0
+    payloads = []
+    chapter_meta = []
+
+    for co in chapter_outputs:
+        idx, heading, beats, md_text = co["index"], co["heading"], co["beats"], co["md_text"]
+        shot_n = len(_shot_blocks_from_md(md_text))
+
+        # 每章独立 md
+        ch_header = "\n".join([
+            f"# 第 {idx} 章：{heading}",
+            "",
+            f"- 提取节拍数：{len(beats.get('beats') or [])}",
+            f"- 本章镜头数：{shot_n}",
+            "",
+            "## 提取结果（剧本节拍）",
+            "",
+            "```json",
+            json.dumps(beats, ensure_ascii=False, indent=2),
+            "```",
+            "",
+            "## 逐镜提示词集（AI 工具可生成级）",
+            "",
+        ])
+        (chapter_dir / f"chapter_{idx:02d}.md").write_text(ch_header + md_text + "\n", encoding="utf-8")
+
+        # 每章平台分区
+        ch_parts = _split_platform_parts(md_text, platforms)
+
+        # payloads：全局连续编号
+        for b in _shot_blocks_from_md(md_text):
+            shot_global += 1
+            payload = {
+                "shot": shot_global,
+                "chapter": idx,
+                "prompt_text": b,
+                "duration": 4,   # 默认 4-15s 内，正文含时长时以正文为准
+                "ratio": "9:16",
+                "platforms": platforms,
+            }
+            payloads.append(payload)
+            (payload_dir / f"shot_{shot_global:03d}.json").write_text(
+                json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
+
+        full_parts.append(f"## 第 {idx} 章：{heading}\n\n{md_text.strip()}")
+        output_md_parts.append(f"## 第 {idx} 章：{heading}\n\n{md_text.strip()}")
+        chapter_meta.append({
+            "index": idx,
+            "heading": heading,
+            "beat_count": len(beats.get("beats") or []),
+            "shot_count": shot_n,
+            "md_file": f"chapters/chapter_{idx:02d}.md",
+            "platform_parts": ch_parts,
+        })
+
+    # 整篇平台分区（供前端平台 tab 快速切换）
+    merged_md = "\n\n---\n\n".join(full_parts)
+    merged_platform_parts = _split_platform_parts(merged_md, platforms)
+
+    # prompts.md 汇总
     header = [
         "# 提示词提取与重构结果集",
         "",
         f"- 任务：{task_id}",
         f"- 生成时间：{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}",
         f"- 目标平台：{'、'.join(PLATFORM_LABELS.get(p, p) for p in platforms)}",
-        f"- 提取节拍数：{len(beats.get('beats') or [])}",
+        f"- 章节数：{len(chapter_outputs)}（智能断章，每章 ≤ {MAX_CHAPTER_CHARS} 字）",
+        f"- 总镜头数：{shot_global}",
         "",
         "## 原始输入（节选）",
         "",
         f"```text\n{input_text[:1500]}\n```",
         "",
-        "## 提取结果（剧本节拍）",
+        "## 章节总览",
         "",
-        "```json",
-        json.dumps(beats, ensure_ascii=False, indent=2),
-        "```",
-        "",
-        "## 逐镜提示词集（AI 工具可生成级）",
-        "",
+        "| 章 | 标题 | 节拍数 | 镜头数 | 独立文件 |",
+        "|---|---|---|---|---|",
     ]
+    for cm in chapter_meta:
+        header.append(f"| {cm['index']} | {cm['heading']} | {cm['beat_count']} | {cm['shot_count']} | {cm['md_file']} |")
+    header += ["", "## 逐镜提示词集（AI 工具可生成级，按章分区）", ""]
     md_path = out_dir / "prompts.md"
-    md_path.write_text("\n".join(header) + md_text + "\n", encoding="utf-8")
-
-    # payloads：逐镜提示词 JSON（供 API/ComfyUI 复用）
-    blocks = _shot_blocks_from_md(md_text)
-    payloads = []
-    for idx, block in enumerate(blocks, 1):
-        payload = {
-            "shot": idx,
-            "prompt_text": block,
-            "duration": 4,   # 默认 4-15s 内，正文含时长时以正文为准
-            "ratio": "9:16",
-            "platforms": platforms,
-        }
-        payloads.append(payload)
-        (payload_dir / f"shot_{idx:03d}.json").write_text(
-            json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
+    md_path.write_text("\n".join(header) + "\n\n" + merged_md + "\n", encoding="utf-8")
 
     # report.json
-    platform_parts = _split_platform_parts(md_text, platforms)
     report = {
         "task_id": task_id,
-        "beats": beats,
+        "chapter_count": len(chapter_outputs),
+        "chapters": chapter_meta,
         "platforms": platforms,
-        "shot_count": len(payloads),
-        "platform_parts": platform_parts,
+        "shot_count": shot_global,
+        "platform_parts": merged_platform_parts,
         "generated_at": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
     }
     (out_dir / "report.json").write_text(json.dumps(report, ensure_ascii=False, indent=2), encoding="utf-8")
@@ -427,38 +604,65 @@ def _pack_outputs(task_id: str, input_text: str, beats: dict, md_text: str, plat
         for fn in sorted(files):
             rel = str(rel_root / fn) if str(rel_root) != "." else fn
             file_tree.append({"path": rel.replace("\\", "/"), "size": os.path.getsize(os.path.join(root, fn))})
-    return {"file_tree": file_tree, "shot_count": len(payloads)}
+    return {"file_tree": file_tree, "shot_count": shot_global, "chapter_count": len(chapter_outputs)}
 
 
 # ═══════════════════════════ 主流程 ═══════════════════════════
 
 async def run_prompt_reforge(task_id: str, input_text: str, director_key: str, platforms: list):
-    """后台任务：提取 → 重构 → 组装落盘"""
+    """
+    后台任务：智能断章 → 逐章（提取 → 重构）→ 组装落盘。
+    多章严格按序串行执行（for + await 顺序推进，worker 队列 + gpu_lock 保证
+    同一时刻只跑一个模型任务，不并行抢显存）。
+    """
     director = get_director_model(director_key)
     platforms = [p for p in platforms if p in PLATFORM_LABELS] or DEFAULT_PLATFORMS
-    input_text = _truncate_input(input_text)
 
     try:
-        # ① 提取
-        _update_state(task_id, stage=f"① 提取剧本节拍（{director['name']}）…")
-        beats = await _extract_beats(input_text)
+        # ⓪ 智能断章（每章 ≤ 1 万字，不再整篇截断）
+        chapters = _smart_split_chapters(input_text or "")
+        if not chapters:
+            _update_state(task_id, status="failed", stage="重构失败", error="输入为空")
+            return
+        _update_state(
+            task_id,
+            stage=f"智能断章完成：共 {len(chapters)} 章（每章 ≤ {MAX_CHAPTER_CHARS} 字），开始顺序生成…",
+        )
 
-        # ② 重构
-        _update_state(task_id, stage=f"② 按导演模型重构逐镜提示词（目标：{'、'.join(PLATFORM_LABELS.get(p, p) for p in platforms)}）…")
-        md_text = await _reforge_prompts(director_key, beats, platforms)
+        # ①+② 逐章：提取 → 重构（严格串行）
+        chapter_outputs = []
+        for i, ch in enumerate(chapters, 1):
+            _update_state(task_id, stage=f"第 {i}/{len(chapters)} 章《{ch['heading']}》：① 提取剧本节拍…")
+            beats = await _extract_beats(ch["text"])
+            _update_state(
+                task_id,
+                stage=f"第 {i}/{len(chapters)} 章《{ch['heading']}》：② 重构逐镜提示词（{director['name']}）…",
+            )
+            md_text = await _reforge_prompts(director_key, beats, platforms)
+            chapter_outputs.append({"index": ch["index"], "heading": ch["heading"], "beats": beats, "md_text": md_text})
 
-        # ③ 组装落盘
-        _update_state(task_id, stage="③ 组装提示词集并落盘…")
-        result = _pack_outputs(task_id, input_text, beats, md_text, platforms)
+        # ③ 组装落盘（分章产物 + 汇总）
+        _update_state(task_id, stage=f"③ 组装 {len(chapters)} 章提示词集并落盘…")
+        result = _pack_outputs(task_id, input_text, chapters, chapter_outputs, platforms)
+
+        # 汇总 output_md（按章分区，供前端提示词集页签展示）
+        output_md = "\n\n---\n\n".join(
+            f"## 第 {co['index']} 章：{co['heading']}\n\n{co['md_text'].strip()}"
+            for co in chapter_outputs
+        )
 
         _update_state(
             task_id,
             status="success",
-            stage=f"完成：{result['shot_count']} 个镜头提示词，{len(platforms)} 个平台",
-            output_md=md_text,
-            report={"beats": beats, "platforms": platforms, "shot_count": result["shot_count"]},
+            stage=f"完成：{result['chapter_count']} 章 / {result['shot_count']} 个镜头提示词 / {len(platforms)} 个平台",
+            output_md=output_md,
+            report={
+                "chapter_count": result["chapter_count"],
+                "shot_count": result["shot_count"],
+                "platforms": platforms,
+            },
         )
-        print(f"[PromptReforge] {task_id} 完成：{result['shot_count']} 镜 / {','.join(platforms)}")
+        print(f"[PromptReforge] {task_id} 完成：{result['chapter_count']} 章 / {result['shot_count']} 镜 / {','.join(platforms)}")
     except Exception as exc:
         import traceback
         traceback.print_exc()
