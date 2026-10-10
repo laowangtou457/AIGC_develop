@@ -1,0 +1,11 @@
+{
+  "shot": 1,
+  "chapter": 1,
+  "prompt_text": "Shot 1 (04-12 sec, 9:16):  \n1. subject_definitions: <Subject 1> is the young man in the script, wearing a black robe, a straw hat covering his face, holding a long knife, and with a fit physique. <Subject 2> is the middle-aged man in the script, wearing a black robe, a mask covering his face, with a burned half face, and holding a long knife.  \n2. summary: [reference generation] The young man steps onto the broken bridge, the middle-aged man draws his knife facing him.  \n3. retention_analysis: <Subject 1> (appears in [Shot 1]): fully_preserved. <Subject 2> (appears in [Shot 1]): fully_preserved.  \n4. detailed_description: In the style of a realistic movie, [Shot 1] starts with a low-angle upward shot, highlighting the broken bridge and the middle-aged man. The camera follows the young man as he steps onto the wet and slippery bridge surface. Lightning reflects on the blade of the middle-aged man's knife. The atmosphere is heavy with rain and darkness, with the bridge surface reflecting wetness and light.  \n5. overall_soundscape: The sound of heavy rain falling on the bridge. The sound of the wind howling through the broken bridge. The sound of the middle-aged man's knife being drawn. The sound of thunder in the distance.  \n6. non_diegetic_music: A low, suspenseful string melody with a steady rhythm. A deep, resonant bass line. A faint, echoing percussion.",
+  "duration": 4,
+  "ratio": "9:16",
+  "platforms": [
+    "minimax_h3",
+    "seedance"
+  ]
+}

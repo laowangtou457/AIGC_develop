@@ -1,0 +1,11 @@
+{
+  "shot": 6,
+  "chapter": 1,
+  "prompt_text": "Shot 6 (04-12 sec, 9:16):  \n1. subject_definitions: <Subject 1> is the young man陆离 in <Picture 1>, with black cloak, a long knife, and wet clothes; <Subject 2> is the middle-aged man黑衣人 in <Picture 2>, with black clothes, a burned half face, and a long knife.  \n2. summary: [reference generation] The two swords clash again, the battle intensifies.  \n3. retention_analysis: <Subject 1> (appears in [Shot 6]): fully_preserved; <Subject 2> (appears in [Shot 6]): fully_preserved.  \n4. detailed_description: Style: Realistic movie texture, stormy night, dramatic lighting. At MM:20.000, the shot cuts to [Shot 6]. Quick cuts, focusing on the clash of swords and the rain. The two swords clash again, the battle intensifies.  \n5. overall_soundscape: Rain hitting the bridge, metallic clang of swords, distant thunder.  \n6. non_diegetic_music: Fast-paced, intense strings with a driving rhythm, matching the clash of swords and the storm.\n\n### Seedance\n\n### Seedance",
+  "duration": 4,
+  "ratio": "9:16",
+  "platforms": [
+    "minimax_h3",
+    "seedance"
+  ]
+}

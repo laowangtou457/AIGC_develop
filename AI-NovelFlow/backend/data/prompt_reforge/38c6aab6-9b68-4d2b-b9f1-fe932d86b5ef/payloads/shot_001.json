@@ -1,0 +1,14 @@
+{
+  "shot": 1,
+  "chapter": 1,
+  "prompt_text": "### MiniMax H3\n<Subject 1> is the middle-aged man 方源, with a slim face, deep eyes, wearing a light blue robe, holding a wine jar, and a calm demeanor.\n<Subject 2> is the young woman 沈翠, in servant attire, with a clear face, holding wine and food, and a respectful expression.\n<Subject 3> is the rain-soaked bamboo pavilion, with continuous rain, a pond in front, a dark room, and a half-open window.\n<Subject 4> is the inner world of 方源, with an empty窍 like an ocean, and bronze-colored true energy.\n<Subject 5> is the moonlight蛊 in 方源's palm, with a pale blue glow, true energy being infused, and the蛊 resisting.\n<Subject 6> is the yuan stone, with true energy being absorbed, the yuan sea recovering, and the limitation of cultivation revealed.\n<Subject 7> is the rain-soaked bamboo pavilion, with decreasing rain, 方源 preparing to open the window, and 沈翠 knocking on the door to deliver wine and food.\n[reference generation]\n<Subject 1> (appears in [Shot 1]): fully_preserved - 保持外观一致性.\n<Subject 2> (appears in [Shot 8]): fully_preserved - 保持外观一致性.\n<Subject 3> (appears in [Shot 1]): fully_preserved - 保持外观一致性.\n<Subject 4> (appears in [Shot 3]): fully_preserved - 保持外观一致性.\n<Subject 5> (appears in [Shot 4]): fully_preserved - 保持外观一致性.\n<Subject 6> (appears in [Shot 6]): fully_preserved - 保持外观一致性.\n<Subject 7> (appears in [Shot 7]): fully_preserved - 保持外观一致性.",
+  "duration": 4,
+  "ratio": "9:16",
+  "platforms": [
+    "minimax_h3",
+    "seedance",
+    "kling",
+    "veo",
+    "jimeng"
+  ]
+}

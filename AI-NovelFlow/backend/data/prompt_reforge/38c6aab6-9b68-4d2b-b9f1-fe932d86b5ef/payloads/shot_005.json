@@ -1,0 +1,14 @@
+{
+  "shot": 5,
+  "chapter": 1,
+  "prompt_text": "Shot 4: A close-up, focusing on the changes on the moonlight蛊's surface and 方源's facial expression. The atmosphere is tense and intense, with pale blue light and bronze green energy intertwining.",
+  "duration": 4,
+  "ratio": "9:16",
+  "platforms": [
+    "minimax_h3",
+    "seedance",
+    "kling",
+    "veo",
+    "jimeng"
+  ]
+}

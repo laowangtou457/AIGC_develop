@@ -1,0 +1,14 @@
+{
+  "shot": 4,
+  "chapter": 1,
+  "prompt_text": "Shot 3: A first-person shot, showing 方源's perspective of the empty窍 with a bronze sea of true energy and a light membrane. The atmosphere is mysterious and deep, with the sea like an ocean and the membrane like silk.",
+  "duration": 4,
+  "ratio": "9:16",
+  "platforms": [
+    "minimax_h3",
+    "seedance",
+    "kling",
+    "veo",
+    "jimeng"
+  ]
+}

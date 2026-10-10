@@ -1,0 +1,11 @@
+{
+  "shot": 3,
+  "chapter": 1,
+  "prompt_text": "Shot 3 (04-12 sec, 9:16):  \n1. subject_definitions: <Subject 1> is the young man in the script, wearing a black robe, a straw hat covering his face, holding a long knife, and with a fit physique. <Subject 2> is the middle-aged man in the script, wearing a black robe, a mask covering his face, with a burned half face, and holding a long knife.  \n2. summary: [reference generation] The young man jumps into the air, slicing off the middle-aged man's mask.  \n3. retention_analysis: <Subject 1> (appears in [Shot 3]): fully_preserved. <Subject 2> (appears in [Shot 3]): fully_preserved.  \n4. detailed_description: At MM:08.000, the shot cuts to [Shot 3]. The camera is in a low-angle overhead shot, highlighting the young man's jump into the air and the trembling of the iron chain. The camera follows the mask falling into the river valley. The atmosphere is filled with the young man's jump and the trembling of the iron chain, with the mask falling into the river valley.  \n5. overall_soundscape: The sound of the young man jumping into the air. The sound of the iron chain trembling. The sound of the mask falling into the river. The sound of the wind howling through the broken bridge.  \n6. non_diegetic_music: A fast-paced string melody with a sharp rhythm. A deep, resonant bass line. A faint, echoing percussion.",
+  "duration": 4,
+  "ratio": "9:16",
+  "platforms": [
+    "minimax_h3",
+    "seedance"
+  ]
+}

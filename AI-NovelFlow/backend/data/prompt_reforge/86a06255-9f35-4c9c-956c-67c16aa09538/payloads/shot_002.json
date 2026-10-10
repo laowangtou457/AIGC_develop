@@ -1,0 +1,11 @@
+{
+  "shot": 2,
+  "chapter": 1,
+  "prompt_text": "Shot 2 (04-12 sec, 9:16):  \n1. subject_definitions: <Subject 1> is the young man in the script, wearing a black robe, a straw hat covering his face, holding a long knife, and with a fit physique. <Subject 2> is the middle-aged man in the script, wearing a black robe, a mask covering his face, with a burned half face, and holding a long knife.  \n2. summary: [reference generation] The two men's blades clash, sparks fly in the rain.  \n3. retention_analysis: <Subject 1> (appears in [Shot 2]): fully_preserved. <Subject 2> (appears in [Shot 2]): fully_preserved.  \n4. detailed_description: At MM:04.000, the shot cuts to [Shot 2]. The camera rapidly switches between the two men's blades clashing, focusing on the light and rain. The camera follows the movements of the blades as they clash, sparks flying in the rain. The atmosphere is filled with the clash of blades and the flashing of lightning in the rain.  \n5. overall_soundscape: The sound of the blades clashing in the rain. The sound of the wind howling through the broken bridge. The sound of thunder in the distance. The sound of the rain falling on the bridge.  \n6. non_diegetic_music: A fast-paced string melody with a sharp rhythm. A deep, resonant bass line. A faint, echoing percussion.",
+  "duration": 4,
+  "ratio": "9:16",
+  "platforms": [
+    "minimax_h3",
+    "seedance"
+  ]
+}

@@ -1,0 +1,14 @@
+{
+  "shot": 7,
+  "chapter": 1,
+  "prompt_text": "Shot 6: A close-up, focusing on the yuan stone and 方源's hand movements. The atmosphere is a mix of recovery and limitation, with the yuan sea rising.",
+  "duration": 4,
+  "ratio": "9:16",
+  "platforms": [
+    "minimax_h3",
+    "seedance",
+    "kling",
+    "veo",
+    "jimeng"
+  ]
+}

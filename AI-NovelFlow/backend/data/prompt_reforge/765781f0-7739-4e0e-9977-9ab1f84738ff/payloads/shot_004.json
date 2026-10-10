@@ -1,0 +1,11 @@
+{
+  "shot": 4,
+  "chapter": 1,
+  "prompt_text": "Shot 4 (04-12 sec, 9:16):  \n1. subject_definitions: <Subject 1> is the young man陆离 in <Picture 1>, with black cloak, a long knife, and wet clothes; <Subject 2> is the middle-aged man黑衣人 in <Picture 2>, with black clothes, a burned half face, and a long knife.  \n2. summary: [reference generation] 黑衣人 reveals his identity, 陆离 responds to the past.  \n3. retention_analysis: <Subject 1> (appears in [Shot 4]): fully_preserved; <Subject 2> (appears in [Shot 4]): fully_preserved.  \n4. detailed_description: Style: Realistic movie texture, stormy night, dramatic lighting. At MM:12.000, the shot cuts to [Shot 4]. Medium shot, focusing on the faces of 陆离 and 黑衣人. <d>黑衣人: 你终于认出我了。五年前青石镇那一夜，我全家十三口死在你的刀下。</d> <d>陆离: 那夜我杀的，是屠镇的悍匪十三人。你父亲是他们的头目。</d>  \n5. overall_soundscape: Thunder rumbling in the distance, rain hitting the bridge, distant echoes of footsteps.  \n6. non_diegetic_music: Deep, rhythmic percussion with a slow build-up, matching the tension of the storm and the confrontation.",
+  "duration": 4,
+  "ratio": "9:16",
+  "platforms": [
+    "minimax_h3",
+    "seedance"
+  ]
+}

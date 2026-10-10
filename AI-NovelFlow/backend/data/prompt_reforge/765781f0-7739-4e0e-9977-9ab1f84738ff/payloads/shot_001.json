@@ -1,0 +1,11 @@
+{
+  "shot": 1,
+  "chapter": 1,
+  "prompt_text": "Shot 1 (04-12 sec, 9:16):  \n1. subject_definitions: <Subject 1> is the young man陆离 in <Picture 1>, with black cloak, a long knife, and wet clothes; <Subject 2> is the middle-aged man黑衣人 in <Picture 2>, with black clothes, a burned half face, and a long knife.  \n2. summary: [reference generation] 陆离 steps onto the broken bridge, 黑衣人 draws his knife facing him.  \n3. retention_analysis: <Subject 1> (appears in [Shot 1]): fully_preserved; <Subject 2> (appears in [Shot 1]): fully_preserved.  \n4. detailed_description: Style: Realistic movie texture, stormy night, dramatic lighting. [Shot 1] Low-angle仰拍, camera follows 陆离's steps on the wet bridge. 陆离 wears a black cloak with a long knife, his wet clothes are soaked by the rain. 黑衣人 stands opposite, draws his knife, the blade reflects lightning.  \n5. overall_soundscape: Thunder rumbling in the distance, rain hitting the bridge, distant echoes of footsteps.  \n6. non_diegetic_music: Deep, rhythmic percussion with a slow build-up, matching the tension of the storm and the confrontation.",
+  "duration": 4,
+  "ratio": "9:16",
+  "platforms": [
+    "minimax_h3",
+    "seedance"
+  ]
+}

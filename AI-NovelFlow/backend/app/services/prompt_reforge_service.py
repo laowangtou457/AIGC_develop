@@ -229,10 +229,20 @@ def _split_by_paragraphs(text: str, max_chars: int) -> list:
 
 
 def _chapter_heading(chunk: str, index: int) -> str:
-    """从章首行提取标题（无标记时回退『第N部分』）"""
+    """从章首行提取标题（无标记时回退『第N部分』）。
+
+    修复：原文首行常为『第十章：天有不测风云，炼蛊别具艰辛』这类带
+    『第X章』前缀的标题；此处剥离前缀只保留冒号/分隔符后的标题正文，
+    避免后续 _pack_outputs 拼接成『第 1 章：第十章：…』双重前缀。
+    """
     first = next((l.strip() for l in chunk.splitlines() if l.strip()), "")
     if re.match(r"^第\s*[0-9一二三四五六七八九十百千零]+\s*[章节回幕卷部场]", first):
-        return first[:40]
+        # 剥离『第X章』前缀及紧邻分隔符（第X章 / 第X章： / 第X章、等）
+        rest = re.sub(
+            r"^第\s*[0-9一二三四五六七八九十百千零]+\s*[章节回幕卷部场]\s*[:：、.．,，\-—\s]*",
+            "", first,
+        ).strip()
+        return (rest or first)[:40]
     if re.match(r"^Chapter\s+\d+|^Scene\s+\d+", first, re.IGNORECASE):
         return first[:40]
     return f"第{index}部分"
@@ -405,38 +415,113 @@ REFORGE_OUTPUT_TAIL = (
 )
 
 
-async def _reforge_prompts(director_key: str, beats: dict, platforms: list) -> str:
-    """按导演模型 + 节拍 + 目标平台，生成多平台逐镜提示词集"""
+# 单平台重构的最大输出 token（六段式/六要素 × 8-12 镜需要充足余量；
+# 6000 会截断导致 LLM 复读如 '### Seed' 洪水，拉高到 8000）
+REFORGE_MAX_TOKENS = 8000
+
+
+def _sanitize_md(md_text: str) -> str:
+    """清洗 LLM 原始输出，防御截断复读污染。
+
+    典型病态：模型在 max_tokens 截断后进入复读，连续输出数千行
+    '### Seed' 等无意义占位；此处按『连续重复行』截断，并顺带清理
+    行尾空白/空行堆积。
+    """
+    text = (md_text or "").replace("\r\n", "\n").replace("\r", "\n")
+    lines = text.split("\n")
+    cleaned: list[str] = []
+    run_key, run_count = None, 0
+    for ln in lines:
+        key = ln.strip()
+        if key == run_key:
+            run_count += 1
+            if run_count > 5:  # 同一行连续出现超过 5 次视为复读，丢弃
+                continue
+        else:
+            run_key, run_count = key, 1
+        cleaned.append(ln)
+    # 折叠尾部连续空行
+    while cleaned and not cleaned[-1].strip():
+        cleaned.pop()
+    return "\n".join(cleaned).strip()
+
+
+def _quality_check(platform: str, md_text: str, beats: dict) -> bool:
+    """轻量质量门：输出是否达到可生成级（不合格触发重试）"""
+    text = md_text or ""
+    if len(text.splitlines()) < max(3, len(beats.get("beats") or [])):
+        return False
+    if platform == "minimax_h3":
+        # Ref2VA/I2VA 关键段必须出现，否则视为八股复读/摆烂输出
+        return ("subject_definitions" in text and "detailed_description" in text) or \
+               ("integrated_multimodal_description" in text)
+    return True
+
+
+async def _reforge_platform_prompts(
+    director_key: str, beats: dict, platform: str, *, attempt: int = 0
+) -> str:
+    """按『单平台』重构逐镜提示词（一次调用只输出一个平台分区）"""
     director = get_director_model(director_key)
     rules = director["build_rules"]()
     system_prompt = "\n\n".join([
         rules,
-        _platform_pack_instruction(platforms),
+        _platform_pack_instruction([platform]),
         "你是 AI 视频提示词导演，输出必须达到【AI 工具可生成级】：模型拿到提示词无需二次理解即可生成。",
     ])
     user_content = (
         f"导演模型：{director['name']}\n"
-        f"目标平台：{'、'.join(PLATFORM_LABELS.get(p, p) for p in platforms)}\n\n"
+        f"目标平台：{PLATFORM_LABELS.get(platform, platform)}\n\n"
         f"【提取的剧本节拍】\n{json.dumps(beats, ensure_ascii=False, indent=2)}\n\n"
-        "请按导演模型规则与平台要求，输出逐镜提示词集。"
+        "请按导演模型规则与平台要求，输出该平台分区的逐镜提示词集（每镜完整、可直接复制提交）。"
     )
     result = await LLMService().chat_completion(
         system_prompt=system_prompt,
         user_content=user_content + REFORGE_OUTPUT_TAIL,
         temperature=0.3,
-        max_tokens=6000,
+        max_tokens=REFORGE_MAX_TOKENS,
         task_type="prompt_reforge_build",
-        prompt_template_name=f"提示词重构-{director['name']}",
+        prompt_template_name=f"提示词重构-{director['name']}-{platform}",
     )
     if not result.get("success"):
         raise RuntimeError(result.get("error") or "提示词重构失败")
-    return (result.get("content") or "").strip()
+    raw = (result.get("content") or "").strip()
+    raw = _sanitize_md(raw)
+    # 质量门：不合格自动重试一次（同平台最多 2 次）
+    if not _quality_check(platform, raw, beats) and attempt < 1:
+        await asyncio.sleep(2)
+        return await _reforge_platform_prompts(
+            director_key, beats, platform, attempt=attempt + 1
+        )
+    return raw
+
+
+async def _reforge_prompts(director_key: str, beats: dict, platforms: list) -> str:
+    """按导演模型 + 节拍 + 目标平台，生成多平台逐镜提示词集。
+
+    修复：原实现一次调用输出全部平台，5 平台 × 8-12 镜远超单次
+    max_tokens，必然截断并诱发 LLM 复读（'### Seed' 洪水）。
+    现改为逐平台串行生成，每平台独立分区标题，单次输出量可控。
+    """
+    parts: list[str] = []
+    for platform in platforms:
+        part = await _reforge_platform_prompts(director_key, beats, platform)
+        if not part:
+            continue
+        parts.append(f"### {PLATFORM_LABELS.get(platform, platform)}\n\n{part}")
+    return "\n\n".join(parts)
 
 
 # ═══════════════════════════ ③ 组装落盘 ═══════════════════════════
 
 def _shot_blocks_from_md(md_text: str) -> list:
-    """从提示词集 Markdown 粗拆镜头块（供 payload JSON 使用，尽力而为）"""
+    """从提示词集 Markdown 粗拆镜头块（供 payload JSON 使用，尽力而为）
+
+    修复：
+      1) 首个 Shot 行之前的共享段（<Subject N> 定义 / [reference generation]）
+         不属于任何单镜，直接跳过，避免混入 Shot 1 的 payload；
+      2) 每个块经 _sanitize_md 清洗，截断截断复读（'### Seed' 洪水）。
+    """
     blocks = []
     current = []
     for line in (md_text or "").splitlines():
@@ -444,11 +529,28 @@ def _shot_blocks_from_md(md_text: str) -> list:
             if current:
                 blocks.append("\n".join(current))
             current = [line]
-        else:
+        elif current:
             current.append(line)
+        # 首个 Shot 之前的行：不收集（属于分区共享段）
     if current:
         blocks.append("\n".join(current))
-    return [b for b in blocks if b.strip()][:MAX_BEATS]
+    cleaned = []
+    for b in blocks:
+        if not b.strip():
+            continue
+        c = _sanitize_md(b)
+        if not c:
+            continue
+        # 过滤块内误入的平台分区标题行（LLM 在镜头中途插入
+        # '### Seedance' 等分区标记属于边界噪声，不属于镜头内容）
+        kept = [
+            ln for ln in c.splitlines()
+            if not re.match(r"^#{1,3}\s*(MiniMax\s*H3|Seedance|Kling|Veo|即梦)\s*$", ln.strip())
+        ]
+        c = "\n".join(kept).strip()
+        if c:
+            cleaned.append(c)
+    return cleaned[:MAX_BEATS]
 
 
 def _split_platform_parts(md_text: str, platforms: list) -> dict:

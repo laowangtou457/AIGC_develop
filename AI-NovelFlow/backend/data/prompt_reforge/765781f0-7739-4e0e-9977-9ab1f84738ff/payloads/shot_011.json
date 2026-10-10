@@ -1,0 +1,11 @@
+{
+  "shot": 11,
+  "chapter": 1,
+  "prompt_text": "Shot 5 (04-15 sec, 9:16): <Subject 1> is the young man陆离 in <Picture 1>, wearing a black cloak, a straw hat, and a long knife, his clothes are soaked by the rain. <Subject 2> is the middle-aged man黑衣人 in <Picture 2>, wearing black clothes, with a burned half face, and a long knife. [reference generation] <Subject 1> (appears in [Shot 5]): fully_preserved - <Subject 2> (appears in [Shot 5]): fully_preserved. The style opens with a medium shot, focusing on the facial expressions of both <Subject 1> and <Subject 2>. At MM:16.000, the shot cuts to <Subject 2> insists on the father's vengeance, <Subject 1> nods, and they fight again. <d>黑衣人: 即便如此，父仇不共戴天。</d> <d>陆离: 那便再战。</d> <d>no subtitles</d>\noverall_soundscape: Thunder rumbling, rain hitting the bridge, distant echo of footsteps. non_diegetic_music: Thunderous drums, low-pitched strings, rhythmic rain sounds.",
+  "duration": 4,
+  "ratio": "9:16",
+  "platforms": [
+    "minimax_h3",
+    "seedance"
+  ]
+}

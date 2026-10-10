@@ -1,0 +1,11 @@
+{
+  "shot": 3,
+  "chapter": 1,
+  "prompt_text": "Shot 3 (04-12 sec, 9:16):  \n1. subject_definitions: <Subject 1> is the young man陆离 in <Picture 1>, with black cloak, a long knife, and wet clothes; <Subject 2> is the middle-aged man黑衣人 in <Picture 2>, with black clothes, a burned half face, and a long knife.  \n2. summary: [reference generation] 陆离 jumps to avoid the attack, lifting 黑衣人's mask.  \n3. retention_analysis: <Subject 1> (appears in [Shot 3]): fully_preserved; <Subject 2> (appears in [Shot 3]): fully_preserved.  \n4. detailed_description: Style: Realistic movie texture, stormy night, dramatic lighting. At MM:08.000, the shot cuts to [Shot 3]. Low-angle俯拍, focusing on 陆离's jump and the mask falling into the river. 陆离 jumps to avoid the attack, lifting 黑衣人's mask, the mask falls into the river.  \n5. overall_soundscape: Rain hitting the bridge, the sound of the mask falling into the river, distant thunder.  \n6. non_diegetic_music: Deep, rhythmic percussion with a slow build-up, matching the tension of the storm and the confrontation.",
+  "duration": 4,
+  "ratio": "9:16",
+  "platforms": [
+    "minimax_h3",
+    "seedance"
+  ]
+}

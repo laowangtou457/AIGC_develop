@@ -1,0 +1,11 @@
+{
+  "shot": 5,
+  "chapter": 1,
+  "prompt_text": "Shot 5 (04-12 sec, 9:16):  \n1. subject_definitions: <Subject 1> is the young man陆离 in <Picture 1>, with black cloak, a long knife, and wet clothes; <Subject 2> is the middle-aged man黑衣人 in <Picture 2>, with black clothes, a burned half face, and a long knife.  \n2. summary: [reference generation] 黑衣人 insists on revenge, 陆离 agrees to fight again.  \n3. retention_analysis: <Subject 1> (appears in [Shot 5]): fully_preserved; <Subject 2> (appears in [Shot 5]): fully_preserved.  \n4. detailed_description: Style: Realistic movie texture, stormy night, dramatic lighting. At MM:16.000, the shot cuts to [Shot 5]. Medium shot, focusing on the faces of 陆离 and 黑衣人. <d>黑衣人: 即便如此，父仇不共戴天。</d> <d>陆离: 那便再战。</d>  \n5. overall_soundscape: Thunder rumbling in the distance, rain hitting the bridge, distant echoes of footsteps.  \n6. non_diegetic_music: Deep, rhythmic percussion with a slow build-up, matching the tension of the storm and the confrontation.",
+  "duration": 4,
+  "ratio": "9:16",
+  "platforms": [
+    "minimax_h3",
+    "seedance"
+  ]
+}

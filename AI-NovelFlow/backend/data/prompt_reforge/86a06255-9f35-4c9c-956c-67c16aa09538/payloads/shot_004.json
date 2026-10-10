@@ -1,0 +1,11 @@
+{
+  "shot": 4,
+  "chapter": 1,
+  "prompt_text": "Shot 4 (04-12 sec, 9:16):  \n1. subject_definitions: <Subject 1> is the young man in the script, wearing a black robe, a straw hat covering his face, holding a long knife, and with a fit physique. <Subject 2> is the middle-aged man in the script, wearing a black robe, a mask covering his face, with a burned half face, and holding a long knife.  \n2. summary: [reference generation] The middle-aged man reveals his identity, the young man recalls the past.  \n3. retention_analysis: <Subject 1> (appears in [Shot 4]): fully_preserved. <Subject 2> (appears in [Shot 4]): fully_preserved.  \n4. detailed_description: At MM:12.000, the shot cuts to [Shot 4]. The camera is in a medium shot, focusing on the two men facing each other. The camera pulls back to highlight their confrontation. The atmosphere is filled with the confrontation between the two men, with memories of the past intertwining with the present, and the light is dim.  \n5. overall_soundscape: The sound of the middle-aged man speaking. The sound of the young man speaking. The sound of the wind howling through the broken bridge. The sound of the rain falling on the bridge.  \n6. non_diegetic_music: A slow, melancholic string melody with a steady rhythm. A deep, resonant bass line. A faint, echoing percussion.",
+  "duration": 4,
+  "ratio": "9:16",
+  "platforms": [
+    "minimax_h3",
+    "seedance"
+  ]
+}

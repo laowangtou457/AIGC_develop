@@ -1,0 +1,14 @@
+{
+  "shot": 8,
+  "chapter": 1,
+  "prompt_text": "Shot 7: A medium shot, showing 方源's actions and the decreasing rain outside. The atmosphere is a mix of decision and inner resolution. <d>这场大雨已经连下了三天三夜，也该停了。</d>",
+  "duration": 4,
+  "ratio": "9:16",
+  "platforms": [
+    "minimax_h3",
+    "seedance",
+    "kling",
+    "veo",
+    "jimeng"
+  ]
+}

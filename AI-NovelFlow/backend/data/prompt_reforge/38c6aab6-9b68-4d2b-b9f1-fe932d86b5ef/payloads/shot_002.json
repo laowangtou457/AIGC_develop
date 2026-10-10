@@ -1,0 +1,14 @@
+{
+  "shot": 2,
+  "chapter": 1,
+  "prompt_text": "Shot 1: A medium shot, the camera slowly moves from the rain outside the window to a close-up of 方源's face. The atmosphere is dark and damp, with heavy rain. <d>已经三天三夜了。</d>",
+  "duration": 4,
+  "ratio": "9:16",
+  "platforms": [
+    "minimax_h3",
+    "seedance",
+    "kling",
+    "veo",
+    "jimeng"
+  ]
+}

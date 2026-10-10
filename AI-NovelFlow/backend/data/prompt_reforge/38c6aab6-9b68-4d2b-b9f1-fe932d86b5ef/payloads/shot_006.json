@@ -1,0 +1,14 @@
+{
+  "shot": 6,
+  "chapter": 1,
+  "prompt_text": "Shot 5: A medium shot, following 方源's actions and the changes of the moonlight蛊. The atmosphere is a mix of fatigue and determination, with visible depletion of true energy. <d>炼蛊艰难呐。</d>",
+  "duration": 4,
+  "ratio": "9:16",
+  "platforms": [
+    "minimax_h3",
+    "seedance",
+    "kling",
+    "veo",
+    "jimeng"
+  ]
+}
